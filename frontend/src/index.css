@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@400;500&display=swap");
+@import "tailwindcss";
+@config "..//tailwind.config.ts";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@layer base {
+  :root {
+    --color-text-base: #28262c;
+    --color-text-muted: #5a5860;
+    --color-text-inverted: #f9f5ff;
+    --color-fill: #f9f5ff;
+    --color-button: #14248a;
+    --color-button-hover: #1c35c9;
+    --color-card: #ffffff;
+    --color-border: #e2e8f0;
+  }
+
+  .dark {
+    --color-text-base: #f9f5ff;
+    --color-text-muted: #b3a8d8;
+    --color-text-inverted: #28262c;
+    --color-fill: #28262c;
+    --color-button: #d4c2fc;
+    --color-button-hover: #bda5fa;
+    --color-card: #1f1d22;
+    --color-border: #3a3840;
+  }
+
+  body {
+    background-color: var(--color-fill);
+    color: var(--color-text-base);
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Merriweather", serif;
+    color: var(--color-text-base);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  a {
+    color: var(--color-button);
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: var(--color-button-hover);
+  }
+}
+
+.before\:bg-no-repeat::before {
+  background-repeat: no-repeat;
+}
+
+.absolute.inset-0::before {
+  background-image: var(--tw-bg-image);
+}
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2 rounded-lg transition-colors shadow-lg;
+    background-color: var(--color-button);
+    color: var(--color-text-inverted);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-button-hover);
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2 rounded-lg transition-colors;
+    background-color: #998fc7;
+    color: #28262c;
+  }
+
+  .btn-secondary:hover {
+    background-color: #b2a9e0;
+  }
+
+  .card {
+    @apply rounded-xl p-6 shadow-lg;
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+  }
+
+  .neumorphic {
+    @apply rounded-xl;
+    background: #d4c2fc;
+    box-shadow: 8px 8px 16px #d1c7f9, -8px -8px 16px #ffffff;
+  }
+
+  .dark .neumorphic {
+    background: #28262c;
+    box-shadow: 8px 8px 16px #1f1d22, -8px -8px 16px #312f36;
+  }
+}
