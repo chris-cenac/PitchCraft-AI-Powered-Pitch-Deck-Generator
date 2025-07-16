@@ -1,51 +1,116 @@
+import React, { useState, useEffect } from "react";
 import Button from "@/components/ui/Button";
+import UserAvatar from "./ui/UserAvatar";
 import { useTheme } from "@/hooks/useTheme";
 import { useNavigate } from "react-router-dom";
+
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+  roles?: string[];
+}
 
 const Hero: React.FC = () => {
   const { toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (storedUser && accessToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/create");
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <section className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-background dark:bg-background-dark transition-colors">
-      {/* Dark mode toggle */}
-      <button
-        onClick={toggleTheme}
-        className="absolute top-4 right-4 z-20 p-2 rounded-full bg-surface dark:bg-surface-dark text-primary dark:text-primary-light hover:bg-accent-light dark:hover:bg-accent transition-colors shadow-soft dark:shadow-neumorphic-dark"
-        aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-      >
-        {isDark ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      {/* Top right controls */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
+        {/* User Avatar - only show if logged in */}
+        {user && <UserAvatar user={user} onLogout={handleLogout} />}
+
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-full bg-surface dark:bg-surface-dark text-primary dark:text-primary-light hover:bg-accent-light dark:hover:bg-accent transition-colors shadow-soft dark:shadow-neumorphic-dark"
+          aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+        >
+          {isDark ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Login/Register buttons - only show if not logged in */}
+      {!user && (
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-3">
+          <Button
+            onClick={() => navigate("/login")}
+            variant="outline"
+            className="text-sm"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-            />
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+            Login
+          </Button>
+          <Button
+            onClick={() => navigate("/signup")}
+            variant="primary"
+            className="text-sm"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-            />
-          </svg>
-        )}
-      </button>
+            Sign Up
+          </Button>
+        </div>
+      )}
 
       {/* Background pattern */}
       <div
@@ -81,7 +146,7 @@ const Hero: React.FC = () => {
           </a>
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary dark:text-surface transition-colors ">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary dark:text-surface transition-colors">
           Build Your{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-tr from-primary to-secondary">
             Investor-Ready Pitch Deck
@@ -94,8 +159,8 @@ const Hero: React.FC = () => {
         </p>
 
         <div className="mt-10 flex justify-center gap-4 flex-wrap">
-          <Button onClick={() => navigate("/create")} variant="primary">
-            Get Started
+          <Button onClick={handleGetStarted} variant="primary">
+            {user ? "Create Pitch Deck" : "Get Started"}
             <svg
               className="size-4"
               fill="none"
@@ -111,6 +176,13 @@ const Hero: React.FC = () => {
             How It Works
           </Button>
         </div>
+
+        {/* User welcome message */}
+        {user && (
+          <div className="mt-8 text-secondary dark:text-secondary-light">
+            Welcome back, {user.name || user.email.split("@")[0]}!
+          </div>
+        )}
       </div>
     </section>
   );
