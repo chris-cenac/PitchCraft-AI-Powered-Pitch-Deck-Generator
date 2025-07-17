@@ -1,62 +1,34 @@
-// src/pitch-deck/dto/create-pitch-deck.dto.ts
 import {
+  IsObject,
   IsString,
   IsOptional,
-  IsEnum,
-  IsNumberString,
-  IsUrl,
+  ValidateNested,
+  IsArray,
 } from "class-validator";
+import { Type, Transform } from "class-transformer";
 
-export enum BusinessStage {
-  IDEA = "Idea",
-  MVP = "MVP",
-  REVENUE = "Revenue",
-  GROWTH = "Growth",
-}
-
-export enum PricingStrategy {
-  SUBSCRIPTION = "Subscription",
-  FREEMIUM = "Freemium",
-  ONE_TIME = "One-time",
-  TIERED = "Tiered",
-}
-
-export enum FundingStage {
-  BOOTSTRAPPED = "Bootstrapped",
-  PRE_SEED = "Pre-seed",
-  SEED = "Seed",
-  SERIES_A = "Series A",
-  SERIES_B_PLUS = "Series B+",
-}
-
-export enum DesignStyle {
-  MINIMAL = "Minimal",
-  BOLD = "Bold",
-  PLAYFUL = "Playful",
-  CORPORATE = "Corporate",
-  ELEGANT = "Elegant",
-}
-
-export class CreatePitchDeckDto {
-  // Step 1: Company Basics
+class BusinessDataDto {
   @IsString()
   companyName: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   tagline?: string;
 
+  @IsString()
   @IsOptional()
-  @IsUrl()
   websiteUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  logoUrl?: string;
 
   @IsString()
   industry: string;
 
-  @IsEnum(BusinessStage)
-  businessStage: BusinessStage;
+  @IsString()
+  businessStage: string;
 
-  // Step 2: Problem & Solution
   @IsString()
   problemStatement: string;
 
@@ -69,12 +41,11 @@ export class CreatePitchDeckDto {
   @IsString()
   uniqueValueProposition: string;
 
-  // Step 3: Business Model & Market
   @IsString()
   revenueModel: string;
 
-  @IsEnum(PricingStrategy)
-  pricingStrategy: PricingStrategy;
+  @IsString()
+  pricingStrategy: string;
 
   @IsString()
   goToMarketStrategy: string;
@@ -82,58 +53,74 @@ export class CreatePitchDeckDto {
   @IsString()
   marketSize: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   competitors?: string;
 
-  // Step 4: Team
   @IsString()
   founders: string;
 
-  @IsNumberString()
+  @IsString()
   teamSize: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   advisors?: string;
 
-  // Step 5: Financials
-  @IsOptional()
-  @IsEnum(FundingStage)
-  fundingStage?: FundingStage;
-
-  @IsOptional()
   @IsString()
+  @IsOptional()
+  fundingStage?: string;
+
+  @IsString()
+  @IsOptional()
   amountRaised?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   projectedRevenue?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   costs?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   financialMilestones?: string;
 
-  // Step 6: Vision & Goals
   @IsString()
   visionStatement: string;
 
   @IsString()
   longTermGoals: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   exitStrategy?: string;
 
-  // Step 7: Style Preferences
-  @IsEnum(DesignStyle)
-  designStyle: DesignStyle;
-
-  @IsOptional()
   @IsString()
+  designStyle: string;
+
+  @IsString()
+  @IsOptional()
   brandColors?: string;
+}
+
+// Updated DTO to match frontend structure
+export class CreatePitchDeckDto {
+  @ValidateNested()
+  @Type(() => BusinessDataDto)
+  @IsObject()
+  businessData: BusinessDataDto;
+
+  @IsArray()
+  @IsOptional()
+  componentsCatalog?: any[];
+
+  @IsArray()
+  @IsOptional()
+  slides?: any[];
+
+  @IsObject()
+  @IsOptional()
+  theme?: Record<string, any>;
 }

@@ -11,6 +11,10 @@ export interface LoginDto {
   password: string;
 }
 
+export interface LogoutDto {
+  refreshToken: string;
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 async function handleResponse(res: Response) {
@@ -33,6 +37,19 @@ export async function login(data: LoginDto) {
   return fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+}
+
+export async function logout(data: LogoutDto) {
+  const accessToken = localStorage.getItem("accessToken");
+
+  return fetch(`${BASE_URL}/auth/logout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
     body: JSON.stringify(data),
   }).then(handleResponse);
 }

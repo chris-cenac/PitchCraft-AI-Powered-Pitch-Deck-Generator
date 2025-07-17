@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { logout } from "@/api/auth";
 
 interface User {
   id: string;
@@ -38,15 +39,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, onLogout }) => {
     try {
       // Call the logout API if needed
       const refreshToken = localStorage.getItem("refreshToken");
+
       if (refreshToken) {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({ refreshToken }),
-        });
+        await logout({ refreshToken });
       }
 
       // Clear local storage
@@ -116,23 +111,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, onLogout }) => {
             <li>
               <button
                 onClick={() => {
-                  navigate("/dashboard");
+                  navigate("/templates");
                   setIsDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 hover:bg-background dark:hover:bg-background-dark hover:text-primary dark:hover:text-surface transition-colors"
               >
-                Dashboard
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => {
-                  navigate("/profile");
-                  setIsDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-background dark:hover:bg-background-dark hover:text-primary dark:hover:text-surface transition-colors"
-              >
-                Profile
+                My Decks
               </button>
             </li>
             <li>

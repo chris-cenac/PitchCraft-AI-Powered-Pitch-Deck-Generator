@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "@/pages/LandingView";
 import FormView from "@/pages/FormView";
 import DeckEditor from "@/pages/DeckEditor";
+import TemplatesView from "@/pages/TemplatesView";
 import Signup from "./components/auth/Signup";
 import Login from "./components/auth/Login";
 
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/create" element={<FormView />} />
+        <Route path="/templates" element={<TemplatesView />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/view/:id" element={<DeckEditor />} />

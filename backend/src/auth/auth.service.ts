@@ -83,13 +83,14 @@ export class AuthService {
     return user;
   }
 
-  // Token management
   async generateAccessToken(user: AuthUserDocument): Promise<string> {
     const payload = {
-      sub: user._id,
+      sub: user._id.toString(), // Convert ObjectId to string
       email: user.email,
-      roles: user.roles,
+      name: user.name, // Add name to payload
+      roles: user.roles || [],
     };
+
     return this.jwtService.sign(payload);
   }
 
@@ -195,8 +196,20 @@ export class AuthService {
     return user;
   }
 
-  // Utility methods
   async findUserById(id: string): Promise<AuthUserDocument | null> {
-    return this.userModel.findById(id).exec();
+    try {
+      return await this.userModel.findById(id).exec();
+    } catch (error) {
+      // Handle invalid ObjectId format
+      return null;
+    }
+  }
+  async invalidateRefreshToken(refreshToken: string): Promise<void> {
+    try {
+      await this.refreshTokenModel.deleteOne({ token: refreshToken });
+    } catch (error) {
+      this.logger.error("Error invalidating refresh token:", error);
+      // Don't throw error - logout should still succeed
+    }
   }
 }

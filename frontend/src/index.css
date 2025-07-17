@@ -74,6 +74,29 @@
 .absolute.inset-0::before {
   background-image: var(--tw-bg-image);
 }
+
+/* Line clamp utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Grid pattern background */
+.bg-grid-pattern {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 @layer components {
   .btn-primary {
     @apply px-6 py-2 rounded-lg transition-colors shadow-lg;

@@ -47,6 +47,34 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-background dark:bg-background-dark transition-colors">
+      {/* Templates button - only show if logged in */}
+      {user && (
+        <div className="absolute top-4 left-4 z-20">
+          <Button
+            onClick={() => navigate("/templates")}
+            variant="outline"
+            className="relative overflow-hidden group bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-primary text-white hover:text-white transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+          >
+            <span className="relative z-10 flex items-center gap-2 font-semibold">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
+              </svg>
+              Templates
+            </span>
+          </Button>
+        </div>
+      )}
+
       {/* Top right controls */}
       <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
         {/* User Avatar - only show if logged in */}
@@ -98,14 +126,14 @@ const Hero: React.FC = () => {
           <Button
             onClick={() => navigate("/login")}
             variant="outline"
-            className="text-sm"
+            className="text-sm px-4 py-2 bg-surface/80 dark:bg-surface-dark/80 backdrop-blur-sm border-secondary/30 hover:border-secondary/50 transition-all duration-200"
           >
             Login
           </Button>
           <Button
             onClick={() => navigate("/signup")}
             variant="primary"
-            className="text-sm"
+            className="text-sm px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Sign Up
           </Button>

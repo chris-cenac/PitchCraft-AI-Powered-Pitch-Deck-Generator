@@ -1,15 +1,10 @@
-// src/pitch-deck/schemas/pitch-deck.schema.ts
+// schemas/pitch-deck.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Types } from "mongoose";
 
-export type PitchDeckDocument = PitchDeck & Document;
-
-@Schema({ timestamps: true })
-export class PitchDeck {
-  @Prop({ type: Types.ObjectId, ref: "User", required: true })
-  userId: Types.ObjectId;
-
-  // Company Basics
+// Define the BusinessData schema
+@Schema({ _id: false })
+export class BusinessData {
   @Prop({ required: true })
   companyName: string;
 
@@ -19,19 +14,15 @@ export class PitchDeck {
   @Prop()
   websiteUrl?: string;
 
-  @Prop({ required: true })
-  industry: string;
-
-  @Prop({
-    required: true,
-    enum: ["Idea", "MVP", "Revenue", "Growth"],
-  })
-  businessStage: string;
-
   @Prop()
   logoUrl?: string;
 
-  // Problem & Solution
+  @Prop({ required: true })
+  industry: string;
+
+  @Prop({ required: true })
+  businessStage: string;
+
   @Prop({ required: true })
   problemStatement: string;
 
@@ -44,14 +35,10 @@ export class PitchDeck {
   @Prop({ required: true })
   uniqueValueProposition: string;
 
-  // Business Model & Market
   @Prop({ required: true })
   revenueModel: string;
 
-  @Prop({
-    required: true,
-    enum: ["Subscription", "Freemium", "One-time", "Tiered"],
-  })
+  @Prop({ required: true })
   pricingStrategy: string;
 
   @Prop({ required: true })
@@ -63,7 +50,6 @@ export class PitchDeck {
   @Prop()
   competitors?: string;
 
-  // Team
   @Prop({ required: true })
   founders: string;
 
@@ -73,10 +59,7 @@ export class PitchDeck {
   @Prop()
   advisors?: string;
 
-  // Financials
-  @Prop({
-    enum: ["Bootstrapped", "Pre-seed", "Seed", "Series A", "Series B+"],
-  })
+  @Prop()
   fundingStage?: string;
 
   @Prop()
@@ -91,7 +74,6 @@ export class PitchDeck {
   @Prop()
   financialMilestones?: string;
 
-  // Vision & Goals
   @Prop({ required: true })
   visionStatement: string;
 
@@ -101,19 +83,49 @@ export class PitchDeck {
   @Prop()
   exitStrategy?: string;
 
-  // Style Preferences
-  @Prop({
-    required: true,
-    enum: ["Minimal", "Bold", "Playful", "Corporate", "Elegant"],
-  })
+  @Prop({ required: true })
   designStyle: string;
 
   @Prop()
   brandColors?: string;
+}
 
-  // Status and Processing
-  @Prop({ default: "draft" })
+// Define the Spec schema
+@Schema({ _id: false })
+export class Spec {
+  @Prop({ type: BusinessData, required: true })
+  businessData: BusinessData;
+
+  @Prop({ type: [Object], default: [] })
+  componentsCatalog?: any[];
+
+  @Prop({ type: [Object], default: [] })
+  slides?: any[];
+
+  @Prop({ type: Object })
+  theme?: Record<string, any>;
+}
+
+@Schema({ timestamps: true })
+export class PitchDeck {
+  @Prop({ type: Types.ObjectId, ref: "User", required: true })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Spec, required: true })
+  spec: Spec;
+
+  @Prop({
+    type: String,
+    enum: ["draft", "processing", "completed"],
+    default: "draft",
+  })
   status: string;
+
+  @Prop({ type: Number, default: 0 })
+  progress: number;
+
+  @Prop({ type: Number, default: 0 })
+  phase: number;
 
   @Prop({ type: Object })
   generatedContent?: any;
@@ -125,9 +137,5 @@ export class PitchDeck {
   updatedAt: Date;
 }
 
+export type PitchDeckDocument = PitchDeck & Document;
 export const PitchDeckSchema = SchemaFactory.createForClass(PitchDeck);
-
-// Add indexes for better query performance
-PitchDeckSchema.index({ userId: 1 });
-PitchDeckSchema.index({ status: 1 });
-PitchDeckSchema.index({ createdAt: -1 });

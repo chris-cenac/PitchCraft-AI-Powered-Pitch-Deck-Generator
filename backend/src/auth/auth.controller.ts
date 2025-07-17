@@ -17,11 +17,13 @@ import { SignupDto } from "./dto/signup.dto";
 import { LoginDto } from "./dto/login.dto";
 import { ResetPasswordDto } from "./dto/resest-password.dto";
 import { JwtAuthGuard } from "./jwt-auth/jwt-auth.guard";
+import { Public } from "./decorators/public.decorator";
 
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post("signup")
   @UsePipes(new ValidationPipe({ transform: true }))
   async signup(@Body() signupDto: SignupDto, @Res() res: Response) {
@@ -32,7 +34,7 @@ export class AuthController {
         statusCode: HttpStatus.CREATED,
         message: "User created successfully",
         data: {
-          id: user.id, // Use .id instead of ._id
+          id: user._id.toString(),
           email: user.email,
         },
       });
@@ -46,6 +48,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Post("login")
   @UsePipes(new ValidationPipe({ transform: true }))
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
@@ -53,7 +56,7 @@ export class AuthController {
       const user = await this.authService.validateUserLocal(loginDto);
       const accessToken = await this.authService.generateAccessToken(user);
       const refreshToken = await this.authService.generateRefreshToken(
-        user.id // Use .id instead of ._id.toString()
+        user._id.toString()
       );
 
       return res.status(HttpStatus.OK).json({
@@ -61,7 +64,7 @@ export class AuthController {
         message: "Login successful",
         data: {
           user: {
-            id: user.id, // Use .id instead of ._id
+            id: user._id.toString(),
             email: user.email,
             name: user.name,
             roles: user.roles,
@@ -82,6 +85,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Post("refresh")
   @UsePipes(new ValidationPipe({ transform: true }))
   async refreshToken(
@@ -109,6 +113,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Post("forgot-password")
   @UsePipes(new ValidationPipe({ transform: true }))
   async forgotPassword(@Body("email") email: string, @Res() res: Response) {
@@ -119,7 +124,7 @@ export class AuthController {
         statusCode: HttpStatus.OK,
         message: "Password reset token created",
         data: {
-          resetToken, // In production, this would be sent via email
+          resetToken,
         },
       });
     } catch (error) {
@@ -132,6 +137,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Post("reset-password")
   @UsePipes(new ValidationPipe({ transform: true }))
   async resetPassword(
@@ -159,17 +165,18 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async getProfile(@Request() req, @Res() res: Response) {
     try {
-      const user = await this.authService.findUserById(req.user.sub);
+      // req.user now comes from the JWT strategy validate method
+      const user = req.user;
 
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: "Profile retrieved successfully",
         data: {
           user: {
-            id: user?.id, // Use .id instead of ._id
-            email: user?.email,
-            name: user?.name,
-            roles: user?.roles,
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            roles: user.roles,
           },
         },
       });
@@ -188,11 +195,15 @@ export class AuthController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async logout(
     @Body("refreshToken") refreshToken: string,
+    @Request() req,
     @Res() res: Response
   ) {
     try {
-      // In a real app, you'd invalidate the refresh token here
-      // For now, just return success
+      // Optional: Invalidate the refresh token
+      if (refreshToken) {
+        await this.authService.invalidateRefreshToken(refreshToken);
+      }
+
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: "Logged out successfully",
