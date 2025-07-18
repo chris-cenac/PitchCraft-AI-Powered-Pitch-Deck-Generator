@@ -22,6 +22,8 @@ export const COMPONENT_CATALOG: ComponentDefinition[] = [
       color: "#000",
       underlineColor: "#666",
       icon: "FiBarChart2",
+      gradient: false,
+      variant: "default",
     },
     layout: {
       columns: 12,
@@ -81,6 +83,64 @@ export const COMPONENT_CATALOG: ComponentDefinition[] = [
       size: "md",
       circular: true,
       border: "light",
+    },
+    layout: {
+      columns: 6,
+    },
+  },
+  {
+    name: "MetricCard",
+    props: {
+      title: "Revenue Growth",
+      value: "$2.5M",
+      subtitle: "Annual Recurring Revenue",
+      icon: "FiTrendingUp",
+      trend: "up",
+      trendValue: "+45%",
+      variant: "primary",
+      size: "md",
+    },
+    layout: {
+      columns: 4,
+    },
+  },
+  {
+    name: "FeatureList",
+    props: {
+      title: "Key Benefits",
+      features: [
+        {
+          text: "10x faster processing",
+          icon: "FiZap",
+          highlight: true,
+        },
+        {
+          text: "99.9% uptime guarantee",
+          icon: "FiShield",
+        },
+        {
+          text: "24/7 customer support",
+          icon: "FiHeadphones",
+        },
+      ],
+      variant: "benefits",
+      layout: "list",
+      columns: 1,
+    },
+    layout: {
+      columns: 6,
+    },
+  },
+  {
+    name: "QuoteCard",
+    props: {
+      quote:
+        "This solution has transformed how we operate. The efficiency gains are incredible.",
+      author: "Sarah Johnson",
+      title: "CTO",
+      company: "TechCorp",
+      variant: "testimonial",
+      size: "md",
     },
     layout: {
       columns: 6,

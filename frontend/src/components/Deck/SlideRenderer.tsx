@@ -7,7 +7,6 @@ import { useTheme } from "@/hooks/useTheme";
 interface SlideRendererProps {
   items: SlideItem[];
   spacing?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-  rowHeight?: "auto" | "dense" | number;
   containerHeight?: string;
   containerWidth?: string;
 }
@@ -47,7 +46,6 @@ const getAlignmentClasses = (
 const SlideRenderer: React.FC<SlideRendererProps> = ({
   items,
   spacing = 4,
-  rowHeight = "auto",
   containerHeight = "100%",
   containerWidth = "100%",
 }) => {
@@ -56,19 +54,28 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
 
   return (
     <div
-      className={`grid grid-cols-12 ${gapClass} w-full h-full`}
+      className={`grid grid-cols-12 ${gapClass} w-full h-full relative overflow-hidden`}
       style={{
         height: containerHeight,
         width: containerWidth,
-        gridAutoRows:
-          rowHeight === "dense"
-            ? "min-content"
-            : rowHeight === "auto"
-            ? "auto"
-            : `${rowHeight}px`,
-        backgroundColor: theme === "dark" ? "#1a202c" : "#f7fafc",
+        gridTemplateRows: "repeat(12, 1fr)",
+        background:
+          theme === "dark"
+            ? "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)"
+            : "linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)",
       }}
     >
+      {/* Background pattern for visual interest */}
+      <div
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, ${
+            theme === "dark" ? "#4a5568" : "#a0aec0"
+          } 1px, transparent 1px)`,
+          backgroundSize: "20px 20px",
+        }}
+      />
+
       {items.map((item, idx) => {
         const {
           columns,
@@ -83,13 +90,15 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
         const rowSpan = Math.max(1, rows || 1);
 
         // Calculate placement properties
-        const gridColumn = columnStart
-          ? `${columnStart} / span ${colSpan}`
-          : `span ${colSpan}`;
+        // If columnStart is specified, use it; otherwise start from 1
+        const startCol = columnStart || 1;
+        const endCol = startCol + colSpan - 1;
+        const gridColumn = `${startCol} / ${endCol + 1}`;
 
-        const gridRow = rowStart
-          ? `${rowStart} / span ${rowSpan}`
-          : `span ${rowSpan}`;
+        // If rowStart is specified, use it; otherwise start from 1
+        const startRow = rowStart || 1;
+        const endRow = startRow + rowSpan - 1;
+        const gridRow = `${startRow} / ${endRow + 1}`;
 
         // Get alignment classes
         const { alignItems, justifyContent } = getAlignmentClasses(
@@ -102,10 +111,12 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
           return (
             <div
               key={idx}
-              className={`flex ${alignItems} ${justifyContent} bg-yellow-100 border border-yellow-400 text-yellow-700 p-4 rounded`}
+              className={`flex ${alignItems} ${justifyContent} bg-yellow-100 border border-yellow-400 text-yellow-700 p-4 rounded-lg shadow-sm`}
               style={{ gridColumn, gridRow }}
             >
-              <p>Invalid component: {item.name}</p>
+              <p className="text-sm font-medium">
+                Invalid component: {item.name}
+              </p>
             </div>
           );
         }
@@ -118,7 +129,13 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
             className={`flex ${alignItems} ${justifyContent}`}
             style={{ gridColumn, gridRow }}
           >
-            <Component {...item.props} />
+            <div
+              className={
+                item.name === "DeckChart" ? "w-full h-full" : "inline-block"
+              }
+            >
+              <Component {...item.props} />
+            </div>
           </div>
         );
       })}

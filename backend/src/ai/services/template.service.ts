@@ -6,100 +6,135 @@ import { SlideTemplate, SlideType } from "../interfaces/ai.interface";
 export class TemplateService {
   private readonly templates: SlideTemplate[] = [
     {
-      id: "title-default",
-      name: "Company Introduction",
+      id: "title-hero",
+      name: "Hero Title Slide",
       type: "title",
       template: `
-        • Company name and tagline
-        • Founded date and location
-        • Brief mission statement
-        • Key differentiator in one sentence
+        • Company name with hero styling and gradient
+        • Compelling tagline or mission statement
+        • Company logo with professional branding
+        • Key metrics (founded date, team size, location)
+        • Professional color scheme and typography
       `,
-      description: "Standard title slide with company overview",
+      description:
+        "Professional hero title slide with company branding and key metrics",
     },
     {
-      id: "problem-pain-point",
-      name: "Problem Statement",
+      id: "problem-compelling",
+      name: "Compelling Problem Statement",
       type: "problem",
       template: `
-        • Current market pain point
-        • Size and scope of the problem
-        • Existing solutions and their limitations
-        • Why this problem matters now
+        • Market size with compelling data visualization
+        • Current market problems with quantified impact
+        • Pain points that resonate with target audience
+        • Why this problem matters now (timing)
+        • Visual elements showing market opportunity
       `,
-      description: "Comprehensive problem definition slide",
+      description: "Data-driven problem statement with market validation",
     },
     {
-      id: "solution-product",
-      name: "Solution Overview",
+      id: "solution-revolutionary",
+      name: "Revolutionary Solution",
       type: "solution",
       template: `
-        • Core solution description
-        • Key features and benefits
-        • Competitive advantages
-        • Proof of concept or validation
+        • Solution overview with key benefits
+        • Feature list highlighting competitive advantages
+        • Performance metrics and improvements
+        • Customer testimonials or validation
+        • Visual representation of solution impact
       `,
-      description: "Product/service solution presentation",
+      description: "Solution presentation with benefits and validation",
     },
     {
-      id: "market-tam-sam",
-      name: "Market Opportunity",
+      id: "market-opportunity",
+      name: "Market Opportunity Analysis",
       type: "market",
       template: `
-        • Total Addressable Market (TAM)
-        • Serviceable Addressable Market (SAM)
-        • Target market segments
-        • Market growth trends
+        • Market size breakdown (TAM, SAM, Target)
+        • Growth trends and market dynamics
+        • Customer lifetime value and acquisition metrics
+        • Market timing and tailwinds
+        • Visual charts and data presentation
       `,
-      description: "Market sizing and opportunity analysis",
+      description: "Comprehensive market analysis with data visualization",
     },
     {
-      id: "business-model-revenue",
-      name: "Business Model",
+      id: "business-model-scalable",
+      name: "Scalable Business Model",
       type: "business-model",
       template: `
-        • Revenue streams
-        • Pricing strategy
-        • Customer acquisition model
-        • Unit economics
+        • Multiple revenue streams with pricing
+        • Unit economics and margins
+        • Customer acquisition and retention
+        • Scalability factors and growth drivers
+        • Financial metrics and projections
       `,
-      description: "Revenue and business model slide",
+      description: "Scalable business model with strong unit economics",
+    },
+    {
+      id: "competitive-advantage",
+      name: "Competitive Advantage",
+      type: "competitive",
+      template: `
+        • Competitive landscape analysis
+        • Feature comparison with key competitors
+        • Unique value propositions
+        • Market positioning and differentiation
+        • Why you'll win in the market
+      `,
+      description: "Clear competitive analysis and positioning",
+    },
+    {
+      id: "go-to-market-strategy",
+      name: "Go-to-Market Strategy",
+      type: "go-to-market",
+      template: `
+        • Customer acquisition channels
+        • Marketing and sales strategy
+        • Partnership and distribution approach
+        • Customer acquisition cost and payback
+        • Growth metrics and targets
+      `,
+      description: "Comprehensive go-to-market strategy",
     },
     {
       id: "financial-projections",
       name: "Financial Projections",
       type: "financial",
       template: `
-        • 3-5 year revenue projections
-        • Key financial metrics
-        • Funding requirements
+        • Revenue growth projections
+        • Key financial metrics and KPIs
+        • Growth drivers and assumptions
         • Path to profitability
+        • Visual charts and data presentation
       `,
-      description: "Financial forecast and metrics",
+      description: "Financial projections with clear growth trajectory",
     },
     {
-      id: "team-founders",
-      name: "Team & Advisors",
+      id: "team-world-class",
+      name: "World-Class Team",
       type: "team",
       template: `
-        • Founder backgrounds
-        • Key team members
-        • Advisory board
-        • Relevant experience
+        • Leadership team with backgrounds
+        • Key team members and advisors
+        • Relevant experience and credentials
+        • Team size and experience metrics
+        • Why this team can execute
       `,
-      description: "Team introduction and credentials",
+      description: "Team presentation with proven track record",
     },
     {
-      id: "closing-ask",
-      name: "Funding Ask",
-      type: "closing",
+      id: "funding-opportunity",
+      name: "Investment Opportunity",
+      type: "funding",
       template: `
-        • Funding amount requested
-        • Use of funds breakdown
-        • Milestones to be achieved
-        • Next steps and timeline
+        • Funding amount and use of funds
+        • Investment opportunity and returns
+        • Milestones and timeline
+        • Risk mitigation and execution plan
+        • Clear call to action
       `,
-      description: "Investment ask and next steps",
+      description: "Compelling investment opportunity presentation",
     },
   ];
 

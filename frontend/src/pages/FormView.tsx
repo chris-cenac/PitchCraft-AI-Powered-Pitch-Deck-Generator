@@ -8,52 +8,9 @@ import {
   getGenerateStatus,
 } from "@/api/decks";
 import { useNavigate } from "react-router-dom";
+import { FiArrowLeft } from "react-icons/fi";
 
 const FormView: React.FC = () => {
-  const sampleData: PitchFormData = {
-    companyName: "BrightHive Analytics",
-    tagline: "Turning data into decisions",
-    websiteUrl: "https://www.brighthive.io",
-    industry: "Data Analytics",
-    businessStage: "MVP",
-    logo: null,
-
-    problemStatement:
-      "Many mid-market companies struggle to make sense of fragmented data from multiple sources, leading to slow decision cycles.",
-    targetAudience:
-      "Mid-market retail and finance enterprises with 50–500 employees",
-    proposedSolution:
-      "A no‑code platform that ingests, cleans, and visualizes your data in real time, complete with predictive insights.",
-    uniqueValueProposition:
-      "Deployable in 24 hrs, integrates with 30+ APIs, built‑in ML forecasting models.",
-
-    revenueModel: "Subscription",
-    pricingStrategy: "Tiered",
-    goToMarketStrategy:
-      "Partner with boutique consulting firms; targeted LinkedIn ads; direct sales demos.",
-    marketSize: "$5 billion annual spend on analytics tools in our segment",
-    competitors: "Tableau, Power BI, Looker",
-
-    founders: "Alice Johnson (CEO), Bob Lee (CTO)",
-    teamSize: "8",
-    advisors: "Dr. Emily Stone (Data Science), John Perez (Go‑to‑Market)",
-
-    fundingStage: "Seed",
-    amountRaised: "750000",
-    projectedRevenue: "2 M in Year 1, 5 M in Year 2",
-    costs: "500 K burn per annum",
-    financialMilestones: "50 paying customers; $100 K ARR achieved",
-
-    visionStatement:
-      "To become the analytics engine powering every SME's data-driven decisions.",
-    longTermGoals:
-      "Expand into European markets; introduce AI‑driven demand forecasting; reach 1,000 customers.",
-    exitStrategy:
-      "Acquisition by a major BI vendor (e.g., Tableau or Microsoft)",
-
-    designStyle: "Minimal",
-    brandColors: "#14248a, #998fc7, #d4c2fc",
-  };
   const [isLoading, setIsLoading] = useState(false);
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -77,31 +34,17 @@ const FormView: React.FC = () => {
         businessData: {
           companyName: pitchData.companyName,
           tagline: pitchData.tagline,
-          websiteUrl: pitchData.websiteUrl,
           industry: pitchData.industry,
           businessStage: pitchData.businessStage,
           problemStatement: pitchData.problemStatement,
           targetAudience: pitchData.targetAudience,
           proposedSolution: pitchData.proposedSolution,
-          uniqueValueProposition: pitchData.uniqueValueProposition,
           revenueModel: pitchData.revenueModel,
-          pricingStrategy: pitchData.pricingStrategy,
-          goToMarketStrategy: pitchData.goToMarketStrategy,
           marketSize: pitchData.marketSize,
           competitors: pitchData.competitors,
           founders: pitchData.founders,
-          teamSize: pitchData.teamSize,
-          advisors: pitchData.advisors,
-          fundingStage: pitchData.fundingStage,
-          amountRaised: pitchData.amountRaised,
-          projectedRevenue: pitchData.projectedRevenue,
-          costs: pitchData.costs,
-          financialMilestones: pitchData.financialMilestones,
           visionStatement: pitchData.visionStatement,
-          longTermGoals: pitchData.longTermGoals,
-          exitStrategy: pitchData.exitStrategy,
           designStyle: pitchData.designStyle,
-          brandColors: pitchData.brandColors,
         },
       };
 
@@ -189,41 +132,48 @@ const FormView: React.FC = () => {
     };
   }, []);
 
-  // Handler for the test button
-  const handleTestSubmit = () => {
-    handleGenerate(sampleData);
-  };
-
   if (isLoading) {
     return <Loading currentPhaseIndex={phaseIndex} progress={progress} />;
   }
 
   return (
-    <div>
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          <strong>Error:</strong> {error}
+    <div className="h-screen bg-background dark:bg-background-dark overflow-hidden flex flex-col">
+      {/* Header with back button */}
+      <div className="flex-shrink-0 p-4 border-b border-secondary/20 dark:border-secondary-dark/20">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
-            onClick={() => setError(null)}
-            className="ml-2 text-red-500 hover:text-red-700"
+            onClick={() => navigate(-1)}
+            className="flex items-center space-x-2 px-4 py-2 bg-secondary/20 dark:bg-secondary-dark/20 text-secondary dark:text-secondary-light rounded-lg hover:bg-secondary/30 dark:hover:bg-secondary-dark/30 transition-colors"
           >
-            ×
+            <FiArrowLeft className="w-4 h-4" />
+            <span>Back</span>
           </button>
+          <h1 className="text-xl font-semibold">Create Pitch Deck</h1>
+          <div className="w-20"></div> {/* Spacer for centering */}
+        </div>
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="flex-shrink-0 p-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <strong>Error:</strong> {error}
+              <button
+                onClick={() => setError(null)}
+                className="ml-2 text-red-500 hover:text-red-700"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Test button to submit sample data */}
-      <button
-        type="button"
-        className="btn-primary mb-4"
-        onClick={handleTestSubmit}
-        disabled={isLoading}
-      >
-        {isLoading ? "Processing..." : "Test with Sample Data"}
-      </button>
-
-      {/* Actual form */}
-      <MultiStepForm onSubmit={handleGenerate} />
+      {/* Form content - takes remaining space */}
+      <div className="flex-1 overflow-hidden">
+        <MultiStepForm onSubmit={handleGenerate} />
+      </div>
     </div>
   );
 };

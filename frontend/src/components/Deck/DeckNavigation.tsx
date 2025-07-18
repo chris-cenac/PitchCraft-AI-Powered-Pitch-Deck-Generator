@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { FiSave } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -9,14 +9,10 @@ interface DeckNavigationProps {
   onSave?: () => void;
   onShare?: () => void;
   onEdit?: () => void;
-  onUndo?: () => void;
-  onRedo?: () => void;
   onPresent?: () => void;
   onPrint?: () => void;
   onDownloadPDF?: () => void;
   onDownloadPPTX?: () => void;
-  canUndo?: boolean;
-  canRedo?: boolean;
   isEditing?: boolean;
   deckTitle?: string;
   onBack?: () => void;
@@ -30,14 +26,10 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
   onSave,
   onShare,
   onEdit,
-  onUndo,
-  onRedo,
   onPresent,
   onPrint,
   onDownloadPDF,
   onDownloadPPTX,
-  canUndo = false,
-  canRedo = false,
   isEditing = false,
   deckTitle,
   onBack,
@@ -45,14 +37,57 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
 }) => {
   const [showToolsMenu, setShowToolsMenu] = useState(false);
 
-  const goToFirst = () => onSlideChange(0);
-  const goToLast = () => onSlideChange(totalSlides - 1);
-  const goPrev = () => onSlideChange(Math.max(currentSlide - 1, 0));
-  const goNext = () =>
-    onSlideChange(Math.min(currentSlide + 1, totalSlides - 1));
+  const goToFirst = useCallback(() => {
+    if (typeof onSlideChange === "function") {
+      onSlideChange(0);
+    } else {
+      console.error("onSlideChange is not a function:", onSlideChange);
+    }
+  }, [currentSlide, totalSlides, onSlideChange]);
+  const goToLast = useCallback(() => {
+    if (
+      typeof onSlideChange === "function" &&
+      typeof totalSlides === "number"
+    ) {
+      onSlideChange(totalSlides - 1);
+    } else {
+      console.error(
+        "onSlideChange is not a function or totalSlides is invalid:",
+        { onSlideChange, totalSlides }
+      );
+    }
+  }, [currentSlide, totalSlides, onSlideChange]);
+  const goPrev = useCallback(() => {
+    if (
+      typeof onSlideChange === "function" &&
+      typeof currentSlide === "number"
+    ) {
+      onSlideChange(Math.max(currentSlide - 1, 0));
+    } else {
+      console.error(
+        "onSlideChange is not a function or currentSlide is invalid:",
+        { onSlideChange, currentSlide }
+      );
+    }
+  }, [currentSlide, onSlideChange]);
+  const goNext = useCallback(() => {
+    if (
+      typeof onSlideChange === "function" &&
+      typeof currentSlide === "number" &&
+      typeof totalSlides === "number"
+    ) {
+      onSlideChange(Math.min(currentSlide + 1, totalSlides - 1));
+    } else {
+      console.error("onSlideChange is not a function or values are invalid:", {
+        onSlideChange,
+        currentSlide,
+        totalSlides,
+      });
+    }
+  }, [currentSlide, totalSlides, onSlideChange]);
 
   return (
-    <nav className="fixed z-50 w-full max-w-6xl left-1/2 transform -translate-x-1/2 bottom-4 h-24 bg-surface dark:bg-surface-dark border border-secondary/20 dark:border-secondary-dark/20 rounded-2xl shadow-lg backdrop-blur-sm">
+    <nav className="fixed z-[99999] w-full max-w-6xl left-1/2 transform -translate-x-1/2 bottom-4 h-24 bg-surface dark:bg-surface-dark border border-secondary/20 dark:border-secondary-dark/20 rounded-2xl shadow-lg backdrop-blur-sm">
       <div className="grid h-full grid-cols-12 gap-2 mx-auto px-4">
         {/* Left Section - Header Info & Back Button */}
         <div className="col-span-3 flex items-center gap-2">
@@ -87,7 +122,8 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
               {deckTitle || "Pitch Deck Editor"}
             </h1>
             <p className="text-xs text-secondary dark:text-secondary-light">
-              Slide {currentSlide + 1} of {totalSlides}
+              Slide {typeof currentSlide === "number" ? currentSlide + 1 : "?"}{" "}
+              of {typeof totalSlides === "number" ? totalSlides : "?"}
             </p>
           </div>
         </div>
@@ -115,7 +151,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
           {/* Previous Slide */}
           <button
             onClick={goPrev}
-            disabled={currentSlide === 0}
+            disabled={typeof currentSlide !== "number" || currentSlide === 0}
             className="inline-flex flex-col items-center justify-center px-3 py-2 hover:bg-background dark:hover:bg-background-dark group transition-colors disabled:opacity-50"
             title="Previous Slide"
           >
@@ -140,7 +176,8 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
           {/* Slide Counter */}
           <div className="flex flex-col items-center justify-center px-3 py-2">
             <span className="text-sm font-medium text-primary dark:text-accent">
-              {currentSlide + 1} / {totalSlides}
+              {typeof currentSlide === "number" ? currentSlide + 1 : "?"} /{" "}
+              {typeof totalSlides === "number" ? totalSlides : "?"}
             </span>
             <span className="text-xs text-secondary dark:text-secondary-light">
               Slide
@@ -150,7 +187,11 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
           {/* Next Slide */}
           <button
             onClick={goNext}
-            disabled={currentSlide === totalSlides - 1}
+            disabled={
+              typeof currentSlide !== "number" ||
+              typeof totalSlides !== "number" ||
+              currentSlide === totalSlides - 1
+            }
             className="inline-flex flex-col items-center justify-center px-3 py-2 hover:bg-background dark:hover:bg-background-dark group transition-colors disabled:opacity-50"
             title="Next Slide"
           >
@@ -370,63 +411,11 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
         </div>
       </div>
 
-      {/* Bottom Row - Tools & Export */}
-      <div className="grid grid-cols-12 gap-2 mx-auto px-4 pb-2">
-        {/* Left - Undo/Redo */}
-        <div className="col-span-3 flex items-center gap-1">
-          <button
-            onClick={onUndo}
-            disabled={!canUndo}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-secondary/20 dark:bg-secondary-dark/20 text-secondary dark:text-secondary-light hover:bg-secondary/30 dark:hover:bg-secondary-dark/30 transition-colors disabled:opacity-50"
-            title="Undo"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={onRedo}
-            disabled={!canRedo}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-secondary/20 dark:bg-secondary-dark/20 text-secondary dark:text-secondary-light hover:bg-secondary/30 dark:hover:bg-secondary-dark/30 transition-colors disabled:opacity-50"
-            title="Redo"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Center - Spacer */}
-        <div className="col-span-9"></div>
-      </div>
-
       {/* Click outside to close dropdowns */}
       {showToolsMenu && (
         <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setShowToolsMenu(false);
-          }}
+          className="fixed inset-0 z-[9998]"
+          onClick={() => setShowToolsMenu(false)}
         />
       )}
     </nav>

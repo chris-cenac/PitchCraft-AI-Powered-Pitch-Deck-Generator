@@ -14,6 +14,34 @@ export class PromptUtils {
       Context: ${context}
       
       Always provide actionable, specific advice that helps create professional, investor-ready content.
+
+      ---
+      
+      When specifying slide layouts, use the following grid system:
+      - Each slide is a 12-column grid (columns: 1-12).
+      - For each component, specify:
+        - columns: width (number of columns to span, 1-12)
+        - rows: height (number of rows to span, optional)
+        - columnStart: left position (starting column, 1-based, optional)
+        - rowStart: top position (starting row, 1-based, optional)
+        - align: vertical alignment within grid cell (start, center, end, stretch)
+        - justify: horizontal alignment within grid cell (start, center, end, stretch)
+      - Example layout for a component:
+        {
+          "name": "MetricCard",
+          "props": { ... },
+          "layout": {
+            "columns": 4,
+            "rows": 2,
+            "columnStart": 5,
+            "rowStart": 1,
+            "align": "center",
+            "justify": "center"
+          }
+        }
+      - Place components so they are visually balanced and do not overlap.
+      - Use columnStart/rowStart to position components left/right and top/bottom as needed.
+      - Use align/justify for fine-tuned alignment within their grid area.
     `;
   }
 
@@ -54,6 +82,34 @@ export class PromptUtils {
       8. Team & Advisors
       9. Funding Ask & Use of Funds
       10. Closing & Next Steps
+
+      ---
+      
+      When specifying slide layouts, use the following grid system:
+      - Each slide is a 12-column grid (columns: 1-12).
+      - For each component, specify:
+        - columns: width (number of columns to span, 1-12)
+        - rows: height (number of rows to span, optional)
+        - columnStart: left position (starting column, 1-based, optional)
+        - rowStart: top position (starting row, 1-based, optional)
+        - align: vertical alignment within grid cell (start, center, end, stretch)
+        - justify: horizontal alignment within grid cell (start, center, end, stretch)
+      - Example layout for a component:
+        {
+          "name": "MetricCard",
+          "props": { ... },
+          "layout": {
+            "columns": 4,
+            "rows": 2,
+            "columnStart": 5,
+            "rowStart": 1,
+            "align": "center",
+            "justify": "center"
+          }
+        }
+      - Place components so they are visually balanced and do not overlap.
+      - Use columnStart/rowStart to position components left/right and top/bottom as needed.
+      - Use align/justify for fine-tuned alignment within their grid area.
       
       Format as JSON with proper structure for easy parsing.
     `;

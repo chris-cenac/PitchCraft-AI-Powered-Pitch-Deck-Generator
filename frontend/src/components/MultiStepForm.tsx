@@ -2,49 +2,30 @@ import React, { useState } from "react";
 import Stepper from "./StepperComponent";
 import { TextInput, TextArea, SelectDropdown } from "@/components/form";
 
-// Define the PitchFormData shape
+// Streamlined PitchFormData shape
 export interface PitchFormData {
   // Step 1: Company Basics
   companyName: string;
   tagline: string;
-  websiteUrl: string;
   industry: string;
   businessStage: string;
-  logo: File | null;
 
   // Step 2: Problem & Solution
   problemStatement: string;
   targetAudience: string;
   proposedSolution: string;
-  uniqueValueProposition: string;
 
-  // Step 3: Business Model & Market
+  // Step 3: Business & Market
   revenueModel: string;
-  pricingStrategy: string;
-  goToMarketStrategy: string;
   marketSize: string;
   competitors: string;
 
-  // Step 4: Team
+  // Step 4: Team & Vision
   founders: string;
-  teamSize: string;
-  advisors: string;
-
-  // Step 5: Financials
-  fundingStage: string;
-  amountRaised: string;
-  projectedRevenue: string;
-  costs: string;
-  financialMilestones: string;
-
-  // Step 6: Vision & Goals
   visionStatement: string;
-  longTermGoals: string;
-  exitStrategy: string;
 
-  // Step 7: Style Preferences
+  // Step 5: Design Preferences
   designStyle: string;
-  brandColors: string;
 }
 
 interface MultiStepFormProps {
@@ -58,61 +39,43 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
     // Step 1: Company Basics
     companyName: "",
     tagline: "",
-    websiteUrl: "",
     industry: "",
     businessStage: "",
-    logo: null,
 
     // Step 2: Problem & Solution
     problemStatement: "",
     targetAudience: "",
     proposedSolution: "",
-    uniqueValueProposition: "",
 
-    // Step 3: Business Model & Market
+    // Step 3: Business & Market
     revenueModel: "",
-    pricingStrategy: "",
-    goToMarketStrategy: "",
     marketSize: "",
     competitors: "",
 
-    // Step 4: Team
+    // Step 4: Team & Vision
     founders: "",
-    teamSize: "",
-    advisors: "",
-
-    // Step 5: Financials
-    fundingStage: "",
-    amountRaised: "",
-    projectedRevenue: "",
-    costs: "",
-    financialMilestones: "",
-
-    // Step 6: Vision & Goals
     visionStatement: "",
-    longTermGoals: "",
-    exitStrategy: "",
 
-    // Step 7: Style Preferences
+    // Step 5: Design Preferences
     designStyle: "",
-    brandColors: "",
   });
 
   const steps = [
-    { title: "Company Basics", description: "Company information" },
+    { title: "Company Basics", description: "Basic company information" },
     {
       title: "Problem & Solution",
-      description: "Define your value proposition",
+      description: "What problem do you solve?",
     },
     {
-      title: "Business Model & Market",
-      description: "Revenue and market strategy",
+      title: "Business & Market",
+      description: "How do you make money?",
     },
-    { title: "Team", description: "Your core team members" },
-    { title: "Financials", description: "Financial projections" },
-    { title: "Vision & Goals", description: "Long-term objectives" },
-    { title: "Style Preferences", description: "Design and branding" },
-    { title: "Review & Confirm", description: "Verify your information" },
+    {
+      title: "Team & Vision",
+      description: "Who are you and where are you going?",
+    },
+    { title: "Design Style", description: "How should it look?" },
+    { title: "Review & Generate", description: "Verify and create your deck" },
   ];
 
   const handleChange = (
@@ -129,40 +92,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-
-      // Validate file type
-      const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/webp",
-      ];
-      if (!allowedTypes.includes(file.type)) {
-        setErrors((prev) => ({
-          ...prev,
-          logo: "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
-        }));
-        return;
-      }
-
-      // Validate file size (5MB limit)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        setErrors((prev) => ({
-          ...prev,
-          logo: "File size must be less than 5MB",
-        }));
-        return;
-      }
-
-      setFormData((prev) => ({ ...prev, logo: file }));
-      setErrors((prev) => ({ ...prev, logo: "" }));
-    }
-  };
-
   const validateStep = (stepNumber: number): boolean => {
     const newErrors: { [key: string]: string } = {};
 
@@ -174,9 +103,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
           newErrors.industry = "Industry is required";
         if (!FormData.businessStage)
           newErrors.businessStage = "Business stage is required";
-        if (FormData.websiteUrl && !isValidUrl(FormData.websiteUrl)) {
-          newErrors.websiteUrl = "Please enter a valid URL";
-        }
         break;
 
       case 2:
@@ -186,18 +112,11 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
           newErrors.targetAudience = "Target audience is required";
         if (!FormData.proposedSolution.trim())
           newErrors.proposedSolution = "Proposed solution is required";
-        if (!FormData.uniqueValueProposition.trim())
-          newErrors.uniqueValueProposition =
-            "Unique value proposition is required";
         break;
 
       case 3:
         if (!FormData.revenueModel.trim())
           newErrors.revenueModel = "Revenue model is required";
-        if (!FormData.pricingStrategy)
-          newErrors.pricingStrategy = "Pricing strategy is required";
-        if (!FormData.goToMarketStrategy.trim())
-          newErrors.goToMarketStrategy = "Go-to-market strategy is required";
         if (!FormData.marketSize.trim())
           newErrors.marketSize = "Market size is required";
         break;
@@ -205,47 +124,18 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
       case 4:
         if (!FormData.founders.trim())
           newErrors.founders = "Founders information is required";
-        if (!FormData.teamSize.trim())
-          newErrors.teamSize = "Team size is required";
-        if (FormData.teamSize && isNaN(Number(FormData.teamSize))) {
-          newErrors.teamSize = "Team size must be a number";
-        }
-        break;
-
-      case 6:
         if (!FormData.visionStatement.trim())
           newErrors.visionStatement = "Vision statement is required";
-        if (!FormData.longTermGoals.trim())
-          newErrors.longTermGoals = "Long-term goals are required";
         break;
 
-      case 7:
+      case 5:
         if (!FormData.designStyle)
           newErrors.designStyle = "Design style is required";
-        if (FormData.brandColors && !isValidColorFormat(FormData.brandColors)) {
-          newErrors.brandColors =
-            "Please enter valid hex colors (e.g., #14248a, #998fc7)";
-        }
         break;
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const isValidUrl = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const isValidColorFormat = (colors: string): boolean => {
-    const colorArray = colors.split(",").map((c) => c.trim());
-    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
-    return colorArray.every((color) => hexPattern.test(color));
   };
 
   const handleSubmit = () => {
@@ -267,166 +157,149 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
       case 1:
         return (
           <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">
+                Tell us about your company
+              </h3>
+              <p className="text-secondary dark:text-secondary-light">
+                Let's start with the basics
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TextInput
+                label="Company Name *"
+                name="companyName"
+                value={FormData.companyName}
+                onChange={handleChange}
+                required
+                error={errors.companyName}
+                placeholder="e.g., TechStart Inc."
+              />
+
+              <TextInput
+                label="Industry / Sector *"
+                name="industry"
+                value={FormData.industry}
+                onChange={handleChange}
+                required
+                error={errors.industry}
+                placeholder="e.g., FinTech, Healthcare, SaaS"
+              />
+            </div>
+
             <TextInput
-              label="Company Name"
-              name="companyName"
-              value={FormData.companyName}
-              onChange={handleChange}
-              required
-              error={errors.companyName}
-            />
-            <TextInput
-              label="Tagline / Slogan (Optional)"
+              label="Tagline (Optional)"
               name="tagline"
               value={FormData.tagline}
               onChange={handleChange}
+              placeholder="e.g., Revolutionizing the future of..."
             />
-            <TextInput
-              label="Website URL (Optional)"
-              name="websiteUrl"
-              value={FormData.websiteUrl}
-              onChange={handleChange}
-              type="url"
-              error={errors.websiteUrl}
-              placeholder="https://example.com"
-            />
-            <TextInput
-              label="Industry / Sector"
-              name="industry"
-              value={FormData.industry}
-              onChange={handleChange}
-              required
-              error={errors.industry}
-            />
+
             <SelectDropdown
-              label="Stage of Business"
+              label="Business Stage *"
               name="businessStage"
               value={FormData.businessStage}
               onChange={handleChange}
               required
               error={errors.businessStage}
             >
-              <option value="">Select stage</option>
-              <option value="Idea">Idea</option>
-              <option value="MVP">MVP</option>
-              <option value="Revenue">Revenue</option>
-              <option value="Growth">Growth</option>
+              <option value="">Select your stage</option>
+              <option value="Idea">Idea Stage</option>
+              <option value="MVP">MVP / Prototype</option>
+              <option value="Early Revenue">Early Revenue</option>
+              <option value="Growth">Growth Stage</option>
+              <option value="Scale">Scale Stage</option>
             </SelectDropdown>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium text-primary dark:text-accent">
-                Logo Upload (Optional)
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg"
-              />
-              {errors.logo && (
-                <p className="text-red-500 text-sm mt-1">{errors.logo}</p>
-              )}
-              {FormData.logo && (
-                <p className="text-sm text-green-600 mt-1">
-                  Selected: {FormData.logo.name} (
-                  {(FormData.logo.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
-            </div>
           </div>
         );
 
       case 2:
         return (
           <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">
+                What problem are you solving?
+              </h3>
+              <p className="text-secondary dark:text-secondary-light">
+                Help investors understand your value
+              </p>
+            </div>
+
             <TextArea
-              label="Problem Statement"
+              label="Problem Statement *"
               name="problemStatement"
               value={FormData.problemStatement}
               onChange={handleChange}
               required
               error={errors.problemStatement}
-              placeholder="Describe the problem your company solves..."
+              placeholder="Describe the problem your company solves in 1-2 sentences..."
+              rows={3}
             />
-            <TextInput
-              label="Target Audience / Customer Segment"
-              name="targetAudience"
-              value={FormData.targetAudience}
-              onChange={handleChange}
-              required
-              error={errors.targetAudience}
-              placeholder="Who are your ideal customers?"
-            />
-            <TextArea
-              label="Proposed Solution"
-              name="proposedSolution"
-              value={FormData.proposedSolution}
-              onChange={handleChange}
-              required
-              error={errors.proposedSolution}
-              placeholder="How does your product/service solve the problem?"
-            />
-            <TextInput
-              label="Unique Value Proposition"
-              name="uniqueValueProposition"
-              value={FormData.uniqueValueProposition}
-              onChange={handleChange}
-              required
-              error={errors.uniqueValueProposition}
-              placeholder="What makes you different from competitors?"
-            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TextInput
+                label="Target Audience *"
+                name="targetAudience"
+                value={FormData.targetAudience}
+                onChange={handleChange}
+                required
+                error={errors.targetAudience}
+                placeholder="e.g., Small business owners, Enterprise companies"
+              />
+
+              <TextArea
+                label="Your Solution *"
+                name="proposedSolution"
+                value={FormData.proposedSolution}
+                onChange={handleChange}
+                required
+                error={errors.proposedSolution}
+                placeholder="How does your product/service solve this problem?"
+                rows={3}
+              />
+            </div>
           </div>
         );
 
       case 3:
         return (
           <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">Business & Market</h3>
+              <p className="text-secondary dark:text-secondary-light">
+                Show your business model and market opportunity
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TextInput
+                label="Revenue Model *"
+                name="revenueModel"
+                value={FormData.revenueModel}
+                onChange={handleChange}
+                required
+                error={errors.revenueModel}
+                placeholder="e.g., Subscription, Transaction fees, Freemium"
+              />
+
+              <TextInput
+                label="Market Size *"
+                name="marketSize"
+                value={FormData.marketSize}
+                onChange={handleChange}
+                required
+                error={errors.marketSize}
+                placeholder="e.g., $50B TAM, $5B SAM"
+              />
+            </div>
+
             <TextInput
-              label="Revenue Model"
-              name="revenueModel"
-              value={FormData.revenueModel}
-              onChange={handleChange}
-              required
-              error={errors.revenueModel}
-              placeholder="How do you make money?"
-            />
-            <SelectDropdown
-              label="Pricing Strategy"
-              name="pricingStrategy"
-              value={FormData.pricingStrategy}
-              onChange={handleChange}
-              required
-              error={errors.pricingStrategy}
-            >
-              <option value="">Select strategy</option>
-              <option value="Subscription">Subscription</option>
-              <option value="Freemium">Freemium</option>
-              <option value="One-time">One-time fee</option>
-              <option value="Tiered">Tiered pricing</option>
-            </SelectDropdown>
-            <TextInput
-              label="Go-to-Market Strategy"
-              name="goToMarketStrategy"
-              value={FormData.goToMarketStrategy}
-              onChange={handleChange}
-              required
-              error={errors.goToMarketStrategy}
-              placeholder="How will you acquire customers?"
-            />
-            <TextInput
-              label="Market Size / Opportunity"
-              name="marketSize"
-              value={FormData.marketSize}
-              onChange={handleChange}
-              required
-              error={errors.marketSize}
-              placeholder="What's the size of your market?"
-            />
-            <TextInput
-              label="Competitors (Optional)"
+              label="Main Competitors (Optional)"
               name="competitors"
               value={FormData.competitors}
               onChange={handleChange}
-              placeholder="Who are your main competitors?"
+              placeholder="e.g., Stripe, Square, PayPal"
             />
           </div>
         );
@@ -434,271 +307,247 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
       case 4:
         return (
           <div className="space-y-4">
-            <TextArea
-              label="Founders & Roles"
-              name="founders"
-              value={FormData.founders}
-              onChange={handleChange}
-              required
-              error={errors.founders}
-              placeholder="List founders and their roles..."
-            />
-            <TextInput
-              label="Team Size"
-              name="teamSize"
-              value={FormData.teamSize}
-              onChange={handleChange}
-              type="number"
-              min="1"
-              required
-              error={errors.teamSize}
-              placeholder="Total number of team members"
-            />
-            <TextInput
-              label="Notable Advisors / Mentors (Optional)"
-              name="advisors"
-              value={FormData.advisors}
-              onChange={handleChange}
-              placeholder="List key advisors and their expertise..."
-            />
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">Team & Vision</h3>
+              <p className="text-secondary dark:text-secondary-light">
+                Tell us about your team and future vision
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TextArea
+                label="Founders & Key Team *"
+                name="founders"
+                value={FormData.founders}
+                onChange={handleChange}
+                required
+                error={errors.founders}
+                placeholder="List founders and key team members with their roles..."
+                rows={3}
+              />
+
+              <TextArea
+                label="Vision Statement *"
+                name="visionStatement"
+                value={FormData.visionStatement}
+                onChange={handleChange}
+                required
+                error={errors.visionStatement}
+                placeholder="What's your long-term vision for the company?"
+                rows={3}
+              />
+            </div>
           </div>
         );
 
       case 5:
         return (
           <div className="space-y-4">
-            <SelectDropdown
-              label="Funding Stage"
-              name="fundingStage"
-              value={FormData.fundingStage}
-              onChange={handleChange}
-            >
-              <option value="">Select stage</option>
-              <option value="Bootstrapped">Bootstrapped</option>
-              <option value="Pre-seed">Pre-seed</option>
-              <option value="Seed">Seed</option>
-              <option value="Series A">Series A</option>
-              <option value="Series B+">Series B+</option>
-            </SelectDropdown>
-            <TextInput
-              label="Amount Raised (if any)"
-              name="amountRaised"
-              value={FormData.amountRaised}
-              onChange={handleChange}
-              type="number"
-              min="0"
-              placeholder="Enter amount in USD"
-            />
-            <TextInput
-              label="Projected Revenue (1-3 years)"
-              name="projectedRevenue"
-              value={FormData.projectedRevenue}
-              onChange={handleChange}
-              type="text"
-              placeholder="e.g., $1M in Year 1, $3M in Year 2"
-            />
-            <TextInput
-              label="Costs / Burn Rate"
-              name="costs"
-              value={FormData.costs}
-              onChange={handleChange}
-              type="text"
-              placeholder="e.g., $50K monthly burn rate"
-            />
-            <TextInput
-              label="Financial Milestones Achieved"
-              name="financialMilestones"
-              value={FormData.financialMilestones}
-              onChange={handleChange}
-              placeholder="Key financial achievements..."
-            />
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">Design Preferences</h3>
+              <p className="text-secondary dark:text-secondary-light">
+                Choose how your pitch deck should look
+              </p>
+            </div>
+
+            <div className="max-w-2xl mx-auto">
+              <SelectDropdown
+                label="Design Style *"
+                name="designStyle"
+                value={FormData.designStyle}
+                onChange={handleChange}
+                required
+                error={errors.designStyle}
+              >
+                <option value="">Select your preferred style</option>
+                <option value="Minimal">Minimal & Clean</option>
+                <option value="Bold">Bold & Modern</option>
+                <option value="Playful">Playful & Creative</option>
+                <option value="Corporate">Professional & Corporate</option>
+                <option value="Elegant">Elegant & Sophisticated</option>
+              </SelectDropdown>
+            </div>
+
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-xl p-4 border border-primary/20 dark:border-accent/20">
+              <h4 className="font-semibold mb-2 text-primary dark:text-accent">
+                What you'll get:
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-secondary dark:text-secondary-light">
+                    Professional pitch deck with 8-12 slides
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-secondary dark:text-secondary-light">
+                    Customized content based on your inputs
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-secondary dark:text-secondary-light">
+                    Modern design matching your style preference
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-secondary dark:text-secondary-light">
+                    Ready for investor presentations
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         );
 
       case 6:
         return (
           <div className="space-y-4">
-            <TextArea
-              label="Vision Statement"
-              name="visionStatement"
-              value={FormData.visionStatement}
-              onChange={handleChange}
-              required
-              error={errors.visionStatement}
-              placeholder="What's your long-term vision?"
-            />
-            <TextArea
-              label="Long-Term Goals"
-              name="longTermGoals"
-              value={FormData.longTermGoals}
-              onChange={handleChange}
-              required
-              error={errors.longTermGoals}
-              placeholder="What are your key long-term objectives?"
-            />
-            <TextInput
-              label="Exit Strategy (Optional)"
-              name="exitStrategy"
-              value={FormData.exitStrategy}
-              onChange={handleChange}
-              placeholder="IPO, acquisition, etc."
-            />
-          </div>
-        );
-
-      case 7:
-        return (
-          <div className="space-y-4">
-            <SelectDropdown
-              label="Preferred Design Style"
-              name="designStyle"
-              value={FormData.designStyle}
-              onChange={handleChange}
-              required
-              error={errors.designStyle}
-            >
-              <option value="">Select style</option>
-              <option value="Minimal">Minimal</option>
-              <option value="Bold">Bold</option>
-              <option value="Playful">Playful</option>
-              <option value="Corporate">Corporate</option>
-              <option value="Elegant">Elegant</option>
-            </SelectDropdown>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium text-primary dark:text-accent">
-                Logo Upload Preview
-              </label>
-              {FormData.logo ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-green-600">✓</span>
-                  <p className="text-sm">{FormData.logo.name}</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, logo: null }))
-                    }
-                    className="text-red-500 text-sm hover:text-red-700"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <p className="text-sm text-muted">No logo uploaded</p>
-              )}
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">
+                Review Your Information
+              </h3>
+              <p className="text-secondary dark:text-secondary-light">
+                Everything looks good? Let's create your pitch deck!
+              </p>
             </div>
-            <TextInput
-              label="Brand Colors (Optional)"
-              name="brandColors"
-              value={FormData.brandColors}
-              onChange={handleChange}
-              placeholder="#14248a, #998fc7, #d4c2fc"
-              error={errors.brandColors}
-            />
-          </div>
-        );
 
-      case 8:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-xl font-semibold">Review Your Information</h3>
-
-            <div className="grid gap-4">
-              <div className="card">
-                <h4 className="font-bold mb-2">Company Basics</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <p>
-                    <strong>Name:</strong> {FormData.companyName}
-                  </p>
-                  <p>
-                    <strong>Industry:</strong> {FormData.industry}
-                  </p>
-                  <p>
-                    <strong>Stage:</strong> {FormData.businessStage}
-                  </p>
-                  <p>
-                    <strong>Tagline:</strong> {FormData.tagline || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Website:</strong> {FormData.websiteUrl || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Logo:</strong>{" "}
-                    {FormData.logo ? FormData.logo.name : "N/A"}
-                  </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-xl p-4 border border-primary/20 dark:border-accent/20">
+                <h4 className="font-bold mb-3 text-primary dark:text-accent flex items-center">
+                  <div className="w-2 h-2 bg-primary dark:bg-accent rounded-full mr-2"></div>
+                  Company
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Name:
+                    </span>
+                    <p className="mt-1">{FormData.companyName}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Industry:
+                    </span>
+                    <p className="mt-1">{FormData.industry}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Stage:
+                    </span>
+                    <p className="mt-1">{FormData.businessStage}</p>
+                  </div>
+                  {FormData.tagline && (
+                    <div>
+                      <span className="font-semibold text-secondary dark:text-secondary-light">
+                        Tagline:
+                      </span>
+                      <p className="mt-1">{FormData.tagline}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="card">
-                <h4 className="font-bold mb-2">Problem & Solution</h4>
-                <div className="text-sm space-y-1">
-                  <p>
-                    <strong>Problem:</strong>{" "}
-                    {FormData.problemStatement.substring(0, 100)}...
-                  </p>
-                  <p>
-                    <strong>Target Audience:</strong> {FormData.targetAudience}
-                  </p>
-                  <p>
-                    <strong>Solution:</strong>{" "}
-                    {FormData.proposedSolution.substring(0, 100)}...
-                  </p>
+              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-xl p-4 border border-primary/20 dark:border-accent/20">
+                <h4 className="font-bold mb-3 text-primary dark:text-accent flex items-center">
+                  <div className="w-2 h-2 bg-primary dark:bg-accent rounded-full mr-2"></div>
+                  Problem & Solution
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Problem:
+                    </span>
+                    <p className="mt-1">{FormData.problemStatement}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Target:
+                    </span>
+                    <p className="mt-1">{FormData.targetAudience}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Solution:
+                    </span>
+                    <p className="mt-1">{FormData.proposedSolution}</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="card">
-                <h4 className="font-bold mb-2">Business Model</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <p>
-                    <strong>Revenue Model:</strong> {FormData.revenueModel}
-                  </p>
-                  <p>
-                    <strong>Pricing:</strong> {FormData.pricingStrategy}
-                  </p>
-                  <p>
-                    <strong>Market Size:</strong> {FormData.marketSize}
-                  </p>
-                  <p>
-                    <strong>Competitors:</strong>{" "}
-                    {FormData.competitors || "N/A"}
-                  </p>
+              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-xl p-4 border border-primary/20 dark:border-accent/20">
+                <h4 className="font-bold mb-3 text-primary dark:text-accent flex items-center">
+                  <div className="w-2 h-2 bg-primary dark:bg-accent rounded-full mr-2"></div>
+                  Business & Market
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Revenue:
+                    </span>
+                    <p className="mt-1">{FormData.revenueModel}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Market:
+                    </span>
+                    <p className="mt-1">{FormData.marketSize}</p>
+                  </div>
+                  {FormData.competitors && (
+                    <div>
+                      <span className="font-semibold text-secondary dark:text-secondary-light">
+                        Competitors:
+                      </span>
+                      <p className="mt-1">{FormData.competitors}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="card">
-                <h4 className="font-bold mb-2">Team & Financials</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <p>
-                    <strong>Team Size:</strong> {FormData.teamSize}
-                  </p>
-                  <p>
-                    <strong>Funding Stage:</strong>{" "}
-                    {FormData.fundingStage || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Amount Raised:</strong>{" "}
-                    {FormData.amountRaised
-                      ? `$${FormData.amountRaised}`
-                      : "N/A"}
-                  </p>
-                  <p>
-                    <strong>Design Style:</strong> {FormData.designStyle}
-                  </p>
+              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-xl p-4 border border-primary/20 dark:border-accent/20">
+                <h4 className="font-bold mb-3 text-primary dark:text-accent flex items-center">
+                  <div className="w-2 h-2 bg-primary dark:bg-accent rounded-full mr-2"></div>
+                  Team & Vision
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Team:
+                    </span>
+                    <p className="mt-1">{FormData.founders}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-secondary dark:text-secondary-light">
+                      Vision:
+                    </span>
+                    <p className="mt-1">{FormData.visionStatement}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 mt-6">
+            <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-xl p-4 border border-primary/20 dark:border-accent/20">
+              <h4 className="font-bold mb-3 text-primary dark:text-accent flex items-center">
+                <div className="w-2 h-2 bg-primary dark:bg-accent rounded-full mr-2"></div>
+                Design Style
+              </h4>
+              <p className="font-medium">{FormData.designStyle}</p>
+            </div>
+
+            <div className="flex flex-wrap gap-4 mt-6 justify-center">
               <button
                 type="button"
                 onClick={prevStep}
-                className="btn-secondary"
+                className="px-6 py-2 bg-secondary/20 dark:bg-secondary-dark/20 text-secondary dark:text-secondary-light rounded-lg hover:bg-secondary/30 dark:hover:bg-secondary-dark/30 transition-colors font-medium"
               >
                 Back to Edit
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="btn-primary"
+                className="px-8 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
               >
                 Generate Pitch Deck
               </button>
@@ -712,53 +561,45 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 mt-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Pitch Deck Generator</h1>
-        <p className="text-muted dark:text-muted">
-          Complete all steps to generate your customized pitch deck
-        </p>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="lg:w-1/3">
-          <div className="sticky top-6">
-            <Stepper steps={steps} currentStep={currentStep} />
-          </div>
-        </div>
-
-        <div className="lg:w-2/3">
-          <div className="card">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
-                Step {currentStep}: {steps[currentStep - 1].title}
-              </h2>
-              <span className="text-sm text-muted dark:text-muted">
-                {currentStep} of {steps.length}
-              </span>
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto h-full flex flex-col">
+          <div className="flex-1 flex flex-col xl:flex-row gap-4 lg:gap-6">
+            {/* Stepper - Smaller on larger screens, full width on mobile */}
+            <div className="xl:w-72 lg:w-64 order-2 xl:order-1 flex-shrink-0">
+              <div className="xl:sticky xl:top-4">
+                <div className="bg-surface/50 dark:bg-surface-dark/50 rounded-xl p-4 backdrop-blur-sm">
+                  <Stepper steps={steps} currentStep={currentStep} />
+                </div>
+              </div>
             </div>
 
-            {renderStep()}
+            {/* Form Content - Takes up most of the space */}
+            <div className="flex-1 order-1 xl:order-2 min-h-0">
+              <div className="bg-surface dark:bg-surface-dark rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 h-full flex flex-col">
+                <div className="flex-1 overflow-auto">{renderStep()}</div>
 
-            <div className="flex justify-between mt-8">
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="btn-secondary"
-                >
-                  Previous
-                </button>
-              )}
-              {currentStep < steps.length && (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="btn-primary ml-auto"
-                >
-                  Next Step
-                </button>
-              )}
+                <div className="flex justify-between mt-6 pt-4 border-t border-secondary/20 dark:border-secondary-dark/20 flex-shrink-0">
+                  {currentStep > 1 && (
+                    <button
+                      type="button"
+                      onClick={prevStep}
+                      className="px-4 sm:px-6 py-2 bg-secondary/20 dark:bg-secondary-dark/20 text-secondary dark:text-secondary-light rounded-lg hover:bg-secondary/30 dark:hover:bg-secondary-dark/30 transition-colors text-sm sm:text-base"
+                    >
+                      ← Previous
+                    </button>
+                  )}
+                  {currentStep < steps.length && (
+                    <button
+                      type="button"
+                      onClick={nextStep}
+                      className="px-4 sm:px-6 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 ml-auto text-sm sm:text-base font-medium"
+                    >
+                      Next Step →
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

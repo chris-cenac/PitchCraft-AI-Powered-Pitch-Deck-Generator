@@ -87,6 +87,30 @@ const TemplatesView: React.FC = () => {
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary-dark/20 dark:to-accent/20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative px-6 py-12 mx-auto max-w-7xl">
+          {/* Back Button */}
+          <div className="mb-6">
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              className="inline-flex items-center gap-2"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Back to Home
+            </Button>
+          </div>
+
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-primary dark:text-accent mb-4">
               Pitch Deck Templates

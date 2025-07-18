@@ -5,7 +5,8 @@ import { useTheme } from "@/hooks/useTheme";
 export const SlideContainer: React.FC<{
   children: React.ReactNode;
   aspectRatio?: "16/9" | "4/3" | "1/1";
-}> = ({ children, aspectRatio = "16/9" }) => {
+  useFullHeight?: boolean;
+}> = ({ children, aspectRatio = "16/9", useFullHeight = false }) => {
   const { theme } = useTheme();
   const ratios = {
     "16/9": "aspect-video",
@@ -15,7 +16,9 @@ export const SlideContainer: React.FC<{
 
   return (
     <div
-      className={`${ratios[aspectRatio]} w-full  mx-auto shadow-xl rounded-xl overflow-hidden`}
+      className={`${
+        useFullHeight ? "h-full" : ratios[aspectRatio]
+      } w-full mx-auto shadow-xl rounded-xl overflow-hidden`}
     >
       <div
         className={`w-full h-full ${

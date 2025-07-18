@@ -11,16 +11,25 @@ export interface ComponentPropsRegistry {
   LabelHeader: {
     text: string;
     subtext?: string;
-    size?: "sm" | "md" | "lg" | "xl";
+    size?: "sm" | "md" | "lg" | "xl" | "2xl";
     align?: "left" | "center" | "right";
     underline?: boolean;
     color?: string;
     underlineColor?: string;
     icon?: string;
+    gradient?: boolean;
+    variant?: "default" | "hero" | "section" | "accent";
   };
   ComparisonTable: {
     headers: string[];
     rows: string[][];
+    caption?: string;
+    highlightCols?: number[];
+    highlightRows?: number[];
+    variant?: "default" | "striped" | "bordered" | "highlighted";
+    className?: string;
+    width?: string | number;
+    height?: string | number;
   };
   DeckChart: {
     type:
@@ -52,6 +61,40 @@ export interface ComponentPropsRegistry {
     height?: number;
     circular?: boolean;
     border?: "none" | "light" | "medium" | "accent";
+  };
+  MetricCard: {
+    title: string;
+    value: string | number;
+    subtitle?: string;
+    icon?: string;
+    trend?: "up" | "down" | "neutral";
+    trendValue?: string;
+    variant?: "default" | "primary" | "success" | "warning" | "danger";
+    size?: "sm" | "md" | "lg";
+    className?: string;
+  };
+  FeatureList: {
+    title?: string;
+    features: Array<{
+      text: string;
+      icon?: string;
+      highlight?: boolean;
+      description?: string;
+    }>;
+    variant?: "default" | "checklist" | "benefits" | "highlights";
+    layout?: "grid" | "list" | "cards";
+    columns?: 1 | 2 | 3;
+    className?: string;
+  };
+  QuoteCard: {
+    quote: string;
+    author?: string;
+    title?: string;
+    company?: string;
+    avatar?: string;
+    variant?: "default" | "highlight" | "testimonial" | "statistic";
+    size?: "sm" | "md" | "lg";
+    className?: string;
   };
 }
 

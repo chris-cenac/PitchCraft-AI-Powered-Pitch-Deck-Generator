@@ -5,7 +5,11 @@ import { ComparisonTable } from "./ComparisonTable";
 import { DeckChart } from "./DeckChart";
 import { IllustrationFlow } from "./IllustrationFlow";
 import { LogoDisplay } from "./LogoDisplay";
+import { MetricCard } from "./MetricCard";
+import { FeatureList } from "./FeatureList";
+import { QuoteCard } from "./QuoteCard";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentRegistry: Record<string, React.FC<any>> = {
   // Header/Label Components
   LabelHeader,
@@ -19,6 +23,11 @@ export const componentRegistry: Record<string, React.FC<any>> = {
 
   // Branding Elements
   LogoDisplay,
+
+  // New Professional Components
+  MetricCard,
+  FeatureList,
+  QuoteCard,
 };
 
 export interface ComponentPropsMap {
@@ -27,6 +36,9 @@ export interface ComponentPropsMap {
   DeckChart: React.ComponentProps<typeof DeckChart>;
   IllustrationFlow: React.ComponentProps<typeof IllustrationFlow>;
   LogoDisplay: React.ComponentProps<typeof LogoDisplay>;
+  MetricCard: React.ComponentProps<typeof MetricCard>;
+  FeatureList: React.ComponentProps<typeof FeatureList>;
+  QuoteCard: React.ComponentProps<typeof QuoteCard>;
 }
 
 export function isValidComponentName(

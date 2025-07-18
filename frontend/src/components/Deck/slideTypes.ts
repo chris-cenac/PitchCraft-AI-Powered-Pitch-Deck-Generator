@@ -36,16 +36,56 @@ export interface ComponentPropsRegistry {
   LabelHeader: {
     text: string;
     subtext?: string;
-    size?: "sm" | "md" | "lg" | "xl";
+    size?: "sm" | "md" | "lg" | "xl" | "2xl";
+    variant?: "default" | "hero" | "section";
+    gradient?: boolean;
     align?: "left" | "center" | "right";
     underline?: boolean;
     color?: string; // Custom text color override
     underlineColor?: string; // Custom underline color
     icon?: string; // Icon name (e.g., "FiBarChart2")
   };
+  MetricCard: {
+    title: string;
+    value: string;
+    subtitle?: string;
+    icon?: string;
+    variant?: "primary" | "secondary" | "success" | "warning" | "danger";
+    size?: "sm" | "md" | "lg" | "xl";
+    trend?: "up" | "down" | "neutral";
+    trendValue?: string;
+    color?: string;
+  };
+  FeatureList: {
+    title?: string;
+    features: Array<{
+      text: string;
+      icon?: string;
+      highlight?: boolean;
+    }>;
+    variant?: "default" | "benefits" | "highlights";
+    layout?: "list" | "cards" | "grid";
+    columns?: 1 | 2 | 3;
+  };
+  QuoteCard: {
+    quote: string;
+    author: string;
+    title?: string;
+    company?: string;
+    variant?: "testimonial" | "quote" | "highlight";
+    size?: "sm" | "md" | "lg";
+    color?: string;
+  };
   ComparisonTable: {
     headers: string[];
     rows: string[][];
+    caption?: string;
+    highlightCols?: number[];
+    highlightRows?: number[];
+    variant?: "default" | "striped" | "bordered" | "highlighted";
+    className?: string;
+    width?: string | number;
+    height?: string | number;
   };
   DeckChart: {
     type:
@@ -57,8 +97,13 @@ export interface ComponentPropsRegistry {
       | "radar"
       | "bubble"
       | "scatter";
-    data: Record<string, any>;
-    options?: Record<string, any>;
+    data: Record<string, unknown>;
+    options?: Record<string, unknown>;
+    height?: string | number;
+    width?: string | number;
+    loading?: boolean;
+    error?: string;
+    className?: string;
   };
   IllustrationFlow: {
     iconName: string;

@@ -27,8 +27,11 @@ export type SlideType =
   | "solution"
   | "market"
   | "business-model"
+  | "competitive"
+  | "go-to-market"
   | "financial"
   | "team"
+  | "funding"
   | "closing"
   | "custom";
 

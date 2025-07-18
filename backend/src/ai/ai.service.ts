@@ -349,54 +349,50 @@ export class AiService {
     businessData: any;
     componentsCatalog: any[];
   }): Promise<DeckSpec> {
-    const prompt = `You are an AI that generates pitch deck JSON for a React app.
+    const prompt = `You are an expert pitch deck designer and business strategist. Create a compelling, investor-ready pitch deck that tells a powerful story and showcases the business opportunity.
 
-**Instructions:**
-- Generate exactly 10 slides, one for each of the following sections, in this order:
-  1. Company Introduction (Title)
-  2. Problem Statement
-  3. Solution
-  4. Market Opportunity & Size
-  5. Business Model & Revenue Streams
-  6. Go-to-Market Strategy
-  7. Financial Projections
-  8. Team & Advisors
-  9. Funding Ask & Use of Funds
-  10. Closing & Next Steps
-- Use ALL available components from the following registry: LabelHeader, ComparisonTable, DeckChart, IllustrationFlow, LogoDisplay.
-- Each slide should use multiple components and fill the screen (use all 12 columns, multiple rows, and varied layouts).
-- For factual business info (tagline, financials, founders, etc.), use the provided data as-is.
-- For other content (problem, solution, market, team, etc.), you may elaborate, rephrase, or add context to make the deck more compelling and investor-friendly.
-- Make the deck visually rich and engaging.
-- Return ONLY a valid JSON object matching this DeckSpec type:
+**CRITICAL REQUIREMENTS:**
+- Generate exactly 10 slides following this proven structure
+- Use ALL available components creatively and strategically
+- Create visually rich, professional layouts that fill the screen
+- Make content compelling, data-driven, and investor-focused
+- Use the business data provided but enhance it with strategic insights
 
-{
-  "slides": [ ... ],
-  "theme": { ... }
-}
+**SLIDE STRUCTURE (10 slides):**
+1. **Title Slide** - Company introduction with hero messaging
+2. **Problem Statement** - Pain point with compelling data/story
+3. **Solution Overview** - Your unique approach with key benefits
+4. **Market Opportunity** - Market size, growth, and timing
+5. **Business Model** - Revenue streams and unit economics
+6. **Competitive Advantage** - Why you'll win vs alternatives
+7. **Go-to-Market Strategy** - How you'll acquire customers
+8. **Financial Projections** - Revenue, growth, and key metrics
+9. **Team & Advisors** - Why you can execute
+10. **Funding Ask** - Investment opportunity and use of funds
 
-**Example Slide:**
-{
-  "id": "problem-solution",
-  "title": "The Data Dilemma",
-  "items": [
-    {
-      "name": "LabelHeader",
-      "props": { "text": "The Problem", "size": "xl", "underline": true },
-      "layout": { "columns": 12, "rowStart": 1 }
-    },
-    {
-      "name": "DeckChart",
-      "props": { "type": "pie", "data": { "labels": ["Unstructured Data", "Manual Processing", "Inaccurate Insights", "Actionable Data"], "datasets": [{ "data": [45, 25, 20, 10], "backgroundColor": ["#ef4444", "#f97316", "#eab308", "#22c55e"] }] }, "options": { "plugins": { "title": { "display": true, "text": "Data Utilization Breakdown" }, "legend": { "position": "right" } } } },
-      "layout": { "columns": 6, "rowStart": 2 }
-    },
-    {
-      "name": "ComparisonTable",
-      "props": { "headers": ["Feature", "Ours", "Competitor"], "rows": [["Real-time Analytics", "✓", "✗"], ["Predictive Modeling", "✓", "Basic"]] },
-      "layout": { "columns": 6, "rowStart": 2 }
-    }
-  ]
-}
+**COMPONENT USAGE STRATEGY:**
+- **LabelHeader**: Use for slide titles, section headers, and key messaging
+- **MetricCard**: Display key metrics, KPIs, financial data, and growth indicators
+- **FeatureList**: Show benefits, competitive advantages, product features
+- **QuoteCard**: Customer testimonials, market validation, expert opinions
+- **DeckChart**: Market data, growth trends, competitive analysis, financial projections
+- **ComparisonTable**: Competitive analysis, feature comparisons, market positioning
+- **IllustrationFlow**: Process flows, user journeys, business model visualization
+- **LogoDisplay**: Company branding, partner logos, customer logos
+
+**LAYOUT PRINCIPLES:**
+- Use full 12-column grid effectively
+- Create visual hierarchy with different component sizes
+- Balance text, data, and visual elements
+- Use multiple components per slide for richness
+- Ensure professional spacing and alignment
+
+**CONTENT ENHANCEMENT:**
+- Transform basic business data into compelling narratives
+- Add market research insights and industry trends
+- Include realistic but optimistic projections
+- Create emotional connection with problem/solution
+- Demonstrate clear path to market leadership
 
 **Business Data:**
 ${JSON.stringify(dto.businessData, null, 2)}
@@ -404,7 +400,51 @@ ${JSON.stringify(dto.businessData, null, 2)}
 **Available Components:**
 ${JSON.stringify(dto.componentsCatalog, null, 2)}
 
-Return ONLY the JSON object:`;
+**EXAMPLE SLIDE STRUCTURE:**
+{
+  "id": "problem-statement",
+  "title": "The Market Pain Point",
+  "items": [
+    {
+      "name": "LabelHeader",
+      "props": {
+        "text": "The Problem We're Solving",
+        "subtext": "A $50B market opportunity waiting to be captured",
+        "size": "xl",
+        "variant": "section",
+        "underline": true
+      },
+      "layout": { "columns": 12, "rowStart": 1 }
+    },
+    {
+      "name": "MetricCard",
+      "props": {
+        "title": "Market Size",
+        "value": "$50B",
+        "subtitle": "Total Addressable Market",
+        "icon": "FiDollarSign",
+        "variant": "primary"
+      },
+      "layout": { "columns": 4, "rowStart": 2 }
+    },
+    {
+      "name": "FeatureList",
+      "props": {
+        "title": "Current Market Problems",
+        "features": [
+          { "text": "Inefficient processes cost $15B annually", "icon": "FiAlertTriangle", "highlight": true },
+          { "text": "80% of companies struggle with legacy systems", "icon": "FiClock" },
+          { "text": "Only 20% achieve digital transformation goals", "icon": "FiTarget" }
+        ],
+        "variant": "highlights",
+        "layout": "cards"
+      },
+      "layout": { "columns": 8, "rowStart": 2 }
+    }
+  ]
+}
+
+Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creating a compelling narrative that investors will love.`;
 
     const response = await this.openai.chat.completions.create({
       model: "gpt-4",
@@ -412,12 +452,12 @@ Return ONLY the JSON object:`;
         {
           role: "system",
           content:
-            "You are a JSON-only AI assistant. Always respond with valid JSON objects only. Never include explanatory text, markdown, or any other formatting.",
+            "You are an expert pitch deck designer with 15+ years of experience helping startups raise billions in funding. You understand investor psychology, market dynamics, and what makes a pitch deck compelling. Always create professional, data-driven content that tells a powerful story. Respond only with valid JSON.",
         },
         { role: "user", content: prompt },
       ],
-      temperature: 0.3,
-      max_tokens: 4000,
+      temperature: 0.4,
+      max_tokens: 6000,
     });
 
     const content = response.choices[0].message.content;
@@ -456,8 +496,11 @@ Return ONLY the JSON object:`;
               name: "LabelHeader",
               props: {
                 text: businessData.companyName || "Company Name",
-                size: "xl",
-                align: "center",
+                subtext: businessData.tagline || "Revolutionizing the future",
+                size: "2xl",
+                variant: "hero",
+                gradient: true,
+                underline: true,
               },
               layout: {
                 columns: 12,
@@ -466,14 +509,16 @@ Return ONLY the JSON object:`;
               },
             },
             {
-              name: "LabelHeader",
+              name: "LogoDisplay",
               props: {
-                text: businessData.tagline || "Your tagline here",
+                companyName: businessData.companyName || "Company",
+                variant: "with-text",
                 size: "lg",
-                align: "center",
+                circular: true,
+                border: "accent",
               },
               layout: {
-                columns: 12,
+                columns: 6,
                 align: "center",
                 justify: "center",
               },
@@ -487,8 +532,10 @@ Return ONLY the JSON object:`;
             {
               name: "LabelHeader",
               props: {
-                text: "The Problem",
+                text: "The Problem We're Solving",
+                subtext: "A critical market gap that needs addressing",
                 size: "xl",
+                variant: "section",
                 underline: true,
               },
               layout: {
@@ -497,16 +544,94 @@ Return ONLY the JSON object:`;
               },
             },
             {
-              name: "IllustrationFlow",
+              name: "FeatureList",
               props: {
-                iconName: "FiTarget",
-                title: "Problem",
-                description:
-                  businessData.problemStatement ||
-                  "Describe the problem your solution addresses.",
+                title: "Market Challenges",
+                features: [
+                  {
+                    text:
+                      businessData.problemStatement ||
+                      "Current solutions are inadequate",
+                    icon: "FiAlertTriangle",
+                    highlight: true,
+                  },
+                  {
+                    text: "High costs and inefficiencies",
+                    icon: "FiDollarSign",
+                  },
+                  {
+                    text: "Poor user experience",
+                    icon: "FiUser",
+                  },
+                ],
+                variant: "highlights",
+                layout: "cards",
+                columns: 3,
               },
               layout: {
                 columns: 12,
+              },
+            },
+          ],
+        },
+        {
+          id: "solution",
+          title: "Our Solution",
+          items: [
+            {
+              name: "LabelHeader",
+              props: {
+                text: "Our Revolutionary Solution",
+                subtext: "Transforming the industry with innovative technology",
+                size: "xl",
+                variant: "section",
+                underline: true,
+              },
+              layout: {
+                columns: 12,
+                align: "center",
+              },
+            },
+            {
+              name: "FeatureList",
+              props: {
+                title: "Key Benefits",
+                features: [
+                  {
+                    text:
+                      businessData.proposedSolution ||
+                      "Innovative approach to solving the problem",
+                    icon: "FiZap",
+                    highlight: true,
+                  },
+                  {
+                    text: "10x faster than alternatives",
+                    icon: "FiClock",
+                  },
+                  {
+                    text: "Cost-effective solution",
+                    icon: "FiTrendingUp",
+                  },
+                ],
+                variant: "benefits",
+                layout: "list",
+                columns: 1,
+              },
+              layout: {
+                columns: 8,
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Market Impact",
+                value: "10x",
+                subtitle: "Performance improvement",
+                icon: "FiTarget",
+                variant: "success",
+              },
+              layout: {
+                columns: 4,
               },
             },
           ],

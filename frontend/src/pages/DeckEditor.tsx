@@ -45,6 +45,35 @@ const DeckEditor: React.FC = () => {
     return () => clearTimeout(timer);
   }, [currentIndex]);
 
+  // Keyboard navigation
+  useEffect(() => {
+    if (!deck) return;
+
+    const slides = deck.slides || [];
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setCurrentIndex((prev) => Math.max(prev - 1, 0));
+        setShowNavigation(true);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setCurrentIndex((prev) => Math.min(prev + 1, slides.length - 1));
+        setShowNavigation(true);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        setCurrentIndex(0);
+        setShowNavigation(true);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        setCurrentIndex(slides.length - 1);
+        setShowNavigation(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, deck]);
+
   const loadTemplate = (templateId: string) => {
     setLoading(true);
     setError(null);
@@ -130,13 +159,14 @@ const DeckEditor: React.FC = () => {
     );
   }
 
-  const slides = deck.slides || [];
-  const currentSlide = slides[currentIndex];
-
   const handleSlideChange = (index: number) => {
+    console.log("Changing slide from", currentIndex, "to", index);
     setCurrentIndex(index);
     setShowNavigation(true); // Show navigation when changing slides
   };
+
+  const slides = deck?.slides || [];
+  const currentSlide = slides[currentIndex];
 
   const handleSave = () => {
     // This would save the deck to the backend
@@ -153,18 +183,6 @@ const DeckEditor: React.FC = () => {
     // This would enter presentation mode
     console.log("Entering presentation mode");
     alert("Presentation mode coming soon!");
-  };
-
-  const handleUndo = () => {
-    // This would undo the last action
-    console.log("Undoing last action");
-    alert("Undo functionality coming soon!");
-  };
-
-  const handleRedo = () => {
-    // This would redo the last undone action
-    console.log("Redoing last action");
-    alert("Redo functionality coming soon!");
   };
 
   const handlePrint = () => {
@@ -203,7 +221,7 @@ const DeckEditor: React.FC = () => {
       {/* Main Content - Maximized Slide Display */}
       <div className="flex-1 flex items-center justify-center p-2">
         <div className="w-full h-full max-w-[95vw] max-h-[calc(100vh-80px)]">
-          <SlideContainer aspectRatio="16/9">
+          <SlideContainer aspectRatio="16/9" useFullHeight={true}>
             <SlideRenderer
               items={currentSlide.items}
               spacing={3}
@@ -229,14 +247,10 @@ const DeckEditor: React.FC = () => {
           onSave={handleSave}
           onShare={handleShare}
           onEdit={handleEdit}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
           onPresent={handlePresent}
           onPrint={handlePrint}
           onDownloadPDF={handleDownloadPDF}
           onDownloadPPTX={handleDownloadPPTX}
-          canUndo={false}
-          canRedo={false}
           isEditing={isEditing}
           deckTitle={
             templateId ? getTemplateById(templateId)?.name : "Pitch Deck Editor"

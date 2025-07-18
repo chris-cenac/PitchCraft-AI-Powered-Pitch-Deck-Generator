@@ -1,4 +1,4 @@
-import type { DeckSpec, Slide, SlideItem } from "@/components/Deck/slideTypes";
+import type { DeckSpec } from "@/components/Deck/slideTypes";
 
 export interface PitchDeckTemplate {
   id: string;
@@ -17,1095 +17,145 @@ export interface PitchDeckTemplate {
 // Template data
 export const pitchDeckTemplates: PitchDeckTemplate[] = [
   {
-    id: "startup-fundraising",
-    name: "Startup Fundraising",
+    id: "comprehensive-pitch-deck",
+    name: "Comprehensive Pitch Deck",
     category: "fundraising",
     description:
-      "Comprehensive pitch deck for early-stage startups seeking seed or Series A funding",
-    slideCount: 12,
+      "Professional pitch deck template with excellent layout showcasing all components - perfect for startup fundraising and investor presentations",
+    slideCount: 9,
     duration: "15-20 minutes",
-    difficulty: "Intermediate",
+    difficulty: "Advanced",
     slides: [
-      "Title & Company Overview",
-      "Problem Statement",
-      "Solution & Product",
+      "Title Slide",
+      "The Problem",
+      "Our Solution",
       "Market Opportunity",
+      "Competitive Advantage",
       "Business Model",
-      "Go-to-Market Strategy",
-      "Competitive Analysis",
       "Financial Projections",
-      "Team & Advisors",
-      "Traction & Milestones",
+      "Team",
       "Funding Ask",
-      "Next Steps",
     ],
-    bestFor: ["Seed stage", "Series A", "Tech startups", "B2B SaaS"],
+    bestFor: [
+      "Startup fundraising",
+      "Series A",
+      "Tech startups",
+      "B2B SaaS",
+      "Investor presentations",
+    ],
     features: [
-      "Investor-focused",
-      "Financial modeling",
-      "Traction metrics",
-      "Team highlights",
+      "All components showcased",
+      "Perfect grid layout",
+      "Professional design",
+      "Investor-focused content",
+      "Data-driven narrative",
     ],
     generateDeck: () => ({
       theme: {
-        primaryColor: "#14248a",
-        secondaryColor: "#998fc7",
-        accentColor: "#d4c2fc",
-        backgroundColor: "#f9f5ff",
-        fontFamily: "Inter",
-        headingFontFamily: "Merriweather",
+        primaryColor: "#3182ce",
+        secondaryColor: "#2d3748",
+        accentColor: "#38a169",
+        backgroundColor: "#f7fafc",
+        fontFamily: "Inter, system-ui, sans-serif",
+        headingFontFamily: "Inter, system-ui, sans-serif",
       },
       slides: [
         {
-          id: "title",
-          title: "Title & Company Overview",
+          id: "slide-1",
+          title: "Title Slide",
           items: [
             {
               name: "LabelHeader",
               props: {
                 text: "TechFlow Solutions",
-                subtext: "Revolutionizing Enterprise Workflow Management",
+                subtext: "Revolutionizing Enterprise Workflow Automation",
+                size: "2xl",
+                variant: "hero",
+                gradient: true,
+                align: "center",
+                color: "#1a365d",
+                icon: "FiZap",
+              },
+              layout: {
+                columns: 12,
+                rows: 3,
+                columnStart: 1,
+                rowStart: 1,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "LogoDisplay",
+              props: {
+                companyName: "TechFlow",
+                variant: "standalone",
                 size: "xl",
-                align: "center",
-                color: "#14248a",
+                circular: false,
+                border: "accent",
               },
               layout: {
-                columns: 12,
+                columns: 4,
                 rows: 2,
+                columnStart: 5,
+                rowStart: 4,
                 align: "center",
                 justify: "center",
               },
             },
             {
-              name: "LabelHeader",
+              name: "MetricCard",
               props: {
-                text: "Founded 2023 | San Francisco, CA",
-                size: "md",
-                align: "center",
-                underline: false,
-                color: "#5a5860",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Mission: Empower teams to work smarter, not harder",
+                title: "Founded",
+                value: "2023",
+                subtitle: "Year Established",
+                icon: "FiCalendar",
+                variant: "primary",
                 size: "sm",
-                align: "center",
-                underline: false,
-                color: "#998fc7",
               },
               layout: {
-                columns: 12,
+                columns: 3,
                 rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "problem",
-          title: "Problem Statement",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "The Problem",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
+                columnStart: 2,
+                rowStart: 6,
                 align: "center",
                 justify: "center",
               },
             },
             {
-              name: "ComparisonTable",
+              name: "MetricCard",
               props: {
-                headers: ["Current State", "Pain Points", "Impact"],
-                rows: [
-                  [
-                    "Manual workflows",
-                    "Time-consuming processes",
-                    "$50K+ annual waste",
-                  ],
-                  [
-                    "Disconnected tools",
-                    "Data silos & inefficiency",
-                    "40% productivity loss",
-                  ],
-                  ["No automation", "Repetitive tasks", "Employee burnout"],
-                  [
-                    "Poor visibility",
-                    "No real-time insights",
-                    "Delayed decisions",
-                  ],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "solution",
-          title: "Solution & Product",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Our Solution",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiZap",
-                title: "AI-Powered Workflow Automation",
-                description:
-                  "Intelligent process optimization that learns and adapts to your team's needs",
-              },
-              layout: {
-                columns: 6,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiDatabase",
-                title: "Unified Data Platform",
-                description:
-                  "Centralized data management with real-time analytics and insights",
-              },
-              layout: {
-                columns: 6,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 7,
-              },
-            },
-          ],
-        },
-        {
-          id: "market",
-          title: "Market Opportunity",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Market Opportunity",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "DeckChart",
-              props: {
-                type: "doughnut",
-                data: {
-                  labels: ["TAM", "SAM", "Target Market"],
-                  datasets: [
-                    {
-                      data: [50, 10, 2],
-                      backgroundColor: ["#14248a", "#998fc7", "#d4c2fc"],
-                    },
-                  ],
-                },
-              },
-              layout: {
-                columns: 6,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "LabelHeader",
-              props: {
-                text: "$50B Total Addressable Market\n$10B Serviceable Market\n$2B Target Market",
-                size: "md",
-                align: "left",
-                underline: false,
-                color: "#5a5860",
-              },
-              layout: {
-                columns: 6,
-                rows: 4,
-                align: "center",
-                justify: "center",
-                columnStart: 7,
-              },
-            },
-          ],
-        },
-        {
-          id: "business-model",
-          title: "Business Model",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Business Model",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: ["Revenue Stream", "Pricing Model", "Target Customer"],
-                rows: [
-                  [
-                    "SaaS Subscriptions",
-                    "$99-999/month",
-                    "Mid-market enterprises",
-                  ],
-                  [
-                    "Implementation Services",
-                    "$50K-200K",
-                    "Enterprise clients",
-                  ],
-                  ["Custom Integrations", "$25K-100K", "Large enterprises"],
-                  ["Training & Support", "$5K-25K", "All customers"],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "go-to-market",
-          title: "Go-to-Market Strategy",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Go-to-Market Strategy",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiUsers",
-                title: "Direct Sales",
-                description:
-                  "Enterprise sales team targeting Fortune 500 companies",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiGlobe",
-                title: "Digital Marketing",
-                description:
-                  "Content marketing and SEO to generate inbound leads",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 5,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiHandshake",
-                title: "Partnerships",
-                description: "Strategic partnerships with consulting firms",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 9,
-              },
-            },
-          ],
-        },
-        {
-          id: "competitive",
-          title: "Competitive Analysis",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Competitive Landscape",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: [
-                  "Competitor",
-                  "Strengths",
-                  "Weaknesses",
-                  "Our Advantage",
-                ],
-                rows: [
-                  [
-                    "ServiceNow",
-                    "Enterprise presence",
-                    "Complex & expensive",
-                    "Ease of use",
-                  ],
-                  [
-                    "Asana",
-                    "User-friendly",
-                    "Limited automation",
-                    "AI capabilities",
-                  ],
-                  [
-                    "Monday.com",
-                    "Visual interface",
-                    "No enterprise features",
-                    "Enterprise focus",
-                  ],
-                  [
-                    "Zapier",
-                    "Integration focus",
-                    "No workflow management",
-                    "Complete solution",
-                  ],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 5,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "financials",
-          title: "Financial Projections",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Financial Projections",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "DeckChart",
-              props: {
-                type: "line",
-                data: {
-                  labels: ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"],
-                  datasets: [
-                    {
-                      label: "Revenue ($M)",
-                      data: [2, 8, 20, 45, 80],
-                      borderColor: "#14248a",
-                      backgroundColor: "rgba(20, 36, 138, 0.1)",
-                    },
-                  ],
-                },
-              },
-              layout: {
-                columns: 8,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Key Metrics:\n• 300% YoY growth\n• 85% gross margin\n• $50K ARR per customer\n• 12-month payback period",
+                title: "Team Size",
+                value: "15",
+                subtitle: "Full-time Employees",
+                icon: "FiUsers",
+                variant: "primary",
                 size: "sm",
-                align: "left",
-                underline: false,
-                color: "#5a5860",
-              },
-              layout: {
-                columns: 4,
-                rows: 4,
-                align: "center",
-                justify: "center",
-                columnStart: 9,
-              },
-            },
-          ],
-        },
-        {
-          id: "team",
-          title: "Team & Advisors",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Our Team",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: ["Name", "Role", "Experience", "Background"],
-                rows: [
-                  [
-                    "Sarah Chen",
-                    "CEO & Co-founder",
-                    "15 years",
-                    "Ex-Google, Stanford MBA",
-                  ],
-                  [
-                    "Mike Rodriguez",
-                    "CTO & Co-founder",
-                    "12 years",
-                    "Ex-AWS, MIT PhD",
-                  ],
-                  [
-                    "Lisa Thompson",
-                    "VP Sales",
-                    "10 years",
-                    "Ex-Salesforce, $50M+ revenue",
-                  ],
-                  [
-                    "Dr. James Wilson",
-                    "Advisor",
-                    "20 years",
-                    "Ex-McKinsey, Board member",
-                  ],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 5,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "traction",
-          title: "Traction & Milestones",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Traction & Milestones",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiTrendingUp",
-                title: "Revenue Growth",
-                description: "$2M ARR, 300% YoY growth",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiUsers",
-                title: "Customer Base",
-                description: "50+ enterprise customers",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 5,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiStar",
-                title: "Product Metrics",
-                description: "4.8/5 rating, 95% retention",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 9,
-              },
-            },
-          ],
-        },
-        {
-          id: "funding",
-          title: "Funding Ask",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Funding Ask",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "LabelHeader",
-              props: {
-                text: "$10M Series A",
-                size: "xl",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 2,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: ["Use of Funds", "Amount", "Timeline"],
-                rows: [
-                  ["Product Development", "$4M", "18 months"],
-                  ["Sales & Marketing", "$3M", "24 months"],
-                  ["Team Expansion", "$2M", "12 months"],
-                  ["Working Capital", "$1M", "Ongoing"],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "next-steps",
-          title: "Next Steps",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Next Steps",
-                size: "lg",
-                align: "center",
-                color: "#14248a",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiCalendar",
-                title: "Due Diligence",
-                description: "Complete investor due diligence process",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiFileText",
-                title: "Term Sheet",
-                description: "Negotiate and finalize term sheet",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 5,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiCheckCircle",
-                title: "Close & Launch",
-                description: "Close funding and execute growth plan",
-              },
-              layout: {
-                columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 9,
-              },
-            },
-          ],
-        },
-      ],
-    }),
-  },
-  {
-    id: "enterprise-sales",
-    name: "Enterprise Sales",
-    category: "enterprise",
-    description:
-      "Professional deck designed for enterprise B2B sales presentations and client pitches",
-    slideCount: 10,
-    duration: "20-30 minutes",
-    difficulty: "Advanced",
-    slides: [
-      "Executive Summary",
-      "Client Challenges",
-      "Solution Overview",
-      "Value Proposition",
-      "Implementation Approach",
-      "Success Stories",
-      "ROI Analysis",
-      "Pricing & Packages",
-      "Timeline & Milestones",
-      "Next Steps",
-    ],
-    bestFor: [
-      "Enterprise sales",
-      "B2B services",
-      "Consulting",
-      "Software solutions",
-    ],
-    features: [
-      "ROI focused",
-      "Case studies",
-      "Implementation plan",
-      "Executive summary",
-    ],
-    generateDeck: () => ({
-      theme: {
-        primaryColor: "#1e40af",
-        secondaryColor: "#3b82f6",
-        accentColor: "#60a5fa",
-        backgroundColor: "#f8fafc",
-        fontFamily: "Inter",
-        headingFontFamily: "Merriweather",
-      },
-      slides: [
-        {
-          id: "executive-summary",
-          title: "Executive Summary",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Enterprise Digital Transformation",
-                subtext: "Comprehensive solution for Fortune 500 companies",
-                size: "xl",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 2,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "LabelHeader",
-              props: {
-                text: "• 40% cost reduction in operational efficiency\n• 60% faster time-to-market\n• 300% ROI within 18 months\n• Proven track record with 50+ enterprises",
-                size: "md",
-                align: "left",
-                underline: false,
-                color: "#374151",
-              },
-              layout: {
-                columns: 12,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "challenges",
-          title: "Client Challenges",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Your Current Challenges",
-                size: "lg",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: ["Challenge", "Current Impact", "Business Risk"],
-                rows: [
-                  [
-                    "Legacy systems",
-                    "Slow processes",
-                    "Competitive disadvantage",
-                  ],
-                  [
-                    "Data silos",
-                    "Poor decision making",
-                    "Missed opportunities",
-                  ],
-                  [
-                    "Manual workflows",
-                    "High operational costs",
-                    "Scalability issues",
-                  ],
-                  ["Security gaps", "Compliance risks", "Reputation damage"],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "solution",
-          title: "Solution Overview",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Our Enterprise Solution",
-                size: "lg",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiShield",
-                title: "Enterprise Security",
-                description: "SOC 2 Type II, GDPR, HIPAA compliant",
-              },
-              layout: {
-                columns: 6,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiZap",
-                title: "Cloud-Native Platform",
-                description: "Scalable, reliable, and always available",
-              },
-              layout: {
-                columns: 6,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 7,
-              },
-            },
-          ],
-        },
-        {
-          id: "value-prop",
-          title: "Value Proposition",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Value Proposition",
-                size: "lg",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: ["Benefit", "Quantified Impact", "Time to Value"],
-                rows: [
-                  ["Cost reduction", "$2M annual savings", "6 months"],
-                  ["Efficiency gains", "40% productivity boost", "3 months"],
-                  ["Risk mitigation", "99.9% uptime guarantee", "Immediate"],
-                  ["Scalability", "10x capacity increase", "12 months"],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 4,
-                align: "center",
-                justify: "center",
-              },
-            },
-          ],
-        },
-        {
-          id: "implementation",
-          title: "Implementation Approach",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Implementation Roadmap",
-                size: "lg",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiPlay",
-                title: "Phase 1: Discovery",
-                description: "Requirements gathering and planning (2 weeks)",
               },
               layout: {
                 columns: 3,
-                rows: 3,
+                rows: 1,
+                columnStart: 6,
+                rowStart: 6,
                 align: "center",
                 justify: "center",
               },
             },
             {
-              name: "IllustrationFlow",
+              name: "MetricCard",
               props: {
-                iconName: "FiSettings",
-                title: "Phase 2: Setup",
-                description: "Infrastructure and configuration (4 weeks)",
+                title: "Location",
+                value: "San Francisco",
+                subtitle: "Headquarters",
+                icon: "FiMapPin",
+                variant: "primary",
+                size: "sm",
               },
               layout: {
                 columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 4,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiUsers",
-                title: "Phase 3: Training",
-                description: "User training and adoption (2 weeks)",
-              },
-              layout: {
-                columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 7,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiCheckCircle",
-                title: "Phase 4: Go-Live",
-                description: "Full deployment and optimization (2 weeks)",
-              },
-              layout: {
-                columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
+                rows: 1,
                 columnStart: 10,
-              },
-            },
-          ],
-        },
-        {
-          id: "success-stories",
-          title: "Success Stories",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Success Stories",
-                size: "lg",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "ComparisonTable",
-              props: {
-                headers: ["Client", "Industry", "Results", "Timeline"],
-                rows: [
-                  [
-                    "Global Bank",
-                    "Financial Services",
-                    "50% cost reduction",
-                    "8 months",
-                  ],
-                  ["Tech Corp", "Technology", "3x efficiency gain", "6 months"],
-                  [
-                    "Manufacturing Co",
-                    "Manufacturing",
-                    "$5M annual savings",
-                    "12 months",
-                  ],
-                  [
-                    "Healthcare System",
-                    "Healthcare",
-                    "99.9% uptime",
-                    "4 months",
-                  ],
-                ],
-              },
-              layout: {
-                columns: 12,
-                rows: 4,
+                rowStart: 6,
                 align: "center",
                 justify: "center",
               },
@@ -1113,20 +163,79 @@ export const pitchDeckTemplates: PitchDeckTemplate[] = [
           ],
         },
         {
-          id: "roi",
-          title: "ROI Analysis",
+          id: "slide-2",
+          title: "The Problem",
           items: [
             {
               name: "LabelHeader",
               props: {
-                text: "ROI Analysis",
-                size: "lg",
+                text: "The Problem We're Solving",
+                subtext:
+                  "Enterprise workflow inefficiencies cost billions annually",
+                size: "xl",
+                variant: "section",
                 align: "center",
-                color: "#1e40af",
+                color: "#2d3748",
               },
               layout: {
                 columns: 12,
-                rows: 1,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 2,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "IllustrationFlow",
+              props: {
+                iconName: "FiAlertTriangle",
+                title: "Manual Processes",
+                description:
+                  "80% of enterprises still rely on manual, error-prone workflows",
+                color: "#e53e3e",
+              },
+              layout: {
+                columns: 4,
+                rows: 3,
+                columnStart: 1,
+                rowStart: 4,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "IllustrationFlow",
+              props: {
+                iconName: "FiClock",
+                title: "Time Waste",
+                description:
+                  "Employees spend 40% of their time on repetitive tasks",
+                color: "#d69e2e",
+              },
+              layout: {
+                columns: 4,
+                rows: 3,
+                columnStart: 5,
+                rowStart: 4,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "IllustrationFlow",
+              props: {
+                iconName: "FiDollarSign",
+                title: "High Costs",
+                description:
+                  "$2.7 trillion lost annually due to inefficient processes",
+                color: "#38a169",
+              },
+              layout: {
+                columns: 4,
+                rows: 3,
+                columnStart: 9,
+                rowStart: 4,
                 align: "center",
                 justify: "center",
               },
@@ -1136,57 +245,248 @@ export const pitchDeckTemplates: PitchDeckTemplate[] = [
               props: {
                 type: "bar",
                 data: {
-                  labels: ["Year 1", "Year 2", "Year 3"],
+                  labels: [
+                    "Manual Processes",
+                    "Time Waste",
+                    "Error Rate",
+                    "Cost Impact",
+                  ],
                   datasets: [
                     {
-                      label: "ROI (%)",
-                      data: [150, 250, 300],
-                      backgroundColor: "#1e40af",
+                      label: "Impact Score (1-10)",
+                      data: [8, 7, 9, 8],
+                      backgroundColor: "#e53e3e",
                     },
                   ],
                 },
               },
               layout: {
                 columns: 8,
-                rows: 4,
+                rows: 6,
+                columnStart: 3,
+                rowStart: 8,
                 align: "center",
                 justify: "center",
-              },
-            },
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Investment: $2M\nYear 1 ROI: $3M\nYear 2 ROI: $5M\nYear 3 ROI: $6M",
-                size: "md",
-                align: "left",
-                underline: false,
-                color: "#374151",
-              },
-              layout: {
-                columns: 4,
-                rows: 4,
-                align: "center",
-                justify: "center",
-                columnStart: 9,
               },
             },
           ],
         },
         {
-          id: "pricing",
-          title: "Pricing & Packages",
+          id: "slide-3",
+          title: "Our Solution",
           items: [
             {
               name: "LabelHeader",
               props: {
-                text: "Pricing & Packages",
-                size: "lg",
+                text: "AI-Powered Workflow Automation",
+                subtext: "Intelligent automation that learns and adapts",
+                size: "xl",
+                variant: "section",
                 align: "center",
-                color: "#1e40af",
+                color: "#2d3748",
               },
               layout: {
                 columns: 12,
-                rows: 1,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 1,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "FeatureList",
+              props: {
+                title: "Key Features",
+                features: [
+                  {
+                    text: "AI-powered process learning",
+                    icon: "FiBrain",
+                    highlight: true,
+                  },
+                  {
+                    text: "Real-time workflow optimization",
+                    icon: "FiZap",
+                    highlight: true,
+                  },
+                  {
+                    text: "Seamless integration with existing systems",
+                    icon: "FiLink",
+                    highlight: false,
+                  },
+                  {
+                    text: "Advanced analytics and reporting",
+                    icon: "FiBarChart2",
+                    highlight: false,
+                  },
+                ],
+                variant: "benefits",
+                layout: "list",
+                columns: 1,
+              },
+              layout: {
+                columns: 6,
+                rows: 4,
+                columnStart: 1,
+                rowStart: 3,
+                align: "start",
+                justify: "start",
+              },
+            },
+            {
+              name: "QuoteCard",
+              props: {
+                quote:
+                  "TechFlow reduced our processing time by 75% and eliminated 90% of manual errors.",
+                author: "Sarah Chen",
+                title: "CTO",
+                company: "GlobalTech Inc.",
+                variant: "testimonial",
+                size: "md",
+              },
+              layout: {
+                columns: 6,
+                rows: 4,
+                columnStart: 7,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+          ],
+        },
+        {
+          id: "slide-4",
+          title: "Market Opportunity",
+          items: [
+            {
+              name: "LabelHeader",
+              props: {
+                text: "Massive Market Opportunity",
+                subtext: "The workflow automation market is exploding",
+                size: "xl",
+                variant: "section",
+                align: "center",
+                color: "#2d3748",
+              },
+              layout: {
+                columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 1,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Total Addressable Market",
+                value: "$45B",
+                subtitle: "Global workflow automation market",
+                icon: "FiGlobe",
+                trend: "up",
+                trendValue: "+23% YoY",
+                variant: "primary",
+                size: "lg",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 4,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Serviceable Market",
+                value: "$12B",
+                subtitle: "Enterprise segment we target",
+                icon: "FiTarget",
+                trend: "up",
+                trendValue: "+18% YoY",
+                variant: "success",
+                size: "lg",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 5,
+                rowStart: 4,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Target Market",
+                value: "$2.8B",
+                subtitle: "Immediate opportunity",
+                icon: "FiTrendingUp",
+                trend: "up",
+                trendValue: "+35% YoY",
+                variant: "warning",
+                size: "lg",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 9,
+                rowStart: 4,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "DeckChart",
+              props: {
+                type: "line",
+                data: {
+                  labels: ["2023", "2024", "2025", "2026", "2027"],
+                  datasets: [
+                    {
+                      label: "Market Growth ($B)",
+                      data: [45, 55, 68, 84, 103],
+                      backgroundColor: "#3182ce",
+                      borderColor: "#3182ce",
+                    },
+                  ],
+                },
+              },
+              layout: {
+                columns: 10,
+                rows: 5,
+                columnStart: 2,
+                rowStart: 7,
+                align: "center",
+                justify: "center",
+              },
+            },
+          ],
+        },
+        {
+          id: "slide-5",
+          title: "Competitive Advantage",
+          items: [
+            {
+              name: "LabelHeader",
+              props: {
+                text: "Why We'll Win",
+                subtext: "Competitive advantages that set us apart",
+                size: "xl",
+                variant: "section",
+                align: "center",
+                color: "#2d3748",
+              },
+              layout: {
+                columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 1,
                 align: "center",
                 justify: "center",
               },
@@ -1194,17 +494,20 @@ export const pitchDeckTemplates: PitchDeckTemplate[] = [
             {
               name: "ComparisonTable",
               props: {
-                headers: ["Package", "Features", "Price", "Timeline"],
+                headers: ["Feature", "Competitors", "TechFlow"],
                 rows: [
-                  ["Starter", "Core platform + support", "$500K", "6 months"],
-                  ["Professional", "Full suite + training", "$1M", "8 months"],
-                  ["Enterprise", "Custom + dedicated team", "$2M", "12 months"],
-                  ["Premier", "White-label + consulting", "$5M", "18 months"],
+                  ["AI Learning", "Basic", "Advanced ML"],
+                  ["Integration", "Limited", "Universal"],
+                  ["Analytics", "Standard", "Predictive"],
+                  ["Pricing", "High", "Competitive"],
+                  ["Support", "Email Only", "24/7 Live"],
                 ],
               },
               layout: {
-                columns: 12,
-                rows: 4,
+                columns: 10,
+                rows: 6,
+                columnStart: 2,
+                rowStart: 4,
                 align: "center",
                 justify: "center",
               },
@@ -1212,146 +515,443 @@ export const pitchDeckTemplates: PitchDeckTemplate[] = [
           ],
         },
         {
-          id: "timeline",
-          title: "Timeline & Milestones",
+          id: "slide-6",
+          title: "Business Model",
           items: [
             {
               name: "LabelHeader",
               props: {
-                text: "Project Timeline",
-                size: "lg",
+                text: "Scalable Revenue Model",
+                subtext: "Multiple revenue streams with strong unit economics",
+                size: "xl",
+                variant: "section",
                 align: "center",
-                color: "#1e40af",
+                color: "#2d3748",
               },
               layout: {
                 columns: 12,
-                rows: 1,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 7,
                 align: "center",
                 justify: "center",
               },
             },
             {
-              name: "IllustrationFlow",
+              name: "MetricCard",
               props: {
-                iconName: "FiCalendar",
-                title: "Month 1-2",
-                description: "Discovery & Planning",
-              },
-              layout: {
-                columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiSettings",
-                title: "Month 3-6",
-                description: "Development & Testing",
-              },
-              layout: {
-                columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 4,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiUsers",
-                title: "Month 7-8",
-                description: "Training & Deployment",
-              },
-              layout: {
-                columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 7,
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiCheckCircle",
-                title: "Month 9-12",
-                description: "Optimization & Support",
-              },
-              layout: {
-                columns: 3,
-                rows: 3,
-                align: "center",
-                justify: "center",
-                columnStart: 10,
-              },
-            },
-          ],
-        },
-        {
-          id: "next-steps",
-          title: "Next Steps",
-          items: [
-            {
-              name: "LabelHeader",
-              props: {
-                text: "Next Steps",
-                size: "lg",
-                align: "center",
-                color: "#1e40af",
-              },
-              layout: {
-                columns: 12,
-                rows: 1,
-                align: "center",
-                justify: "center",
-              },
-            },
-            {
-              name: "IllustrationFlow",
-              props: {
-                iconName: "FiFileText",
-                title: "Proposal Review",
-                description: "Detailed proposal and contract review",
+                title: "Annual Recurring Revenue",
+                value: "$2.5M",
+                subtitle: "Current ARR",
+                icon: "FiDollarSign",
+                trend: "up",
+                trendValue: "+300% YoY",
+                variant: "primary",
+                size: "md",
               },
               layout: {
                 columns: 4,
-                rows: 3,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 3,
                 align: "center",
                 justify: "center",
               },
             },
             {
-              name: "IllustrationFlow",
+              name: "MetricCard",
               props: {
-                iconName: "FiUsers",
-                title: "Stakeholder Meeting",
-                description: "Present to key decision makers",
+                title: "Customer Lifetime Value",
+                value: "$45K",
+                subtitle: "Average CLV",
+                icon: "FiUser",
+                trend: "up",
+                trendValue: "+25% YoY",
+                variant: "success",
+                size: "md",
               },
               layout: {
                 columns: 4,
-                rows: 3,
-                align: "center",
-                justify: "center",
+                rows: 2,
                 columnStart: 5,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
               },
             },
             {
-              name: "IllustrationFlow",
+              name: "MetricCard",
               props: {
-                iconName: "FiCheckCircle",
-                title: "Contract Signing",
-                description: "Finalize agreement and begin project",
+                title: "Gross Margin",
+                value: "85%",
+                subtitle: "High margin SaaS model",
+                icon: "FiTrendingUp",
+                trend: "up",
+                trendValue: "+5% YoY",
+                variant: "warning",
+                size: "md",
               },
               layout: {
                 columns: 4,
-                rows: 3,
+                rows: 2,
+                columnStart: 9,
+                rowStart: 3,
                 align: "center",
                 justify: "center",
+              },
+            },
+            {
+              name: "FeatureList",
+              props: {
+                title: "Revenue Streams",
+                features: [
+                  {
+                    text: "SaaS Subscriptions (70%)",
+                    icon: "FiCreditCard",
+                    highlight: true,
+                  },
+                  {
+                    text: "Professional Services (20%)",
+                    icon: "FiSettings",
+                    highlight: false,
+                  },
+                  {
+                    text: "Enterprise Licenses (10%)",
+                    icon: "FiBuilding",
+                    highlight: false,
+                  },
+                ],
+                variant: "highlights",
+                layout: "list",
+                columns: 1,
+              },
+              layout: {
+                columns: 6,
+                rows: 3,
+                columnStart: 1,
+                rowStart: 6,
+                align: "start",
+                justify: "start",
+              },
+            },
+            {
+              name: "DeckChart",
+              props: {
+                type: "doughnut",
+                data: {
+                  labels: [
+                    "SaaS Subscriptions",
+                    "Professional Services",
+                    "Enterprise Licenses",
+                  ],
+                  datasets: [
+                    {
+                      data: [70, 20, 10],
+                      backgroundColor: ["#3182ce", "#38a169", "#d69e2e"],
+                    },
+                  ],
+                },
+              },
+              layout: {
+                columns: 6,
+                rows: 3,
+                columnStart: 7,
+                rowStart: 6,
+                align: "center",
+                justify: "center",
+              },
+            },
+          ],
+        },
+        {
+          id: "slide-7",
+          title: "Financial Projections",
+          items: [
+            {
+              name: "LabelHeader",
+              props: {
+                text: "Financial Projections",
+                subtext: "Path to $50M ARR in 5 years",
+                size: "xl",
+                variant: "section",
+                align: "center",
+                color: "#2d3748",
+              },
+              layout: {
+                columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 1,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "DeckChart",
+              props: {
+                type: "bar",
+                data: {
+                  labels: ["2023", "2024", "2025", "2026", "2027"],
+                  datasets: [
+                    {
+                      label: "Revenue ($M)",
+                      data: [2.5, 8, 18, 32, 50],
+                      backgroundColor: "#3182ce",
+                    },
+                  ],
+                },
+              },
+              layout: {
+                columns: 8,
+                rows: 4,
+                columnStart: 1,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "2027 Target",
+                value: "$50M",
+                subtitle: "Annual Recurring Revenue",
+                icon: "FiTarget",
+                variant: "primary",
+                size: "md",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
                 columnStart: 9,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Growth Rate",
+                value: "110%",
+                subtitle: "Annual Growth",
+                icon: "FiTrendingUp",
+                trend: "up",
+                variant: "success",
+                size: "md",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 9,
+                rowStart: 5,
+                align: "center",
+                justify: "center",
+              },
+            },
+          ],
+        },
+        {
+          id: "slide-8",
+          title: "Team",
+          items: [
+            {
+              name: "LabelHeader",
+              props: {
+                text: "World-Class Team",
+                subtext: "Proven track record of building successful companies",
+                size: "xl",
+                variant: "section",
+                align: "center",
+                color: "#2d3748",
+              },
+              layout: {
+                columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 1,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "FeatureList",
+              props: {
+                title: "Leadership Team",
+                features: [
+                  {
+                    text: "CEO: Former VP at Salesforce (10+ years)",
+                    icon: "FiUser",
+                    highlight: true,
+                  },
+                  {
+                    text: "CTO: Ex-Google AI researcher, PhD Stanford",
+                    icon: "FiUser",
+                    highlight: true,
+                  },
+                  {
+                    text: "CPO: Built 3 successful SaaS products",
+                    icon: "FiUser",
+                    highlight: true,
+                  },
+                  {
+                    text: "CFO: Former CFO at $500M startup",
+                    icon: "FiUser",
+                    highlight: false,
+                  },
+                ],
+                variant: "benefits",
+                layout: "list",
+                columns: 1,
+              },
+              layout: {
+                columns: 6,
+                rows: 4,
+                columnStart: 1,
+                rowStart: 3,
+                align: "start",
+                justify: "start",
+              },
+            },
+            {
+              name: "QuoteCard",
+              props: {
+                quote:
+                  "This team has the perfect combination of technical expertise and business acumen to execute our vision.",
+                author: "Dr. Michael Chen",
+                title: "Board Member",
+                company: "Sequoia Capital",
+                variant: "testimonial",
+                size: "md",
+              },
+              layout: {
+                columns: 6,
+                rows: 4,
+                columnStart: 7,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+          ],
+        },
+        {
+          id: "slide-9",
+          title: "Funding Ask",
+          items: [
+            {
+              name: "LabelHeader",
+              props: {
+                text: "Investment Opportunity",
+                subtext: "Join us in revolutionizing enterprise automation",
+                size: "xl",
+                variant: "section",
+                align: "center",
+                color: "#2d3748",
+              },
+              layout: {
+                columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 1,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Funding Round",
+                value: "Series A",
+                subtitle: "Seeking $15M",
+                icon: "FiDollarSign",
+                variant: "primary",
+                size: "lg",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Use of Funds",
+                value: "Growth",
+                subtitle: "Team, Sales, R&D",
+                icon: "FiTarget",
+                variant: "success",
+                size: "lg",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 5,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Valuation",
+                value: "$75M",
+                subtitle: "Pre-money valuation",
+                icon: "FiTrendingUp",
+                variant: "warning",
+                size: "lg",
+              },
+              layout: {
+                columns: 4,
+                rows: 2,
+                columnStart: 9,
+                rowStart: 3,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "FeatureList",
+              props: {
+                title: "Key Milestones",
+                features: [
+                  {
+                    text: "Expand team to 50 employees",
+                    icon: "FiUsers",
+                    highlight: true,
+                  },
+                  {
+                    text: "Launch enterprise product",
+                    icon: "FiRocket",
+                    highlight: true,
+                  },
+                  {
+                    text: "Reach $10M ARR",
+                    icon: "FiTarget",
+                    highlight: true,
+                  },
+                  {
+                    text: "International expansion",
+                    icon: "FiGlobe",
+                    highlight: false,
+                  },
+                ],
+                variant: "highlights",
+                layout: "list",
+                columns: 1,
+              },
+              layout: {
+                columns: 8,
+                rows: 3,
+                columnStart: 3,
+                rowStart: 6,
+                align: "start",
+                justify: "center",
               },
             },
           ],
@@ -1359,7 +959,6 @@ export const pitchDeckTemplates: PitchDeckTemplate[] = [
       ],
     }),
   },
-  // Add more templates here...
 ];
 
 export const getTemplateById = (id: string): PitchDeckTemplate | undefined => {
@@ -1373,7 +972,6 @@ export const getAllTemplates = (): PitchDeckTemplate[] => {
 export const getTemplatesByCategory = (
   category: string
 ): PitchDeckTemplate[] => {
-  if (category === "all") return pitchDeckTemplates;
   return pitchDeckTemplates.filter(
     (template) => template.category === category
   );
