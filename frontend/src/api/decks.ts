@@ -1,6 +1,6 @@
 import type { DeckSpec } from "@/components/Deck/slideTypes";
 
-const BASE_URL = import.meta.env.NEST_API_URL || "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_NEST_API_URL || "http://localhost:3000";
 
 export interface CreatePitchDeckPayload {
   businessData: Record<string, unknown>;
