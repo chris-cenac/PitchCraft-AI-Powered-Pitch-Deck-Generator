@@ -1,6 +1,6 @@
 import type { DeckSpec } from "@/components/Deck/slideTypes";
 
-const BASE_URL = import.meta.env.NEST_API_URL || "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export interface CreatePitchDeckPayload {
   businessData: Record<string, unknown>;
@@ -10,191 +10,147 @@ export interface CreatePitchDeckPayload {
 }
 
 export const createPitchDeck = async (data: CreatePitchDeckPayload) => {
-  try {
-    const response = await fetch(`${BASE_URL}/pitch-decks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-      body: JSON.stringify(data),
-    });
+  const response = await fetch(`${BASE_URL}/pitch-decks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify(data),
+  });
 
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      // Clone the response to avoid consuming the stream
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
       try {
-        // Clone the response to avoid consuming the stream
-        const responseClone = response.clone();
-        const errorData = await responseClone.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
       } catch {
-        // If JSON parsing fails, try to get text from original response
-        try {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
-        } catch {
-          // If both fail, use the status text
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       }
-
-      throw new Error(errorMessage);
     }
-
-    // Check if response has content
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const responseText = await response.text();
-      console.error("Non-JSON response:", responseText);
-      throw new Error("Server returned non-JSON response");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error creating pitch deck:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
+
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    throw new Error("Server returned non-JSON response");
+  }
+  return await response.json();
 };
 
 export const generatePitchDeck = async (id: string) => {
-  try {
-    const response = await fetch(`${BASE_URL}/pitch-decks/${id}/generate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    });
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}/generate`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
       try {
-        const responseClone = response.clone();
-        const errorData = await responseClone.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
       } catch {
-        try {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
-        } catch {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       }
-
-      throw new Error(errorMessage);
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error generating pitch deck:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
+  return await response.json();
 };
 
 export const getGenerateStatus = async (id: string) => {
-  try {
-    const response = await fetch(`${BASE_URL}/pitch-decks/${id}/status`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    });
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}/status`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
       try {
-        const responseClone = response.clone();
-        const errorData = await responseClone.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
       } catch {
-        try {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
-        } catch {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       }
-
-      throw new Error(errorMessage);
     }
-
-    const data = await response.json();
-    return data.data || data;
-  } catch (error) {
-    console.error("Error getting generation status:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
+  const data = await response.json();
+  return data.data || data;
 };
 
 export const getDeckById = async (id: string): Promise<DeckSpec> => {
-  try {
-    const response = await fetch(`${BASE_URL}/pitch-decks/${id}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    });
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
       try {
-        const responseClone = response.clone();
-        const errorData = await responseClone.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
       } catch {
-        try {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
-        } catch {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       }
-      throw new Error(errorMessage);
     }
-    const data = await response.json();
-    // The backend returns { success, data: { spec: { slides, theme, ... } } }
-    return data.data?.spec || data.data;
-  } catch (error) {
-    console.error("Error fetching deck by ID:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
+  const data = await response.json();
+  // The backend returns { success, data: { spec: { slides, theme, ... } } }
+  return data.data?.spec || data.data;
 };
 
 export const getAllDecks = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/pitch-decks`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    });
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+  const response = await fetch(`${BASE_URL}/pitch-decks`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
       try {
-        const responseClone = response.clone();
-        const errorData = await responseClone.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
       } catch {
-        try {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
-        } catch {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       }
-      throw new Error(errorMessage);
     }
-    const data = await response.json();
-    // The backend returns { success, data: [ ...decks ] }
-    return data.data || [];
-  } catch (error) {
-    console.error("Error fetching all decks:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
+  const data = await response.json();
+  // The backend returns { success, data: [ ...decks ] }
+  return data.data || [];
 };
 
 export const exportDeckPdf = async (html: string, filename = "deck.pdf") => {
@@ -223,34 +179,29 @@ export const exportDeckPdf = async (html: string, filename = "deck.pdf") => {
 };
 
 export const deleteDeck = async (id: string) => {
-  try {
-    const response = await fetch(`${BASE_URL}/pitch-decks/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    });
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
       try {
-        const responseClone = response.clone();
-        const errorData = await responseClone.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
       } catch {
-        try {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
-        } catch {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       }
-      throw new Error(errorMessage);
     }
-    return await response.json();
-  } catch (error) {
-    console.error("Error deleting deck:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
+  return await response.json();
 };
 
 // Helper function - replace with your actual auth token retrieval
