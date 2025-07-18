@@ -15,7 +15,7 @@ export interface LogoutDto {
   refreshToken: string;
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const BASE_URL = import.meta.env.NEST_API_URL || "http://localhost:3000";
 
 async function handleResponse(res: Response) {
   if (!res.ok) {
