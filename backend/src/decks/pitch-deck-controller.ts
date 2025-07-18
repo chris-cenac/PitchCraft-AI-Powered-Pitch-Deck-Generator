@@ -13,6 +13,8 @@ import {
   BadRequestException,
   InternalServerErrorException,
   NotFoundException,
+  Query,
+  Res,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { JwtAuthGuard } from "src/auth/jwt-auth/jwt-auth.guard";
@@ -21,6 +23,8 @@ import { CreatePitchDeckDto } from "./dto/create-pitch-deck.dto";
 import { DeckSpec } from "../ai/interfaces/deck-spec.interface";
 import { AiService } from "../ai/ai.service";
 import { ComponentsService } from "../ai/services/components.service";
+import { Response } from "express";
+import { Public } from "../auth/decorators/public.decorator";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -423,5 +427,19 @@ export class PitchDeckController {
         error.message || "Failed to generate pitch deck"
       );
     }
+  }
+
+  @Public()
+  @Post("pdf")
+  async generatePdf(@Body("html") html: string, @Res() res: Response) {
+    if (!html) {
+      return res.status(400).json({ error: "Missing HTML content" });
+    }
+    const pdfBuffer = await this.pitchDeckService.generatePdfFromHtml(html);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": 'attachment; filename="deck.pdf"',
+    });
+    res.send(pdfBuffer);
   }
 }

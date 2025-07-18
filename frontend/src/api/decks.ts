@@ -197,6 +197,31 @@ export const getAllDecks = async () => {
   }
 };
 
+export const exportDeckPdf = async (html: string, filename = "deck.pdf") => {
+  const response = await fetch(`${BASE_URL}/pitch-decks/pdf`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ html }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to generate PDF");
+  }
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }, 100);
+};
+
 // Helper function - replace with your actual auth token retrieval
 const getAuthToken = () => {
   return localStorage.getItem("accessToken") || "";

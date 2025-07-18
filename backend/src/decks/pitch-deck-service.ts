@@ -10,6 +10,7 @@ import { PitchDeck, PitchDeckDocument } from "./schemas/pitch-deck.schema";
 import { CreatePitchDeckDto } from "./dto/create-pitch-deck.dto";
 import { DeckSpec, Slide } from "src/common/slide-types";
 import { DeckTheme } from "src/common/slide-types";
+import * as puppeteer from "puppeteer";
 
 export enum PitchDeckStatus {
   DRAFT = "draft",
@@ -395,5 +396,17 @@ export class PitchDeckService {
     }
 
     return pitchDeck;
+  }
+
+  async generatePdfFromHtml(html: string): Promise<Buffer> {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+    const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
+    await browser.close();
+    return pdfBuffer;
   }
 }

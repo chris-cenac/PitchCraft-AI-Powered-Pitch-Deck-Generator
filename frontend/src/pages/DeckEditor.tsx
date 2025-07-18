@@ -8,7 +8,7 @@ import DeckNavigation from "@/components/Deck/DeckNavigation";
 import { getDeckById } from "@/api/decks";
 import { getTemplateById } from "@/services/templateService";
 import Button from "@/components/ui/Button";
-import html2pdf from "html2pdf.js";
+import { exportDeckPdf } from "@/api/decks";
 import PptxGenJS from "pptxgenjs";
 
 // Add a module declaration for html2pdf.js if missing
@@ -205,26 +205,17 @@ const DeckEditor: React.FC = () => {
 
   const handleDownloadPDF = async () => {
     if (!deck || !deck.slides) return;
+    if (!pdfContainerRef.current) {
+      toast.error("PDF export failed: container not found.");
+      return;
+    }
     try {
-      if (pdfContainerRef.current) {
-        await html2pdf()
-          .set({
-            margin: 0,
-            filename: "pitch-deck.pdf",
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: "in", format: "a4", orientation: "landscape" },
-          })
-          .from(pdfContainerRef.current)
-          .save();
-      } else {
-        toast.error("PDF export failed: container not found.");
-      }
+      const html = pdfContainerRef.current.innerHTML;
+      await exportDeckPdf(html, "pitch-deck.pdf");
+      toast.success("PDF downloaded!");
     } catch (err) {
       toast.error("PDF export failed. Please try again.");
       console.error("PDF export error:", err);
-    } finally {
-      // No longer need to set renderingPDF
     }
   };
 
