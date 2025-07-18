@@ -140,33 +140,6 @@ npm run dev
 
 ---
 
-## Evaluation Criteria (for reviewers)
-
-- **Functionality:** Completeness and correctness of core features.
-- **Usability:** Ease of use for generating, editing, and exporting pitch decks.
-- **Code Quality:** Clean, modular, and well-documented code.
-- **Scalability:** Ability to support multiple users and large pitch decks.
-- **AI Integration:** Effective use of LLMs for generation and refinement.
-- **User Experience:** Intuitive design and clear workflows for all users.
-- **Bonus:** Version control, templates, media integration, and innovative features.
-
----
-
-## Deliverables
-
-- **Source Code:** Hosted in a GitHub repository.
-- **Functional Application:** Deployed and accessible via a URL.
-- **Sample Database:** Example user-generated pitch decks.
-- **Documentation:** Setup, deployment, and usage guide (this README).
-
----
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
 ## Contact
 
-For questions or support, open an issue or contact the maintainer.
+Maintainer: [Chris Cenac](https://www.linkedin.com/in/chris-cenac-5a90a3230/?lipi=urn%3Ali%3Apage%3Ad_flagship3_feed%3BU8dioLh9Scq5SaYJfl5k1w%3D%3D)
