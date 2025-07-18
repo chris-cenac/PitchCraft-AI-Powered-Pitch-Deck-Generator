@@ -9,26 +9,56 @@ import { toast } from "react-hot-toast";
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
     const data = new FormData(form);
+
     const payload: SignupDto = {
       email: data.get("email") as string,
       password: data.get("password") as string,
       confirmPassword: data.get("confirmPassword") as string,
     };
 
+    // Client-side validation
+    if (payload.password !== payload.confirmPassword) {
+      toast.error("Passwords do not match. Please try again.");
+      return;
+    }
+
+    if (payload.password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+
+    // Check for password complexity requirements
+    const hasUpperCase = /[A-Z]/.test(payload.password);
+    const hasLowerCase = /[a-z]/.test(payload.password);
+    const hasNumber = /\d/.test(payload.password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      toast.error(
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
       await signup(payload);
-      toast.success("Account created! Please log in.");
+      toast.success("Account created successfully! Please log in.");
       navigate("/login");
     } catch (err: unknown) {
       if (err instanceof Error) {
         toast.error(err.message);
       } else {
-        toast.error("An unknown error occurred.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,6 +95,7 @@ const Signup: React.FC = () => {
                              dark:bg-background-dark dark:border-secondary-dark dark:placeholder-gray-400 
                              dark:text-accent-light dark:focus:ring-accent dark:focus:border-accent"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -84,6 +115,7 @@ const Signup: React.FC = () => {
                              dark:bg-background-dark dark:border-secondary-dark dark:placeholder-gray-400 
                              dark:text-accent-light dark:focus:ring-accent dark:focus:border-accent"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -103,6 +135,7 @@ const Signup: React.FC = () => {
                              dark:bg-background-dark dark:border-secondary-dark dark:placeholder-gray-400 
                              dark:text-accent-light dark:focus:ring-accent dark:focus:border-accent"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <label className="flex items-start cursor-pointer">
@@ -116,6 +149,7 @@ const Signup: React.FC = () => {
                     required
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    disabled={isLoading}
                   />
                 </div>
                 <div className="ml-3 text-sm">
@@ -133,16 +167,16 @@ const Signup: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={!acceptedTerms}
+                disabled={!acceptedTerms || isLoading}
                 className={`w-full text-surface font-medium rounded-lg text-sm px-5 py-2.5 text-center 
                  focus:ring-4 focus:outline-none focus:ring-accent
                  ${
-                   !acceptedTerms
+                   !acceptedTerms || isLoading
                      ? "bg-secondary cursor-not-allowed"
                      : "bg-primary hover:bg-primary-light dark:bg-primary-dark dark:hover:bg-primary cursor-pointer"
                  }`}
               >
-                Create an account
+                {isLoading ? "Creating account..." : "Create an account"}
               </button>
               <p className="text-sm font-light text-secondary dark:text-accent-light">
                 Already have an account?{" "}

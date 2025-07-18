@@ -20,7 +20,40 @@ const BASE_URL = import.meta.env.VITE_NEST_API_URL || "http://localhost:3000";
 async function handleResponse(res: Response) {
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}));
-    throw new Error(payload.message || "API error");
+
+    // Handle validation errors with array of messages
+    if (payload.message && Array.isArray(payload.message)) {
+      throw new Error(payload.message.join(", "));
+    }
+
+    // Handle specific HTTP status codes
+    switch (res.status) {
+      case 400:
+        throw new Error(
+          payload.message || "Invalid request data. Please check your input."
+        );
+      case 401:
+        throw new Error(
+          payload.message ||
+            "Authentication failed. Please check your credentials."
+        );
+      case 409:
+        throw new Error(
+          payload.message || "User already exists with this email address."
+        );
+      case 422:
+        throw new Error(
+          payload.message || "Validation error. Please check your input."
+        );
+      case 500:
+        throw new Error(
+          payload.message || "Server error. Please try again later."
+        );
+      default:
+        throw new Error(
+          payload.message || `Request failed with status ${res.status}`
+        );
+    }
   }
   return res.json();
 }
