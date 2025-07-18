@@ -163,6 +163,40 @@ export const getDeckById = async (id: string): Promise<DeckSpec> => {
   }
 };
 
+export const getAllDecks = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/pitch-decks`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const responseClone = response.clone();
+        const errorData = await responseClone.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        try {
+          const errorText = await response.text();
+          errorMessage = errorText || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+    const data = await response.json();
+    // The backend returns { success, data: [ ...decks ] }
+    return data.data || [];
+  } catch (error) {
+    console.error("Error fetching all decks:", error);
+    throw error;
+  }
+};
+
 // Helper function - replace with your actual auth token retrieval
 const getAuthToken = () => {
   return localStorage.getItem("accessToken") || "";

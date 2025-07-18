@@ -19,13 +19,12 @@ export class PromptUtils {
       
       When specifying slide layouts, use the following grid system:
       - Each slide is a 12-column grid (columns: 1-12).
-      - For each component, specify:
+      - For each component, the layout object MUST ALWAYS include ALL of the following properties:
         - columns: width (number of columns to span, 1-12)
-        - rows: height (number of rows to span, optional)
-        - columnStart: left position (starting column, 1-based, optional)
-        - rowStart: top position (starting row, 1-based, optional)
-        - align: vertical alignment within grid cell (start, center, end, stretch)
-        - justify: horizontal alignment within grid cell (start, center, end, stretch)
+        - columnStart: left position (starting column, 1-based)
+        - rowStart: top position (starting row, 1-based)
+        - rows: height (number of rows to span, 1 or more)
+      - Do NOT omit any of these properties, even if the value is 1.
       - Example layout for a component:
         {
           "name": "MetricCard",
@@ -34,14 +33,13 @@ export class PromptUtils {
             "columns": 4,
             "rows": 2,
             "columnStart": 5,
-            "rowStart": 1,
-            "align": "center",
-            "justify": "center"
+            "rowStart": 1
           }
         }
       - Place components so they are visually balanced and do not overlap.
-      - Use columnStart/rowStart to position components left/right and top/bottom as needed.
-      - Use align/justify for fine-tuned alignment within their grid area.
+      - Use columnStart/rowStart to position components left/right and up/down as needed.
+      - Use align/justify for fine-tuned alignment within their grid area (optional).
+      - Omitting any of the required layout properties will result in rejection.
     `;
   }
 
@@ -87,13 +85,12 @@ export class PromptUtils {
       
       When specifying slide layouts, use the following grid system:
       - Each slide is a 12-column grid (columns: 1-12).
-      - For each component, specify:
+      - For each component, the layout object MUST ALWAYS include ALL of the following properties:
         - columns: width (number of columns to span, 1-12)
-        - rows: height (number of rows to span, optional)
-        - columnStart: left position (starting column, 1-based, optional)
-        - rowStart: top position (starting row, 1-based, optional)
-        - align: vertical alignment within grid cell (start, center, end, stretch)
-        - justify: horizontal alignment within grid cell (start, center, end, stretch)
+        - columnStart: left position (starting column, 1-based)
+        - rowStart: top position (starting row, 1-based)
+        - rows: height (number of rows to span, 1 or more)
+      - Do NOT omit any of these properties, even if the value is 1.
       - Example layout for a component:
         {
           "name": "MetricCard",
@@ -102,14 +99,13 @@ export class PromptUtils {
             "columns": 4,
             "rows": 2,
             "columnStart": 5,
-            "rowStart": 1,
-            "align": "center",
-            "justify": "center"
+            "rowStart": 1
           }
         }
       - Place components so they are visually balanced and do not overlap.
-      - Use columnStart/rowStart to position components left/right and top/bottom as needed.
-      - Use align/justify for fine-tuned alignment within their grid area.
+      - Use columnStart/rowStart to position components left/right and up/down as needed.
+      - Use align/justify for fine-tuned alignment within their grid area (optional).
+      - Omitting any of the required layout properties will result in rejection.
       
       Format as JSON with proper structure for easy parsing.
     `;

@@ -2,19 +2,29 @@ import React from "react";
 import * as FiIcons from "react-icons/fi";
 
 export const IllustrationFlow: React.FC<{
-  iconName: string;
+  iconName: keyof typeof FiIcons;
   title: string;
   description: string;
-  width: number;
+  width?: number;
   color?: string;
   descriptionColor?: string;
-}> = ({ iconName, title, description, width, color, descriptionColor }) => {
+}> = ({
+  iconName,
+  title,
+  description,
+  width = 120,
+  color,
+  descriptionColor,
+}) => {
+  // Ensure width is a valid number
+  const safeWidth =
+    typeof width === "number" && !isNaN(width) && width > 0 ? width : 120;
   // Determine sizes based on container width
-  const iconSize = Math.max(24, width * 0.2);
-  const titleSize = Math.max(16, width * 0.1);
-  const descSize = Math.max(12, width * 0.08);
+  const iconSize = Math.max(24, safeWidth * 0.2);
+  const titleSize = Math.max(16, safeWidth * 0.1);
+  const descSize = Math.max(12, safeWidth * 0.08);
 
-  const IconComponent = (FiIcons as any)[iconName] as React.FC<{
+  const IconComponent = FiIcons[iconName] as React.FC<{
     size: number;
     color?: string;
   }>;
@@ -28,7 +38,7 @@ export const IllustrationFlow: React.FC<{
   return (
     <div
       className="flex flex-col items-center justify-start text-center"
-      style={{ width }}
+      style={{ width: safeWidth }}
     >
       <FinalIcon size={iconSize} color={iconColor} />
       <h3 style={{ fontSize: titleSize, marginTop: 8, color: titleColor }}>

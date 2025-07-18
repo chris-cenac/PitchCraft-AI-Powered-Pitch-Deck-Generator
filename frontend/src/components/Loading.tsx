@@ -2,7 +2,6 @@ import React from "react";
 import ProgressBar from "@/components/Progressbar";
 import styles from "@/assets/LoadingView.module.css";
 
-// Phase labels only — no file paths needed
 const phases = [
   "Uploading Assets",
   "Analyzing Inputs",
@@ -35,11 +34,9 @@ const Loading: React.FC<LoadingProps> = ({ currentPhaseIndex, progress }) => {
           </ul>
         </div>
       </div>
-
       <div className="w-full max-w-lg my-4">
         <ProgressBar progress={progress} />
       </div>
-
       <h2 className="text-xl font-semibold text-primary dark:text-accent font-sans">
         {label}
       </h2>

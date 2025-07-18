@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "html2pdf.js": "^0.10.3",
+    "pptxgenjs": "^4.0.1",
     "react-hot-toast": "^2.5.2"
   }
 }

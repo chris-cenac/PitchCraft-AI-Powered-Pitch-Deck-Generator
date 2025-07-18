@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import MultiStepForm from "@/components/MultiStepForm";
+import type { MultiStepFormHandle } from "@/components/MultiStepForm";
 import Loading from "@/components/Loading";
 import type { PitchFormData } from "@/components/MultiStepForm";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@/api/decks";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 
 const FormView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +20,7 @@ const FormView: React.FC = () => {
   const navigate = useNavigate();
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const simulateRef = useRef<NodeJS.Timeout | null>(null);
+  const multiStepFormRef = useRef<MultiStepFormHandle>(null);
 
   // Remove convertToFormData and replace with direct payload construction
   const handleGenerate = async (pitchData: PitchFormData) => {
@@ -39,47 +42,54 @@ const FormView: React.FC = () => {
           problemStatement: pitchData.problemStatement,
           targetAudience: pitchData.targetAudience,
           proposedSolution: pitchData.proposedSolution,
+          uniqueValueProposition: pitchData.uniqueValueProposition,
           revenueModel: pitchData.revenueModel,
           marketSize: pitchData.marketSize,
           competitors: pitchData.competitors,
+          pricingStrategy: pitchData.pricingStrategy,
+          goToMarketStrategy: pitchData.goToMarketStrategy,
           founders: pitchData.founders,
+          teamSize: pitchData.teamSize,
           visionStatement: pitchData.visionStatement,
+          longTermGoals: pitchData.longTermGoals,
           designStyle: pitchData.designStyle,
         },
       };
+
+      console.log("Payload constructed:", payload);
 
       // Create the pitch deck record
       const createRes = await createPitchDeck(payload);
       console.log("Pitch deck created:", createRes);
 
-      const id = createRes.data._id || createRes.data.id;
+      const id =
+        createRes.data?._id ||
+        createRes.data?.id ||
+        createRes._id ||
+        createRes.id;
+      console.log("Deck ID:", id);
 
       if (!id) {
-        throw new Error("No ID returned from pitch deck creation");
+        toast.error("No ID returned from pitch deck creation");
+        setError("No ID returned from pitch deck creation");
+        setIsLoading(false);
+        return;
       }
 
-      console.log("Starting AI generation for ID:", id);
-
-      // Kick off AI generation
-      await generatePitchDeck(id);
-
-      console.log("AI generation started, beginning status polling...");
-
-      // Start simulation
+      // Start simulation and polling BEFORE triggering backend generation
       simulateRef.current = setInterval(() => {
         setProgress((prev) => {
-          if (prev < 80) {
-            const next = prev + 2;
+          if (prev < 99) {
+            const next = prev + Math.random() * 1.5 + 0.5;
             setPhaseIndex(
               next < 20 ? 0 : next < 40 ? 1 : next < 60 ? 2 : next < 80 ? 3 : 4
             );
-            return next;
+            return Math.min(next, 99);
           }
           return prev;
         });
-      }, 1000);
+      }, 800);
 
-      // Poll for backend status
       pollRef.current = setInterval(async () => {
         try {
           const statusRes = await getGenerateStatus(id);
@@ -99,6 +109,7 @@ const FormView: React.FC = () => {
           clearInterval(pollRef.current!);
           setIsLoading(false);
           setError("Failed to check generation status. Please try again.");
+          toast.error("Failed to check generation status. Please try again.");
         }
       }, 1000);
 
@@ -110,17 +121,26 @@ const FormView: React.FC = () => {
           setError(
             "Generation is taking longer than expected. Please check back later."
           );
+          toast.error(
+            "Generation is taking longer than expected. Please check back later."
+          );
         }
       }, 300000); // 5 minutes timeout
+
+      // Now trigger backend generation WITHOUT awaiting
+      generatePitchDeck(id);
     } catch (error) {
       if (simulateRef.current) clearInterval(simulateRef.current);
       if (pollRef.current) clearInterval(pollRef.current);
       setIsLoading(false);
 
+      console.error("Error in handleGenerate:", error);
       if (error instanceof Error) {
         setError(error.message);
+        toast.error(error.message);
       } else {
         setError("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
@@ -153,6 +173,19 @@ const FormView: React.FC = () => {
         </div>
       </div>
 
+      {/* Autofill for Testing Button */}
+      <div className="flex-shrink-0 p-4">
+        <div className="max-w-7xl mx-auto flex justify-end">
+          <button
+            type="button"
+            onClick={() => multiStepFormRef.current?.autofill()}
+            className="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg shadow hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 font-semibold"
+          >
+            Autofill for Testing
+          </button>
+        </div>
+      </div>
+
       {/* Error message */}
       {error && (
         <div className="flex-shrink-0 p-4">
@@ -172,7 +205,7 @@ const FormView: React.FC = () => {
 
       {/* Form content - takes remaining space */}
       <div className="flex-1 overflow-hidden">
-        <MultiStepForm onSubmit={handleGenerate} />
+        <MultiStepForm ref={multiStepFormRef} onSubmit={handleGenerate} />
       </div>
     </div>
   );
