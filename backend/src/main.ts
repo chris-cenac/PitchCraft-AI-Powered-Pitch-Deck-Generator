@@ -1,4 +1,3 @@
-// src/main.ts
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
@@ -21,12 +20,11 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: "https://chriscenac.dev",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
   });
 
   await app.listen(process.env.PORT || 3000);
-  console.log(`🚀 Server running on ${await app.getUrl()}`);
 }
 bootstrap();
