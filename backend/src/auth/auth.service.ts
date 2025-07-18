@@ -188,11 +188,9 @@ export class AuthService {
       .exec();
 
     if (!user) {
-      this.logger.error(`Failed to upsert user with sub=${payload.sub}`);
       throw new Error("Unable to upsert user");
     }
 
-    this.logger.log(`Upserted user ${user.sub}`);
     return user;
   }
 
@@ -208,7 +206,6 @@ export class AuthService {
     try {
       await this.refreshTokenModel.deleteOne({ token: refreshToken });
     } catch (error) {
-      this.logger.error("Error invalidating refresh token:", error);
       // Don't throw error - logout should still succeed
     }
   }

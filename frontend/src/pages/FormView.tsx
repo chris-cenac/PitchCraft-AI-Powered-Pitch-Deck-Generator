@@ -30,8 +30,6 @@ const FormView: React.FC = () => {
     setProgress(0);
 
     try {
-      console.log("Starting pitch deck creation...");
-
       // Construct payload as a plain object
       const payload = {
         businessData: {
@@ -56,18 +54,14 @@ const FormView: React.FC = () => {
         },
       };
 
-      console.log("Payload constructed:", payload);
-
       // Create the pitch deck record
       const createRes = await createPitchDeck(payload);
-      console.log("Pitch deck created:", createRes);
 
       const id =
         createRes.data?._id ||
         createRes.data?.id ||
         createRes._id ||
         createRes.id;
-      console.log("Deck ID:", id);
 
       if (!id) {
         toast.error("No ID returned from pitch deck creation");
@@ -134,7 +128,6 @@ const FormView: React.FC = () => {
       if (pollRef.current) clearInterval(pollRef.current);
       setIsLoading(false);
 
-      console.error("Error in handleGenerate:", error);
       if (error instanceof Error) {
         setError(error.message);
         toast.error(error.message);

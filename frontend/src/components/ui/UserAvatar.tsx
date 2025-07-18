@@ -54,8 +54,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, onLogout }) => {
 
       toast.success("Logged out successfully");
       navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch {
       // Still clear local storage and redirect even if API call fails
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");

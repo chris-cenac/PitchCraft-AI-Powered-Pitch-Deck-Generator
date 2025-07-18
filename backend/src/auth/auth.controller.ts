@@ -190,8 +190,8 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Post("logout")
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async logout(
     @Body("refreshToken") refreshToken: string,

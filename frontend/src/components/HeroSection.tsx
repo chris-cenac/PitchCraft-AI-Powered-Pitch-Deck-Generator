@@ -24,8 +24,7 @@ const Hero: React.FC = () => {
     if (storedUser && accessToken) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Error parsing user data:", error);
+      } catch {
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");

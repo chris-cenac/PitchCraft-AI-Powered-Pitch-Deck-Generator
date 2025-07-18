@@ -310,7 +310,6 @@ export class AiService {
         duration: parsed.duration || "10-15 minutes",
       };
     } catch (e) {
-      this.logger.error("Failed to parse pitch deck response", e);
       return this.createFallbackPitchDeck(input);
     }
   }
@@ -477,10 +476,7 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
 
       return parsed;
     } catch (e) {
-      this.logger.error("Invalid DeckSpec JSON", e);
-      this.logger.error("Raw AI response:", content);
-
-      // Return a fallback DeckSpec
+      // Invalid DeckSpec JSON or raw AI response, fallback
       return this.createFallbackDeckSpec(dto.businessData);
     }
   }

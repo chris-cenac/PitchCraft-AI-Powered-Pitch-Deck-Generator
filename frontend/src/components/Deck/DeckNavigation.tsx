@@ -111,8 +111,6 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
   const goToFirst = useCallback(() => {
     if (typeof onSlideChange === "function") {
       onSlideChange(0);
-    } else {
-      console.error("onSlideChange is not a function:", onSlideChange);
     }
   }, [currentSlide, totalSlides, onSlideChange]);
   const goToLast = useCallback(() => {
@@ -121,11 +119,6 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
       typeof totalSlides === "number"
     ) {
       onSlideChange(totalSlides - 1);
-    } else {
-      console.error(
-        "onSlideChange is not a function or totalSlides is invalid:",
-        { onSlideChange, totalSlides }
-      );
     }
   }, [currentSlide, totalSlides, onSlideChange]);
   const goPrev = useCallback(() => {
@@ -134,11 +127,6 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
       typeof currentSlide === "number"
     ) {
       onSlideChange(Math.max(currentSlide - 1, 0));
-    } else {
-      console.error(
-        "onSlideChange is not a function or currentSlide is invalid:",
-        { onSlideChange, currentSlide }
-      );
     }
   }, [currentSlide, onSlideChange]);
   const goNext = useCallback(() => {
@@ -148,12 +136,6 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
       typeof totalSlides === "number"
     ) {
       onSlideChange(Math.min(currentSlide + 1, totalSlides - 1));
-    } else {
-      console.error("onSlideChange is not a function or values are invalid:", {
-        onSlideChange,
-        currentSlide,
-        totalSlides,
-      });
     }
   }, [currentSlide, totalSlides, onSlideChange]);
 

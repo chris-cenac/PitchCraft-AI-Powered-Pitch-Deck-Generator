@@ -413,8 +413,7 @@ export class PitchDeckController {
       try {
         await this.pitchDeckService.updateStatus(id, "draft", req.user.id);
       } catch (statusError) {
-        // Log but don't throw - the main error is more important
-        console.error("Failed to revert status:", statusError);
+        // Failed to revert status, but do not throw
       }
 
       if (

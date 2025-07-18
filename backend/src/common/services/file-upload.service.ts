@@ -55,7 +55,7 @@ export class FileUploadService {
         fs.unlinkSync(fullPath);
       }
     } catch (error) {
-      console.error("Error deleting file:", error);
+      // Error deleting file, but do not throw
     }
   }
 }

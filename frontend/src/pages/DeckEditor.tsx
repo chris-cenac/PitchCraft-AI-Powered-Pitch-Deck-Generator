@@ -172,7 +172,6 @@ const DeckEditor: React.FC = () => {
   }
 
   const handleSlideChange = (index: number) => {
-    console.log("Changing slide from", currentIndex, "to", index);
     setCurrentIndex(index);
     setShowNavigation(true); // Show navigation when changing slides
   };
@@ -190,14 +189,10 @@ const DeckEditor: React.FC = () => {
 
   const handlePresent = () => {
     // This would enter presentation mode
-    console.log("Entering presentation mode");
-    alert("Presentation mode coming soon!");
   };
 
   const handlePrint = () => {
     // This would print the deck
-    console.log("Printing deck");
-    alert("Print functionality coming soon!");
   };
 
   const handleDownloadPDF = async () => {
@@ -532,8 +527,6 @@ const DeckEditor: React.FC = () => {
 
   const handleShare = () => {
     // This would share the deck
-    console.log("Sharing deck");
-    alert("Share functionality coming soon!");
   };
 
   const handleMouseMove = () => {
