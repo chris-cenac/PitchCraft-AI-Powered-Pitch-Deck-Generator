@@ -180,11 +180,8 @@ const DeckEditor: React.FC = () => {
   const slides = deck?.slides || [];
   const currentSlide = slides[currentIndex];
 
-  const handleSave = () => {
-    // This would save the deck to the backend
-    console.log("Saving deck:", deck);
-    // For now, just show a success message
-    toast.success("Deck saved successfully!");
+  const handleSave = async () => {
+    toast("Save functionality not implemented.");
   };
 
   const handleEdit = () => {
@@ -543,6 +540,37 @@ const DeckEditor: React.FC = () => {
     setShowNavigation(true);
   };
 
+  // Add moveSlide handler for reordering
+  const moveSlide = (from: number, to: number) => {
+    setDeck((prev) => {
+      if (!prev) return prev;
+      const slides = [...prev.slides];
+      const [removed] = slides.splice(from, 1);
+      slides.splice(to, 0, removed);
+      return { ...prev, slides };
+    });
+    setCurrentIndex(to);
+  };
+
+  // Handler to update layout of a slide item (move/resize)
+  const handleLayoutChange = (
+    itemIdx: number,
+    layout: Partial<DeckSpec["slides"][number]["items"][number]["layout"]>
+  ) => {
+    setDeck((prev) => {
+      if (!prev) return prev;
+      const slides = [...prev.slides];
+      const slide = { ...slides[currentIndex] };
+      const items = [...slide.items];
+      const item = { ...items[itemIdx] };
+      item.layout = { ...item.layout, ...layout };
+      items[itemIdx] = item;
+      slide.items = items;
+      slides[currentIndex] = slide;
+      return { ...prev, slides };
+    });
+  };
+
   return (
     <>
       {/* Hidden container for PDF export - always rendered, just hidden off-screen */}
@@ -572,6 +600,8 @@ const DeckEditor: React.FC = () => {
                 spacing={3}
                 containerWidth="100%"
                 containerHeight="100%"
+                isEditing={isEditing}
+                onLayoutChange={isEditing ? handleLayoutChange : undefined}
               />
             </SlideContainer>
           </div>
@@ -593,6 +623,8 @@ const DeckEditor: React.FC = () => {
                 spacing={3}
                 containerWidth="100%"
                 containerHeight="100%"
+                isEditing={isEditing}
+                onLayoutChange={isEditing ? handleLayoutChange : undefined}
               />
             </SlideContainer>
           </div>
@@ -624,6 +656,11 @@ const DeckEditor: React.FC = () => {
             }
             onBack={() => navigate(templateId ? "/templates" : "/")}
             backLabel={templateId ? "Templates" : "Home"}
+            hideDeckInfo={isEditing}
+            // New props for rearrange UI
+            slides={slides}
+            moveSlide={moveSlide}
+            onSlideClick={handleSlideChange}
           />
         </div>
       </div>

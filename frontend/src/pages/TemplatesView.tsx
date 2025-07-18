@@ -6,6 +6,24 @@ import {
   getTemplatesByCategory,
   type PitchDeckTemplate,
 } from "@/services/templateService";
+import { FiBarChart2, FiTrendingUp } from "react-icons/fi";
+import {
+  MdBusinessCenter,
+  MdHandshake,
+  MdGroup,
+  MdRocket,
+  MdLightbulbOutline,
+} from "react-icons/md";
+
+const categoryIcons: Record<string, React.ReactNode> = {
+  all: <FiBarChart2 />,
+  fundraising: <FiTrendingUp />,
+  enterprise: <MdBusinessCenter />,
+  product: <MdRocket />,
+  partnership: <MdHandshake />,
+  investor: <MdLightbulbOutline />,
+  crowdfunding: <MdGroup />,
+};
 
 const TemplatesView: React.FC = () => {
   const navigate = useNavigate();
@@ -22,13 +40,13 @@ const TemplatesView: React.FC = () => {
   }, []);
 
   const categories = [
-    { id: "all", name: "All Templates", icon: "📋" },
-    { id: "fundraising", name: "Fundraising", icon: "💰" },
-    { id: "enterprise", name: "Enterprise", icon: "🏢" },
-    { id: "product", name: "Product Launch", icon: "🚀" },
-    { id: "partnership", name: "Partnership", icon: "🤝" },
-    { id: "investor", name: "Investor Update", icon: "📊" },
-    { id: "crowdfunding", name: "Crowdfunding", icon: "👥" },
+    { id: "all", name: "All Templates" },
+    { id: "fundraising", name: "Fundraising" },
+    { id: "enterprise", name: "Enterprise" },
+    { id: "product", name: "Product Launch" },
+    { id: "partnership", name: "Partnership" },
+    { id: "investor", name: "Investor Update" },
+    { id: "crowdfunding", name: "Crowdfunding" },
   ];
 
   const filteredTemplates =
@@ -37,8 +55,7 @@ const TemplatesView: React.FC = () => {
       : getTemplatesByCategory(selectedCategory);
 
   const getTemplateIcon = (category: string) => {
-    const cat = categories.find((c) => c.id === category);
-    return cat?.icon || "📄";
+    return categoryIcons[category] || <FiBarChart2 />;
   };
 
   const getTemplateColor = (category: string) => {
@@ -159,7 +176,7 @@ const TemplatesView: React.FC = () => {
                     : "bg-surface dark:bg-surface-dark text-secondary dark:text-secondary-light hover:bg-accent-light dark:hover:bg-accent hover:scale-105"
                 }`}
               >
-                <span className="text-lg">{category.icon}</span>
+                <span className="text-lg">{getTemplateIcon(category.id)}</span>
                 <span className="font-medium">{category.name}</span>
               </button>
             ))}
@@ -267,7 +284,7 @@ const TemplatesView: React.FC = () => {
                     {template.bestFor.map((item, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-accent-light dark:bg-accent text-xs rounded-full text-primary dark:text-accent"
+                        className="px-2 py-1 bg-accent-light dark:bg-white/10 text-xs rounded-full text-primary dark:text-white"
                       >
                         {item}
                       </span>

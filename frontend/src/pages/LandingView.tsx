@@ -1,12 +1,13 @@
 import Hero from "@/components/HeroSection";
 import React from "react";
 
-const LoadingView: React.FC = () => {
+const LandingView: React.FC = () => {
   return (
-    <>
+    <div className="...">
       <Hero></Hero>
-    </>
+      {/* Removed duplicate How it works button */}
+    </div>
   );
 };
 
-export default LoadingView;
+export default LandingView;

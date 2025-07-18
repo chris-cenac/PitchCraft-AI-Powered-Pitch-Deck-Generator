@@ -187,10 +187,14 @@ const Hero: React.FC = () => {
         </p>
 
         <div className="mt-10 flex justify-center gap-4 flex-wrap">
-          <Button onClick={handleGetStarted} variant="primary">
-            {user ? "Create Pitch Deck" : "Get Started"}
+          <Button
+            onClick={handleGetStarted}
+            variant="primary"
+            className="px-8 py-4 text-xl rounded-xl w-56"
+          >
+            {user ? "Create Deck" : "Get Started"}
             <svg
-              className="size-4"
+              className="size-6 ml-2"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -200,7 +204,11 @@ const Hero: React.FC = () => {
             </svg>
           </Button>
 
-          <Button href="#how-it-works" variant="outline">
+          <Button
+            onClick={() => navigate("/how-it-works")}
+            variant="outline"
+            className="px-8 py-4 text-xl rounded-xl w-56"
+          >
             How It Works
           </Button>
         </div>

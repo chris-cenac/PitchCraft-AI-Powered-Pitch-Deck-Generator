@@ -105,16 +105,6 @@ const Step: React.FC<StepProps> = ({
         )}
 
         {/* Progress indicator for current step */}
-        {isCurrent && (
-          <div className="mt-2">
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-              <div
-                className="bg-gradient-to-r from-primary to-secondary h-1 rounded-full animate-pulse"
-                style={{ width: "60%" }}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

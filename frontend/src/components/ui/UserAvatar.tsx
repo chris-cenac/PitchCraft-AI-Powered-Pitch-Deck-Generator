@@ -111,7 +111,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, onLogout }) => {
             <li>
               <button
                 onClick={() => {
-                  navigate("/templates");
+                  navigate("/mydecks");
                   setIsDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 hover:bg-background dark:hover:bg-background-dark hover:text-primary dark:hover:text-surface transition-colors"

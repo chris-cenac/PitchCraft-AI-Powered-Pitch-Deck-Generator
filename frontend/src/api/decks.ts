@@ -222,6 +222,37 @@ export const exportDeckPdf = async (html: string, filename = "deck.pdf") => {
   }, 100);
 };
 
+export const deleteDeck = async (id: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/pitch-decks/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const responseClone = response.clone();
+        const errorData = await responseClone.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        try {
+          const errorText = await response.text();
+          errorMessage = errorText || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting deck:", error);
+    throw error;
+  }
+};
+
 // Helper function - replace with your actual auth token retrieval
 const getAuthToken = () => {
   return localStorage.getItem("accessToken") || "";

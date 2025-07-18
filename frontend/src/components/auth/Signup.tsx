@@ -20,11 +20,15 @@ const Signup: React.FC = () => {
     };
 
     try {
-      const result = await signup(payload);
+      await signup(payload);
       toast.success("Account created! Please log in.");
       navigate("/login");
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("An unknown error occurred.");
+      }
     }
   };
 

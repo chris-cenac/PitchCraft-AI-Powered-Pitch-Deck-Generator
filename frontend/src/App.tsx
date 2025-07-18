@@ -6,6 +6,8 @@ import DeckEditor from "@/pages/DeckEditor";
 import TemplatesView from "@/pages/TemplatesView";
 import Signup from "./components/auth/Signup";
 import Login from "./components/auth/Login";
+import MyDecks from "@/pages/MyDecks";
+import HowItWorks from "@/pages/HowItWorks";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/view/:id" element={<DeckEditor />} />
+        <Route path="/mydecks" element={<MyDecks />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
       </Routes>
     </BrowserRouter>
   );
