@@ -11,16 +11,44 @@ PitchCraft is a user-centric, full-stack web application that leverages AI to he
 - **AI-Powered Deck Generation:**
   - Uses OpenAI to generate a pitch deck outline from user inputs (company name, industry, problem, solution, business model, financials, etc.).
   - Populates slides with starter content (text and suggested images).
+- **Template-Based Deck Creation:**
+  - Create decks from pre-designed templates without requiring business data
+  - Multiple template categories: Fundraising, Enterprise, Product Launch, etc.
+  - Streamlined workflow for quick deck creation
 - **Interactive Editing:**
   - Drag-and-drop to reorder slides.
   - Rename slides dynamically (e.g., change "Market Analysis" to "Industry Insights").
   - Regenerate individual slides based on user feedback.
+- **Version Control System:**
+  - Automatic versioning when significant changes are made
+  - Ability to revert to previous versions
+  - Version history tracking with descriptions
 - **AI-Assisted Script Writing:**
   - Integrated chatbot helps users refine pitch content and generate/improve speaker notes for each slide.
 - **User Management:**
   - Secure authentication (JWT-based) and persistent saving of pitch decks.
 - **Export Options:**
   - Export pitch decks as PowerPoint (.pptx) or PDF (.pdf) files.
+
+### Enhanced Deck Management
+
+- **Separated Business Data & Templates:**
+  - Business data and templates are now separate entities
+  - Create decks from templates without providing business data
+  - Add business data later or keep template-based structure
+- **Deck Types:**
+  - **AI-Generated**: Created with business data and AI generation
+  - **Template-Based**: Created from pre-designed templates
+  - **Custom**: Manually created decks
+- **Efficient Save/Update Logic:**
+  - Prevents duplication when saving
+  - Smart versioning system
+  - Unique ID management for updates
+- **Enhanced My Decks Page:**
+  - Filter decks by type (AI-Generated, Template-Based, Custom, Templates)
+  - Visual indicators for deck status and type
+  - Version information display
+  - Creation and update timestamps
 
 ### Bonus Features
 
@@ -42,18 +70,65 @@ PitchCraft is a user-centric, full-stack web application that leverages AI to he
 
 ## Architecture & How It Works
 
-1. **User Authentication:**
-   - Users sign up/log in; JWT tokens are used for secure API access.
-2. **Deck Generation:**
-   - User provides business data; backend calls OpenAI to generate a deck outline and starter content.
-3. **Editing:**
-   - Users can edit, reorder, rename, and regenerate slides. Drag-and-drop is fully supported.
-   - AI chatbot assists with script writing and speaker notes.
-4. **Saving & Versioning:**
-   - Decks are saved to the database and can be versioned.
-5. **Export:**
-   - **PDF:** Frontend sends HTML to backend `/pitch-decks/pdf`; backend uses Puppeteer to render and return a PDF (supports all modern CSS).
-   - **PPTX:** Client-side export using pptxgenjs.
+### Database Schema
+
+The application uses a flexible schema that separates business data from templates:
+
+```typescript
+// Pitch Deck Schema
+{
+  userId: ObjectId,
+  spec: {
+    businessData?: BusinessData,  // Optional business information
+    template?: Template,          // Optional template reference
+    slides: Slide[],
+    theme: Theme,
+    componentsCatalog: Component[]
+  },
+  deckType: "ai-generated" | "template-based" | "custom",
+  currentVersion: number,
+  versions: Version[],
+  title: string,
+  description: string,
+  isTemplate: boolean,
+  parentDeckId?: string
+}
+```
+
+### Version Control System
+
+- **Automatic Versioning**: New versions are created when significant changes are detected
+- **Version History**: Each version includes metadata (creation date, description, creator)
+- **Revert Functionality**: Users can revert to any previous version
+- **Change Detection**: Compares slides, theme, and business data for significant changes
+
+### Template System
+
+- **Pre-built Templates**: Multiple templates for different use cases
+- **Template Categories**: Fundraising, Enterprise, Product Launch, etc.
+- **Template Features**: Each template includes theme, components, and slide structure
+- **Customization**: Templates can be customized with business data
+
+### API Endpoints
+
+#### Deck Management
+
+- `GET /pitch-decks` - Get all decks with optional filtering
+- `POST /pitch-decks` - Create new deck (business data or template)
+- `POST /pitch-decks/from-template/:templateId` - Create deck from template
+- `PATCH /pitch-decks/:id` - Update deck
+- `DELETE /pitch-decks/:id` - Delete deck
+
+#### Version Control
+
+- `POST /pitch-decks/:id/versions` - Create new version
+- `GET /pitch-decks/:id/versions/:version` - Get specific version
+- `POST /pitch-decks/:id/revert/:version` - Revert to version
+
+#### Templates
+
+- `GET /pitch-decks/templates` - Get all templates
+- `GET /pitch-decks/my-templates` - Get user templates
 
 ---
 
@@ -61,85 +136,115 @@ PitchCraft is a user-centric, full-stack web application that leverages AI to he
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
-- npm (v9+ recommended)
+- Node.js (v18 or higher)
 - MongoDB (local or Atlas)
+- OpenAI API key
 
-### 1. Clone the Repository
+### Installation
 
-```sh
-git clone https://github.com/yourusername/PitchCraft-AI-Powered-Pitch-Deck-Generator.git
-cd PitchCraft-AI-Powered-Pitch-Deck-Generator
-```
+1. **Clone the repository**
 
-### 2. Setup the Backend
+   ```bash
+   git clone <repository-url>
+   cd PitchCraft-AI-Powered-Pitch-Deck-Generator
+   ```
 
-```sh
-cd backend
-npm install
-# Configure your .env file (MONGODB_URI, OPENAI_API_KEY, JWT_SECRET, FRONTEND_URL)
-npm run start:dev
-```
+2. **Install dependencies**
 
-- Backend runs on `http://localhost:3000` by default.
+   ```bash
+   # Backend
+   cd backend
+   npm install
 
-### 3. Setup the Frontend
+   # Frontend
+   cd ../frontend
+   npm install
+   ```
 
-```sh
-cd ../frontend
-npm install
-npm run dev
-```
+3. **Environment Setup**
 
-- Frontend runs on `http://localhost:5173` by default.
+   ```bash
+   # Backend (.env)
+   MONGODB_URI=your_mongodb_connection_string
+   OPENAI_API_KEY=your_openai_api_key
+   JWT_SECRET=your_jwt_secret
+
+   # Frontend (.env)
+   VITE_NEST_API_URL=http://localhost:3000
+   ```
+
+4. **Run the application**
+
+   ```bash
+   # Backend
+   cd backend
+   npm run start:dev
+
+   # Frontend
+   cd frontend
+   npm run dev
+   ```
 
 ---
 
 ## Usage
 
-1. **Sign up and log in.**
-2. **Create a new deck** by entering your business data or choosing a template.
-3. **Edit your deck:**
-   - Drag-and-drop slides, rename, regenerate, and use the AI chatbot for script writing.
-4. **Export:**
-   - Click "Download as PDF" or "Download as PPTX" to export your deck.
+### Creating a Pitch Deck
+
+#### Option 1: AI-Generated Deck
+
+1. Navigate to "Create Custom Deck"
+2. Fill in business information form
+3. Submit to generate AI-powered content
+4. Edit and customize as needed
+
+#### Option 2: Template-Based Deck
+
+1. Navigate to "Templates"
+2. Browse available templates by category
+3. Click "Use This Template"
+4. Optionally add business data
+5. Start editing immediately
+
+#### Option 3: Custom Deck
+
+1. Navigate to "Create Custom Deck"
+2. Skip business data form
+3. Start with blank deck
+4. Add content manually
+
+### Managing Decks
+
+- **My Decks Page**: View all your decks with filtering options
+- **Version Control**: Automatic versioning with manual revert capability
+- **Deck Types**: Easily identify AI-generated vs template-based decks
+- **Status Tracking**: Monitor deck completion status
+
+### Template System
+
+- **Browse Templates**: Filter by category and difficulty
+- **Template Details**: View slide structure, features, and use cases
+- **Quick Creation**: Create decks from templates in one click
+- **Customization**: Add business data to template-based decks
 
 ---
 
-## PDF Export Flow (Puppeteer)
+## Contributing
 
-- The frontend renders a hidden export container with the deck HTML.
-- On export, the HTML is sent to the backend via a POST request to `/pitch-decks/pdf`.
-- The backend launches Puppeteer, renders the HTML, and returns a PDF file.
-- This approach supports all modern CSS (including Tailwind v4, oklch/oklab, etc.).
-
----
-
-## Development
-
-- **Frontend:**
-  - `npm run dev` — Start Vite dev server
-  - `npm run build` — Build for production
-  - `npm run lint` — Lint code
-- **Backend:**
-  - `npm run start:dev` — Start NestJS in watch mode
-  - `npm run build` — Build backend
-  - `npm run test` — Run tests
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-## Environment Variables
+## License
 
-- **Backend:**
-  - `MONGODB_URI` — MongoDB connection string
-  - `OPENAI_API_KEY` — OpenAI API key for AI features
-  - `JWT_SECRET` — Secret for JWT authentication
-  - `FRONTEND_URL` — Allowed CORS origin
-- **Frontend:**
-  - `VITE_NEST_API_URL` — Backend API URL (default: `http://localhost:3000`)
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-## Contact
+## Support
 
-Maintainer: [Chris Cenac](https://www.linkedin.com/in/chris-cenac-5a90a3230/?lipi=urn%3Ali%3Apage%3Ad_flagship3_feed%3BU8dioLh9Scq5SaYJfl5k1w%3D%3D)
+For support, email support@pitchcraft.ai or create an issue in the repository.

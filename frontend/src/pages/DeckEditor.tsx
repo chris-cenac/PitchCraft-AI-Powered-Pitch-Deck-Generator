@@ -5,7 +5,7 @@ import SlideRenderer from "@/components/Deck/SlideRenderer";
 import type { DeckSpec } from "@/components/Deck/slideTypes";
 import { SlideContainer } from "@/components/Deck/SliderContainer";
 import DeckNavigation from "@/components/Deck/DeckNavigation";
-import { getDeckById } from "@/api/decks";
+import { getDeckById, updateDeck } from "@/api/decks";
 import { getTemplateById } from "@/services/templateService";
 import Button from "@/components/ui/Button";
 import { exportDeckPdf } from "@/api/decks";
@@ -38,7 +38,7 @@ const DeckEditor: React.FC = () => {
     const templateParam = searchParams.get("template");
     if (templateParam) {
       setTemplateId(templateParam);
-      loadTemplate(templateParam);
+      loadTemplate();
     } else if (id) {
       // Load existing deck by ID
       loadExistingDeck(id);
@@ -86,17 +86,17 @@ const DeckEditor: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, deck]);
 
-  const loadTemplate = (templateId: string) => {
+  const loadTemplate = () => {
     setLoading(true);
     setError(null);
 
-    const template = getTemplateById(templateId);
-    if (template) {
+    const template = getTemplateById();
+    if (template && template.generateDeck) {
       const generatedDeck = template.generateDeck();
       setDeck(generatedDeck);
       setLoading(false);
     } else {
-      setError("Template not found");
+      setError("Template not found or invalid");
       setLoading(false);
     }
   };
@@ -179,8 +179,45 @@ const DeckEditor: React.FC = () => {
   const slides = deck?.slides || [];
   const currentSlide = slides[currentIndex];
 
+  // Safety check: if no slides or current slide doesn't exist, show empty state
+  if (!slides.length || !currentSlide) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background dark:bg-background-dark">
+        <div className="text-center">
+          <div className="text-6xl mb-4">📄</div>
+          <h3 className="text-xl font-semibold text-primary dark:text-accent mb-2">
+            No slides found
+          </h3>
+          <p className="text-secondary dark:text-secondary-light mb-6">
+            This deck doesn't have any slides yet.
+          </p>
+          <Button onClick={() => navigate("/templates")} variant="primary">
+            Browse Templates
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const handleSave = async () => {
-    toast("Save functionality not implemented.");
+    if (!deck || !id) {
+      toast.error("No deck to save or missing deck ID");
+      return;
+    }
+
+    try {
+      // Prepare the update payload with only the properties that exist in DeckSpec
+      const updatePayload = {
+        slides: deck.slides,
+        theme: deck.theme,
+      };
+
+      await updateDeck(id, updatePayload);
+      toast.success("Deck saved successfully!");
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Failed to save deck. Please try again.");
+    }
   };
 
   const handleEdit = () => {
@@ -660,9 +697,7 @@ const DeckEditor: React.FC = () => {
             onDownloadPPTX={handleDownloadPPTX}
             isEditing={isEditing}
             deckTitle={
-              templateId
-                ? getTemplateById(templateId)?.name
-                : "Pitch Deck Editor"
+              templateId ? getTemplateById()?.name : "Pitch Deck Editor"
             }
             onBack={() => navigate(templateId ? "/templates" : "/")}
             backLabel={templateId ? "Templates" : "Home"}

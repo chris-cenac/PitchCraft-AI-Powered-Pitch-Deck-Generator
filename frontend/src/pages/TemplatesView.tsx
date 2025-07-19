@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/ui/Button";
+import { type PitchDeckTemplate } from "@/services/templateService";
 import {
-  getAllTemplates,
-  getTemplatesByCategory,
-  type PitchDeckTemplate,
-} from "@/services/templateService";
+  createDeckFromTemplate,
+  getAllTemplates as getBackendTemplates,
+} from "@/api/decks";
+import { toast } from "react-hot-toast";
+import { handleAuthError } from "@/utils/authInterceptor";
 import { FiBarChart2, FiTrendingUp } from "react-icons/fi";
 import {
   MdBusinessCenter,
@@ -30,13 +32,23 @@ const TemplatesView: React.FC = () => {
   const [templates, setTemplates] = useState<PitchDeckTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [creatingDeck, setCreatingDeck] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load templates from service
-    setTimeout(() => {
-      setTemplates(getAllTemplates());
-      setLoading(false);
-    }, 500);
+    // Load templates from backend API
+    const loadTemplates = async () => {
+      try {
+        const backendTemplates = await getBackendTemplates();
+        setTemplates(backendTemplates as PitchDeckTemplate[]);
+      } catch (error) {
+        console.error("Failed to load templates:", error);
+        toast.error("Failed to load templates");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplates();
   }, []);
 
   const categories = [
@@ -52,7 +64,7 @@ const TemplatesView: React.FC = () => {
   const filteredTemplates =
     selectedCategory === "all"
       ? templates
-      : getTemplatesByCategory(selectedCategory);
+      : templates.filter((template) => template.category === selectedCategory);
 
   const getTemplateIcon = (category: string) => {
     return categoryIcons[category] || <FiBarChart2 />;
@@ -83,6 +95,40 @@ const TemplatesView: React.FC = () => {
     return (
       colors[difficulty as keyof typeof colors] || "bg-gray-100 text-gray-800"
     );
+  };
+
+  const handleUseTemplate = async (template: PitchDeckTemplate) => {
+    // Check if user is authenticated
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      toast.error("Please log in to create decks from templates");
+      navigate("/login");
+      return;
+    }
+
+    setCreatingDeck(template.id);
+    try {
+      // Create a deck from the template
+      const result = await createDeckFromTemplate(template.id);
+
+      if (result.success && result.data) {
+        const deckData = result.data as Record<string, unknown>;
+        const deckId = deckData._id || deckData.id;
+        toast.success("Deck created from template successfully!");
+        navigate(`/view/${deckId}`);
+      } else {
+        throw new Error("Failed to create deck from template");
+      }
+    } catch (error) {
+      console.error("Error creating deck from template:", error);
+      if (error instanceof Error && error.message.includes("401")) {
+        handleAuthError(401);
+      } else {
+        toast.error("Failed to create deck from template. Please try again.");
+      }
+    } finally {
+      setCreatingDeck(null);
+    }
   };
 
   if (loading) {
@@ -308,13 +354,19 @@ const TemplatesView: React.FC = () => {
                 {/* Action Buttons */}
                 <div className="flex gap-3">
                   <Button
-                    onClick={() =>
-                      navigate(`/view/${template.id}?template=${template.id}`)
-                    }
+                    onClick={() => handleUseTemplate(template)}
                     variant="primary"
                     className="flex-1"
+                    disabled={creatingDeck === template.id}
                   >
-                    Use This Template
+                    {creatingDeck === template.id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Creating...
+                      </>
+                    ) : (
+                      "Use This Template"
+                    )}
                   </Button>
                   <Button
                     onClick={() => {

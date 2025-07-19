@@ -13,7 +13,15 @@ export const LabelHeader: React.FC<{
   icon?: string;
   className?: string;
   gradient?: boolean;
-  variant?: "default" | "hero" | "section" | "accent";
+  variant?:
+    | "default"
+    | "hero"
+    | "section"
+    | "accent"
+    | "enterprise"
+    | "product"
+    | "tech"
+    | "saas";
 }> = ({
   text,
   subtext,
@@ -80,9 +88,29 @@ export const LabelHeader: React.FC<{
       subtext: theme === "dark" ? "text-gray-400" : "text-gray-500",
       underline: theme === "dark" ? "bg-purple-400" : "bg-purple-600",
     },
+    enterprise: {
+      text: theme === "dark" ? "text-blue-400" : "text-blue-700",
+      subtext: theme === "dark" ? "text-gray-400" : "text-gray-500",
+      underline: theme === "dark" ? "bg-blue-400" : "bg-blue-700",
+    },
+    product: {
+      text: theme === "dark" ? "text-purple-400" : "text-purple-600",
+      subtext: theme === "dark" ? "text-gray-400" : "text-gray-500",
+      underline: theme === "dark" ? "bg-purple-400" : "bg-purple-600",
+    },
+    tech: {
+      text: theme === "dark" ? "text-indigo-400" : "text-indigo-600",
+      subtext: theme === "dark" ? "text-gray-400" : "text-gray-500",
+      underline: theme === "dark" ? "bg-indigo-400" : "bg-indigo-600",
+    },
+    saas: {
+      text: theme === "dark" ? "text-violet-400" : "text-violet-600",
+      subtext: theme === "dark" ? "text-gray-400" : "text-gray-500",
+      underline: theme === "dark" ? "bg-violet-400" : "bg-violet-600",
+    },
   };
 
-  const currentVariant = variantStyles[variant];
+  const currentVariant = variantStyles[variant] || variantStyles.default;
 
   // Use custom color if provided, otherwise use variant colors
   const textStyle = color ? { color } : {};

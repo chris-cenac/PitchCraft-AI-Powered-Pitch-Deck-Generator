@@ -90,11 +90,58 @@ export class BusinessData {
   brandColors?: string;
 }
 
+// Define the Template schema
+@Schema({ _id: false })
+export class Template {
+  @Prop({ required: true })
+  id: string;
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  category: string;
+
+  @Prop()
+  description?: string;
+
+  @Prop({ type: [String], default: [] })
+  slides: string[];
+
+  @Prop({ type: Object })
+  theme?: Record<string, any>;
+
+  @Prop({ type: [Object], default: [] })
+  componentsCatalog?: any[];
+}
+
+// Define the Version schema for versioning
+@Schema({ _id: false })
+export class DeckVersion {
+  @Prop({ required: true })
+  version: number;
+
+  @Prop({ required: true })
+  createdAt: Date;
+
+  @Prop({ type: Object })
+  spec: Record<string, any>;
+
+  @Prop()
+  description?: string;
+
+  @Prop()
+  createdBy?: string; // userId who created this version
+}
+
 // Define the Spec schema
 @Schema({ _id: false })
 export class Spec {
-  @Prop({ type: BusinessData, required: true })
-  businessData: BusinessData;
+  @Prop({ type: BusinessData })
+  businessData?: BusinessData;
+
+  @Prop({ type: Template })
+  template?: Template;
 
   @Prop({ type: [Object], default: [] })
   componentsCatalog?: any[];
@@ -130,6 +177,33 @@ export class PitchDeck {
   @Prop({ type: Object })
   generatedContent?: any;
 
+  // Versioning fields
+  @Prop({ type: Number, default: 1 })
+  currentVersion: number;
+
+  @Prop({ type: [DeckVersion], default: [] })
+  versions: DeckVersion[];
+
+  // Deck metadata
+  @Prop({
+    type: String,
+    enum: ["ai-generated", "template-based", "custom"],
+    default: "custom",
+  })
+  deckType: string;
+
+  @Prop()
+  title?: string;
+
+  @Prop()
+  description?: string;
+
+  @Prop({ type: Boolean, default: false })
+  isTemplate: boolean;
+
+  @Prop({ type: String })
+  parentDeckId?: string; // For template-based decks, reference to original template
+
   @Prop({ default: Date.now })
   createdAt: Date;
 
@@ -139,3 +213,9 @@ export class PitchDeck {
 
 export type PitchDeckDocument = PitchDeck & Document;
 export const PitchDeckSchema = SchemaFactory.createForClass(PitchDeck);
+
+// Add indexes for better query performance
+PitchDeckSchema.index({ userId: 1, createdAt: -1 });
+PitchDeckSchema.index({ userId: 1, deckType: 1 });
+PitchDeckSchema.index({ isTemplate: 1 });
+PitchDeckSchema.index({ parentDeckId: 1 });

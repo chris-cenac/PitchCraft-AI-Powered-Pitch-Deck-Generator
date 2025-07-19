@@ -10,7 +10,13 @@ export const FeatureList: React.FC<{
     highlight?: boolean;
     description?: string;
   }>;
-  variant?: "default" | "checklist" | "benefits" | "highlights";
+  variant?:
+    | "default"
+    | "checklist"
+    | "benefits"
+    | "highlights"
+    | "simple"
+    | "product";
   layout?: "grid" | "list" | "cards";
   columns?: 1 | 2 | 3;
   className?: string;
@@ -55,6 +61,21 @@ export const FeatureList: React.FC<{
       item: theme === "dark" ? "text-purple-200" : "text-purple-800",
       icon: "text-purple-500",
     },
+    simple: {
+      container: theme === "dark" ? "bg-gray-800" : "bg-white",
+      border: theme === "dark" ? "border-gray-700" : "border-gray-200",
+      title: theme === "dark" ? "text-white" : "text-gray-900",
+      item: theme === "dark" ? "text-gray-300" : "text-gray-700",
+      icon: theme === "dark" ? "text-green-400" : "text-green-600",
+    },
+    product: {
+      container:
+        "bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20",
+      border: "border-purple-200 dark:border-purple-700",
+      title: theme === "dark" ? "text-purple-100" : "text-purple-900",
+      item: theme === "dark" ? "text-purple-200" : "text-purple-800",
+      icon: "text-purple-500",
+    },
   };
 
   const layoutStyles = {
@@ -67,7 +88,7 @@ export const FeatureList: React.FC<{
     } gap-4`,
   };
 
-  const currentVariant = variantStyles[variant];
+  const currentVariant = variantStyles[variant] || variantStyles.default;
   const currentLayout = layoutStyles[layout];
 
   const getDefaultIcon = (variant: string) => {

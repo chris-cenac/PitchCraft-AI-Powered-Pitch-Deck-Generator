@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import MultiStepForm from "@/components/MultiStepForm";
-import type { MultiStepFormHandle } from "@/components/MultiStepForm";
 import Loading from "@/components/Loading";
 import type { PitchFormData } from "@/components/MultiStepForm";
 import {
@@ -11,6 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+import { handleAuthError } from "@/utils/authInterceptor";
 
 const FormView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,6 @@ const FormView: React.FC = () => {
   const navigate = useNavigate();
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const simulateRef = useRef<NodeJS.Timeout | null>(null);
-  const multiStepFormRef = useRef<MultiStepFormHandle>(null);
 
   // Remove convertToFormData and replace with direct payload construction
   const handleGenerate = async (pitchData: PitchFormData) => {
@@ -58,14 +57,14 @@ const FormView: React.FC = () => {
       const createRes = await createPitchDeck(payload);
 
       const id =
-        createRes.data?._id ||
-        createRes.data?.id ||
-        createRes._id ||
-        createRes.id;
+        (createRes.data as Record<string, unknown>)?._id ||
+        (createRes.data as Record<string, unknown>)?.id ||
+        (createRes as Record<string, unknown>)._id ||
+        (createRes as Record<string, unknown>).id;
 
-      if (!id) {
-        toast.error("No ID returned from pitch deck creation");
-        setError("No ID returned from pitch deck creation");
+      if (!id || typeof id !== "string") {
+        toast.error("No valid ID returned from pitch deck creation");
+        setError("No valid ID returned from pitch deck creation");
         setIsLoading(false);
         return;
       }
@@ -129,8 +128,14 @@ const FormView: React.FC = () => {
       setIsLoading(false);
 
       if (error instanceof Error) {
-        setError(error.message);
-        toast.error(error.message);
+        if (error.message.includes("401")) {
+          // Use the auth interceptor for consistent handling
+          handleAuthError(401);
+          setError("Session expired. Please log in again.");
+        } else {
+          setError(error.message);
+          toast.error(error.message);
+        }
       } else {
         setError("An unexpected error occurred. Please try again.");
         toast.error("An unexpected error occurred. Please try again.");
@@ -166,19 +171,6 @@ const FormView: React.FC = () => {
         </div>
       </div>
 
-      {/* Autofill for Testing Button */}
-      <div className="flex-shrink-0 p-4">
-        <div className="max-w-7xl mx-auto flex justify-end">
-          <button
-            type="button"
-            onClick={() => multiStepFormRef.current?.autofill()}
-            className="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg shadow hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 font-semibold"
-          >
-            Autofill for Testing
-          </button>
-        </div>
-      </div>
-
       {/* Error message */}
       {error && (
         <div className="flex-shrink-0 p-4">
@@ -198,7 +190,7 @@ const FormView: React.FC = () => {
 
       {/* Form content - takes remaining space */}
       <div className="flex-1 overflow-hidden">
-        <MultiStepForm ref={multiStepFormRef} onSubmit={handleGenerate} />
+        <MultiStepForm onSubmit={handleGenerate} />
       </div>
     </div>
   );

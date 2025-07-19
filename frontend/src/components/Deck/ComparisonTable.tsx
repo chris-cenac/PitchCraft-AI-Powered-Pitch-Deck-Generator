@@ -6,7 +6,14 @@ export const ComparisonTable: React.FC<{
   caption?: string;
   highlightCols?: number[];
   highlightRows?: number[];
-  variant?: "default" | "striped" | "bordered" | "highlighted";
+  variant?:
+    | "default"
+    | "striped"
+    | "bordered"
+    | "highlighted"
+    | "modern"
+    | "enterprise"
+    | "saas";
   className?: string;
   width?: string | number;
   height?: string | number;
@@ -27,7 +34,10 @@ export const ComparisonTable: React.FC<{
     if (highlightCols.includes(colIdx)) base += " bg-blue-50 font-semibold ";
     if (highlightRows.includes(rowIdx)) base += " bg-green-50 font-semibold ";
     if (variant === "striped" && rowIdx % 2 === 1) base += " bg-gray-50 ";
-    if (variant === "bordered") base += " border border-gray-200 ";
+    if (variant === "bordered" || variant === "enterprise")
+      base += " border border-gray-200 ";
+    if (variant === "modern") base += " border-b border-gray-100 ";
+    if (variant === "saas") base += " border-b border-violet-100 ";
     if (
       variant === "highlighted" &&
       (highlightCols.includes(colIdx) || highlightRows.includes(rowIdx))
@@ -38,7 +48,11 @@ export const ComparisonTable: React.FC<{
   };
   const tableClass =
     "w-full h-full min-w-full min-h-full rounded-xl shadow-lg overflow-hidden table-fixed " +
-    (variant === "bordered" ? " border-2 border-gray-200 " : "") +
+    (variant === "bordered" || variant === "enterprise"
+      ? " border-2 border-gray-200 "
+      : "") +
+    (variant === "modern" ? " border border-gray-100 " : "") +
+    (variant === "saas" ? " border border-violet-100 " : "") +
     (className || "");
   const thClass =
     "px-4 py-4 text-lg font-semibold bg-gray-100 text-gray-700 align-middle text-center " +

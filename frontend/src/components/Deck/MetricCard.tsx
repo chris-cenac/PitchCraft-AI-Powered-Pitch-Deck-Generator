@@ -9,7 +9,16 @@ export const MetricCard: React.FC<{
   icon?: string;
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
-  variant?: "default" | "primary" | "success" | "warning" | "danger";
+  variant?:
+    | "default"
+    | "primary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "enterprise"
+    | "product"
+    | "tech"
+    | "saas";
   size?: "sm" | "md" | "lg";
   className?: string;
 }> = ({
@@ -61,6 +70,34 @@ export const MetricCard: React.FC<{
       subtitle: "text-red-100",
       icon: "text-red-200",
     },
+    enterprise: {
+      bg: "bg-gradient-to-br from-blue-600 to-blue-700",
+      border: "border-blue-600",
+      text: "text-white",
+      subtitle: "text-blue-100",
+      icon: "text-blue-200",
+    },
+    product: {
+      bg: "bg-gradient-to-br from-purple-500 to-purple-600",
+      border: "border-purple-500",
+      text: "text-white",
+      subtitle: "text-purple-100",
+      icon: "text-purple-200",
+    },
+    tech: {
+      bg: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+      border: "border-indigo-500",
+      text: "text-white",
+      subtitle: "text-indigo-100",
+      icon: "text-indigo-200",
+    },
+    saas: {
+      bg: "bg-gradient-to-br from-violet-500 to-violet-600",
+      border: "border-violet-500",
+      text: "text-white",
+      subtitle: "text-violet-100",
+      icon: "text-violet-200",
+    },
   };
 
   const sizeStyles = {
@@ -102,7 +139,7 @@ export const MetricCard: React.FC<{
     },
   };
 
-  const currentVariant = variantStyles[variant];
+  const currentVariant = variantStyles[variant] || variantStyles.default;
   const currentSize = sizeStyles[size];
   const currentTrend = trend ? trendStyles[trend] : null;
 

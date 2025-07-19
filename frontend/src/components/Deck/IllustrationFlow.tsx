@@ -8,6 +8,7 @@ export const IllustrationFlow: React.FC<{
   width?: number;
   color?: string;
   descriptionColor?: string;
+  variant?: "default" | "process" | "timeline" | "tech";
 }> = ({
   iconName,
   title,
@@ -15,6 +16,7 @@ export const IllustrationFlow: React.FC<{
   width = 120,
   color,
   descriptionColor,
+  variant = "default",
 }) => {
   // Ensure width is a valid number
   const safeWidth =
@@ -30,9 +32,22 @@ export const IllustrationFlow: React.FC<{
   }>;
   const FinalIcon = IconComponent || FiIcons.FiCoffee;
 
-  // Use provided colors or fallback to theme defaults via CSS variables
-  const iconColor = color || "currentColor";
-  const titleColor = color || "currentColor";
+  // Variant-specific styling
+  const variantStyles: Record<
+    string,
+    { iconColor?: string; titleColor?: string }
+  > = {
+    default: {},
+    process: { iconColor: "#3b82f6", titleColor: "#1f2937" },
+    timeline: { iconColor: "#059669", titleColor: "#1f2937" },
+    tech: { iconColor: "#6366f1", titleColor: "#1f2937" },
+  };
+
+  const currentVariant = variantStyles[variant] || variantStyles.default;
+
+  // Use provided colors or fallback to variant defaults
+  const iconColor = color || currentVariant.iconColor || "currentColor";
+  const titleColor = color || currentVariant.titleColor || "currentColor";
   const descColor = descriptionColor || color || "gray";
 
   return (

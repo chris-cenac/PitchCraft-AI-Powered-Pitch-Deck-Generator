@@ -1,4 +1,5 @@
 // src/api/auth.ts
+import { handleAuthError } from "@/utils/authInterceptor";
 
 export interface SignupDto {
   email: string;
@@ -33,10 +34,20 @@ async function handleResponse(res: Response) {
           payload.message || "Invalid request data. Please check your input."
         );
       case 401:
-        throw new Error(
-          payload.message ||
-            "Authentication failed. Please check your credentials."
-        );
+        // For auth endpoints, show specific login-related messages
+        if (
+          res.url.includes("/auth/login") ||
+          res.url.includes("/auth/signup")
+        ) {
+          throw new Error(
+            payload.message ||
+              "Authentication failed. Please check your credentials."
+          );
+        } else {
+          // For other endpoints, handle as session expiration
+          const authError = handleAuthError(res.status, payload.message);
+          throw new Error(authError.message);
+        }
       case 409:
         throw new Error(
           payload.message || "User already exists with this email address."

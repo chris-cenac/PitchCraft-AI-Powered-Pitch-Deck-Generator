@@ -4,6 +4,8 @@ import {
   IsOptional,
   ValidateNested,
   IsArray,
+  IsEnum,
+  IsBoolean,
 } from "class-validator";
 import { Type, Transform } from "class-transformer";
 
@@ -105,12 +107,46 @@ class BusinessDataDto {
   brandColors?: string;
 }
 
-// Updated DTO to match frontend structure
+class TemplateDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  category: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  slides: string[];
+
+  @IsObject()
+  @IsOptional()
+  theme?: Record<string, any>;
+
+  @IsArray()
+  @IsOptional()
+  componentsCatalog?: any[];
+}
+
+// Updated DTO to support both business data and template-based creation
 export class CreatePitchDeckDto {
   @ValidateNested()
   @Type(() => BusinessDataDto)
   @IsObject()
-  businessData: BusinessDataDto;
+  @IsOptional()
+  businessData?: BusinessDataDto;
+
+  @ValidateNested()
+  @Type(() => TemplateDto)
+  @IsObject()
+  @IsOptional()
+  template?: TemplateDto;
 
   @IsArray()
   @IsOptional()
@@ -123,4 +159,24 @@ export class CreatePitchDeckDto {
   @IsObject()
   @IsOptional()
   theme?: Record<string, any>;
+
+  @IsString()
+  @IsOptional()
+  title?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsEnum(["ai-generated", "template-based", "custom"])
+  @IsOptional()
+  deckType?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isTemplate?: boolean;
+
+  @IsString()
+  @IsOptional()
+  parentDeckId?: string;
 }

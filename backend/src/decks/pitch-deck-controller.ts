@@ -23,6 +23,7 @@ import { CreatePitchDeckDto } from "./dto/create-pitch-deck.dto";
 import { DeckSpec } from "../ai/interfaces/deck-spec.interface";
 import { AiService } from "../ai/ai.service";
 import { ComponentsService } from "../ai/services/components.service";
+import { TemplateService } from "../ai/services/template.service";
 import { Response } from "express";
 import { Public } from "../auth/decorators/public.decorator";
 
@@ -36,7 +37,8 @@ export class PitchDeckController {
   constructor(
     private readonly pitchDeckService: PitchDeckService,
     private readonly aiService: AiService,
-    private readonly componentsService: ComponentsService
+    private readonly componentsService: ComponentsService,
+    private readonly templateService: TemplateService
   ) {}
 
   /**
@@ -59,28 +61,116 @@ export class PitchDeckController {
     throw new BadRequestException(`${label} must be an object`);
   }
 
+  @Get()
+  async findAll(@Request() req, @Query() query: any) {
+    try {
+      const options: any = {};
+
+      if (query.deckType) {
+        options.deckType = query.deckType;
+      }
+
+      if (query.isTemplate !== undefined) {
+        options.isTemplate = query.isTemplate === "true";
+      }
+
+      if (query.limit) {
+        options.limit = parseInt(query.limit);
+      }
+
+      if (query.skip) {
+        options.skip = parseInt(query.skip);
+      }
+
+      const decks = await this.pitchDeckService.findAll(req.user.id, options);
+
+      return {
+        success: true,
+        data: decks,
+        message: "Decks retrieved successfully",
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || "Failed to retrieve decks"
+      );
+    }
+  }
+
+  @Get("templates")
+  async findTemplates(@Request() req) {
+    try {
+      // Get hardcoded templates from TemplateService
+      const hardcodedTemplates = this.templateService.getAllTemplates();
+
+      // Also get any user-created templates from database
+      const dbTemplates = await this.pitchDeckService.findTemplates();
+
+      // Combine both
+      const allTemplates = [...hardcodedTemplates, ...dbTemplates];
+
+      return {
+        success: true,
+        data: allTemplates,
+        message: "Templates retrieved successfully",
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || "Failed to retrieve templates"
+      );
+    }
+  }
+
+  @Get("my-templates")
+  async findUserTemplates(@Request() req) {
+    try {
+      const templates = await this.pitchDeckService.findUserTemplates(
+        req.user.id
+      );
+
+      return {
+        success: true,
+        data: templates,
+        message: "User templates retrieved successfully",
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || "Failed to retrieve user templates"
+      );
+    }
+  }
+
   @Post()
   async create(@Body() createPitchDeckDto: CreatePitchDeckDto, @Request() req) {
     try {
-      // Validate businessData
-      if (
-        !createPitchDeckDto.businessData ||
-        typeof createPitchDeckDto.businessData !== "object" ||
-        Array.isArray(createPitchDeckDto.businessData)
-      ) {
-        throw new BadRequestException("businessData must be a plain object");
+      // Validate that either businessData or template is provided
+      if (!createPitchDeckDto.businessData && !createPitchDeckDto.template) {
+        throw new BadRequestException(
+          "Either businessData or template must be provided"
+        );
+      }
+
+      // Validate businessData if provided
+      if (createPitchDeckDto.businessData) {
+        if (
+          typeof createPitchDeckDto.businessData !== "object" ||
+          Array.isArray(createPitchDeckDto.businessData)
+        ) {
+          throw new BadRequestException("businessData must be a plain object");
+        }
+      }
+
+      // Validate template if provided
+      if (createPitchDeckDto.template) {
+        if (
+          typeof createPitchDeckDto.template !== "object" ||
+          Array.isArray(createPitchDeckDto.template)
+        ) {
+          throw new BadRequestException("template must be a plain object");
+        }
       }
 
       const pitchDeck = await this.pitchDeckService.create(
-        {
-          spec: {
-            businessData: createPitchDeckDto.businessData,
-            componentsCatalog: createPitchDeckDto.componentsCatalog,
-            slides: createPitchDeckDto.slides,
-            theme: createPitchDeckDto.theme,
-          },
-          status: "draft",
-        } as any,
+        createPitchDeckDto,
         req.user.id
       );
 
@@ -100,13 +190,108 @@ export class PitchDeckController {
     }
   }
 
-  @Get()
-  async findAll(@Request() req) {
+  @Post("from-template/:templateId")
+  async createFromTemplate(
+    @Param("templateId") templateId: string,
+    @Body() customData: any,
+    @Request() req
+  ) {
     try {
-      const pitchDecks = await this.pitchDeckService.findAllByUser(req.user.id);
-      return { success: true, data: pitchDecks };
+      const pitchDeck = await this.pitchDeckService.createFromTemplate(
+        templateId,
+        req.user.id,
+        customData.businessData
+      );
+
+      return {
+        success: true,
+        data: pitchDeck,
+        message: "Pitch deck created from template successfully",
+      };
     } catch (error) {
-      throw new InternalServerErrorException("Failed to fetch pitch decks");
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        error.message || "Failed to create pitch deck from template"
+      );
+    }
+  }
+
+  @Post(":id/versions")
+  async createVersion(
+    @Param("id") id: string,
+    @Body() versionData: { spec: any; description?: string },
+    @Request() req
+  ) {
+    try {
+      const pitchDeck = await this.pitchDeckService.createVersion(
+        id,
+        req.user.id,
+        versionData.spec,
+        versionData.description
+      );
+
+      return {
+        success: true,
+        data: pitchDeck,
+        message: "Version created successfully",
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        error.message || "Failed to create version"
+      );
+    }
+  }
+
+  @Get(":id/versions/:version")
+  async getVersion(
+    @Param("id") id: string,
+    @Param("version") version: string,
+    @Request() req
+  ) {
+    try {
+      const versionData = await this.pitchDeckService.getVersion(
+        id,
+        parseInt(version),
+        req.user.id
+      );
+
+      return {
+        success: true,
+        data: versionData,
+        message: "Version retrieved successfully",
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        error.message || "Failed to retrieve version"
+      );
+    }
+  }
+
+  @Post(":id/revert/:version")
+  async revertToVersion(
+    @Param("id") id: string,
+    @Param("version") version: string,
+    @Request() req
+  ) {
+    try {
+      const pitchDeck = await this.pitchDeckService.revertToVersion(
+        id,
+        parseInt(version),
+        req.user.id
+      );
+
+      return {
+        success: true,
+        data: pitchDeck,
+        message: "Reverted to version successfully",
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        error.message || "Failed to revert to version"
+      );
     }
   }
 
