@@ -260,7 +260,7 @@ const DraggableResizableSlideItem: React.FC<{
       ref={ref}
       style={{
         ...style,
-        zIndex: dragging || resizing ? 100 : 1,
+        zIndex: dragging || resizing ? 100 : 0,
         cursor: isEditing ? (dragging ? "grabbing" : "move") : undefined,
         pointerEvents: isEditing ? "auto" : "none",
         boxShadow:

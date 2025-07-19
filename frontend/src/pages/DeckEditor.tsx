@@ -52,10 +52,10 @@ const DeckEditor: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowNavigation(false);
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer);
-  }, [currentIndex]);
+  }, [currentIndex, showNavigation]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -529,8 +529,14 @@ const DeckEditor: React.FC = () => {
     // This would share the deck
   };
 
-  const handleMouseMove = () => {
-    setShowNavigation(true);
+  const handleMouseMove = (event: React.MouseEvent) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const mouseY = event.clientY;
+    const threshold = 100; // Show navigation when mouse is within 100px of bottom
+
+    if (mouseY > rect.bottom - threshold) {
+      setShowNavigation(true);
+    }
   };
 
   // Add moveSlide handler for reordering
@@ -602,12 +608,12 @@ const DeckEditor: React.FC = () => {
       </div>
       {/* Main Content - Maximized Slide Display */}
       <div
-        className="h-screen bg-background dark:bg-background-dark flex flex-col overflow-hidden"
+        className="h-screen bg-background dark:bg-background-dark flex flex-col overflow-hidden relative"
         onMouseMove={handleMouseMove}
       >
-        <div className="flex-1 flex items-center justify-center p-2">
+        <div className="flex-1 flex items-center justify-center p-2 pb-4">
           <div
-            className="w-full h-full max-w-[95vw] max-h-[calc(100vh-80px)]"
+            className="w-full h-full max-w-[95vw] max-h-[calc(100vh-32px)]"
             ref={slideContainerRef}
           >
             <SlideContainer aspectRatio="16/9" useFullHeight={true}>
@@ -622,13 +628,24 @@ const DeckEditor: React.FC = () => {
             </SlideContainer>
           </div>
         </div>
+        {/* Hover area to trigger navigation */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-8 z-10"
+          onMouseEnter={() => setShowNavigation(true)}
+        />
+
         {/* Auto-hiding Deck Navigation Component */}
         <div
-          className={`transition-all duration-300 ease-in-out ${
+          className={`absolute bottom-0 left-0 right-0 transition-all duration-500 ease-in-out ${
             showNavigation
               ? "translate-y-0 opacity-100"
               : "translate-y-full opacity-0"
           }`}
+          onMouseEnter={() => setShowNavigation(true)}
+          onMouseLeave={() => {
+            // Only hide if not actively being used
+            setTimeout(() => setShowNavigation(false), 1000);
+          }}
         >
           <DeckNavigation
             currentSlide={currentIndex}
