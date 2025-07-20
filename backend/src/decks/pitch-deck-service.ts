@@ -480,6 +480,31 @@ export class PitchDeckService {
     return pitchDeck;
   }
 
+  async updateTitle(
+    id: string,
+    title: string,
+    userId: string
+  ): Promise<PitchDeck> {
+    const pitchDeck = await this.pitchDeckModel
+      .findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(id),
+          userId: new Types.ObjectId(userId),
+        },
+        {
+          $set: { title, updatedAt: new Date() },
+        },
+        { new: true }
+      )
+      .exec();
+
+    if (!pitchDeck) {
+      throw new NotFoundException("Pitch deck not found");
+    }
+
+    return pitchDeck;
+  }
+
   async updateBusinessData(
     id: string,
     businessData: Record<string, any>,

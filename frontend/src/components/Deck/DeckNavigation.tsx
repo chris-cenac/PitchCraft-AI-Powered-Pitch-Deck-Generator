@@ -5,6 +5,8 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiChevronsRight,
+  FiEdit,
+  FiCheckCircle,
 } from "react-icons/fi";
 import { useDrag, useDrop } from "react-dnd";
 
@@ -21,6 +23,7 @@ interface DeckNavigationProps {
   onDownloadPPTX?: () => void;
   isEditing?: boolean;
   deckTitle?: string;
+  onTitleChange?: (title: string) => void;
   onBack?: () => void;
   backLabel?: string;
   hideDeckInfo?: boolean;
@@ -99,6 +102,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
   onDownloadPPTX,
   isEditing = false,
   deckTitle,
+  onTitleChange,
   onBack,
   backLabel,
   hideDeckInfo = false,
@@ -107,6 +111,13 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
   onSlideClick,
 }) => {
   const [showToolsMenu, setShowToolsMenu] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(deckTitle || "");
+
+  // Update editing title when deckTitle prop changes
+  React.useEffect(() => {
+    setEditingTitle(deckTitle || "");
+  }, [deckTitle]);
 
   const goToFirst = useCallback(() => {
     if (typeof onSlideChange === "function") {
@@ -235,9 +246,53 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
             {/* Deck Title */}
             {!hideDeckInfo && (
               <div className="flex flex-col items-start justify-center pl-4">
-                <h1 className="text-sm font-bold text-primary dark:text-accent truncate max-w-max">
-                  {deckTitle || "Pitch Deck Editor"}
-                </h1>
+                {isEditingTitle ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setIsEditingTitle(false);
+                          onTitleChange?.(editingTitle);
+                        } else if (e.key === "Escape") {
+                          setIsEditingTitle(false);
+                          setEditingTitle(deckTitle || "");
+                        }
+                      }}
+                      onBlur={() => {
+                        setIsEditingTitle(false);
+                        onTitleChange?.(editingTitle);
+                      }}
+                      className="text-sm font-bold text-primary dark:text-accent bg-transparent border-b border-primary dark:border-accent focus:outline-none focus:border-2 px-1 py-0.5 min-w-[120px]"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        setIsEditingTitle(false);
+                        onTitleChange?.(editingTitle);
+                      }}
+                      className="text-xs text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                    >
+                      <FiCheckCircle className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsEditingTitle(true);
+                      setEditingTitle(deckTitle || "");
+                    }}
+                    className="text-sm font-bold text-primary dark:text-accent truncate max-w-max hover:underline cursor-pointer group"
+                    title="Click to edit title"
+                  >
+                    {deckTitle || "Pitch Deck Editor"}
+                    <span className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                      <FiEdit className="w-3 h-3" />
+                    </span>
+                  </button>
+                )}
                 <p className="text-xs text-secondary dark:text-secondary-light">
                   Slide{" "}
                   {typeof currentSlide === "number" ? currentSlide + 1 : "?"} of{" "}

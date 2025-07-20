@@ -172,6 +172,51 @@ export const updateDeck = async (
   return handleResponse(response);
 };
 
+// Update deck slides
+export const updateDeckSlides = async (
+  id: string,
+  slides: unknown[]
+): Promise<Record<string, unknown>> => {
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}/slides`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ slides }),
+  });
+
+  const result = await handleResponse(response);
+  return result;
+};
+
+// Update deck theme
+export const updateDeckTheme = async (
+  id: string,
+  theme: Record<string, unknown>
+): Promise<Record<string, unknown>> => {
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}/theme`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ theme }),
+  });
+
+  const result = await handleResponse(response);
+  return result;
+};
+
+// Update deck title
+export const updateDeckTitle = async (
+  id: string,
+  title: string
+): Promise<Record<string, unknown>> => {
+  const response = await fetch(`${BASE_URL}/pitch-decks/${id}/title`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ title }),
+  });
+
+  const result = await handleResponse(response);
+  return result;
+};
+
 // Delete a deck
 export const deleteDeck = async (id: string): Promise<void> => {
   const response = await fetch(`${BASE_URL}/pitch-decks/${id}`, {
@@ -274,8 +319,24 @@ export const getDeckById = async (id: string): Promise<DeckSpec> => {
   });
 
   const result = await handleResponse(response);
-  // The backend returns { success, data: { spec: { slides, theme, ... } } }
-  return result.data?.spec || result.data;
+
+  // Handle different response structures
+  if (result.data) {
+    // Backend returns { success, data: { slides, theme } }
+    return result.data;
+  } else if (result.slides || result.theme) {
+    // Direct response with slides/theme
+    return result;
+  } else {
+    return {
+      slides: [],
+      theme: {
+        primaryColor: "#2563eb",
+        secondaryColor: "#059669",
+        fontFamily: "Inter, system-ui, sans-serif",
+      },
+    };
+  }
 };
 
 // Export deck as PDF

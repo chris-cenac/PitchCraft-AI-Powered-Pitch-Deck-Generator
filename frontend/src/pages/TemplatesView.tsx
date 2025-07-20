@@ -40,8 +40,7 @@ const TemplatesView: React.FC = () => {
       try {
         const backendTemplates = await getBackendTemplates();
         setTemplates(backendTemplates as PitchDeckTemplate[]);
-      } catch (error) {
-        console.error("Failed to load templates:", error);
+      } catch {
         toast.error("Failed to load templates");
       } finally {
         setLoading(false);
@@ -120,7 +119,6 @@ const TemplatesView: React.FC = () => {
         throw new Error("Failed to create deck from template");
       }
     } catch (error) {
-      console.error("Error creating deck from template:", error);
       if (error instanceof Error && error.message.includes("401")) {
         handleAuthError(401);
       } else {

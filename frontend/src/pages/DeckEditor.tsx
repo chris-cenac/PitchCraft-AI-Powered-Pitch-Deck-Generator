@@ -5,7 +5,12 @@ import SlideRenderer from "@/components/Deck/SlideRenderer";
 import type { DeckSpec } from "@/components/Deck/slideTypes";
 import { SlideContainer } from "@/components/Deck/SliderContainer";
 import DeckNavigation from "@/components/Deck/DeckNavigation";
-import { getDeckById, updateDeck } from "@/api/decks";
+import {
+  getDeckById,
+  updateDeckSlides,
+  updateDeckTheme,
+  updateDeckTitle,
+} from "@/api/decks";
 import { getTemplateById } from "@/services/templateService";
 import Button from "@/components/ui/Button";
 import { exportDeckPdf } from "@/api/decks";
@@ -19,6 +24,10 @@ interface DeckSlide {
   items?: (string | Record<string, unknown>)[];
 }
 
+interface DeckResponse extends DeckSpec {
+  title?: string;
+}
+
 const DeckEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -30,6 +39,7 @@ const DeckEditor: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [showNavigation, setShowNavigation] = useState(true);
+  const [deckTitle, setDeckTitle] = useState<string>("Pitch Deck Editor");
   const slideContainerRef = React.useRef<HTMLDivElement>(null);
   const pdfContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -107,7 +117,29 @@ const DeckEditor: React.FC = () => {
 
     try {
       const data = await getDeckById(deckId);
-      setDeck(data);
+
+      // Ensure we have the correct data structure and provide defaults
+      if (data) {
+        // Provide defaults for missing properties
+        const deckWithDefaults = {
+          slides: data.slides || [],
+          theme: data.theme || {
+            primaryColor: "#2563eb",
+            secondaryColor: "#059669",
+            fontFamily: "Inter, system-ui, sans-serif",
+          },
+        };
+
+        setDeck(deckWithDefaults);
+
+        // Set deck title from data if available
+        const deckData = data as DeckResponse;
+        if (deckData.title) {
+          setDeckTitle(deckData.title);
+        }
+      } else {
+        setError("No deck data received from server");
+      }
       setLoading(false);
     } catch {
       setError("Failed to load deck");
@@ -199,6 +231,21 @@ const DeckEditor: React.FC = () => {
     );
   }
 
+  const handleTitleChange = async (newTitle: string) => {
+    if (!id) {
+      toast.error("No deck ID available");
+      return;
+    }
+
+    try {
+      await updateDeckTitle(id, newTitle);
+      setDeckTitle(newTitle);
+      toast.success("Title updated successfully!");
+    } catch {
+      toast.error("Failed to update title. Please try again.");
+    }
+  };
+
   const handleSave = async () => {
     if (!deck || !id) {
       toast.error("No deck to save or missing deck ID");
@@ -206,16 +253,18 @@ const DeckEditor: React.FC = () => {
     }
 
     try {
-      // Prepare the update payload with only the properties that exist in DeckSpec
-      const updatePayload = {
-        slides: deck.slides,
-        theme: deck.theme,
-      };
-
-      await updateDeck(id, updatePayload);
+      // Use dedicated endpoints for better reliability
+      if (deck.slides) {
+        await updateDeckSlides(id, deck.slides);
+      }
+      if (deck.theme) {
+        await updateDeckTheme(
+          id,
+          deck.theme as unknown as Record<string, unknown>
+        );
+      }
       toast.success("Deck saved successfully!");
-    } catch (error) {
-      console.error("Save error:", error);
+    } catch {
       toast.error("Failed to save deck. Please try again.");
     }
   };
@@ -242,9 +291,8 @@ const DeckEditor: React.FC = () => {
       const html = pdfContainerRef.current.innerHTML;
       await exportDeckPdf(html, "pitch-deck.pdf");
       toast.success("PDF downloaded!");
-    } catch (err) {
+    } catch {
       toast.error("PDF export failed. Please try again.");
-      console.error("PDF export error:", err);
     }
   };
 
@@ -599,7 +647,9 @@ const DeckEditor: React.FC = () => {
       const slide = { ...slides[currentIndex] };
       const items = [...slide.items];
       const item = { ...items[itemIdx] };
+
       item.layout = { ...item.layout, ...layout };
+
       items[itemIdx] = item;
       slide.items = items;
       slides[currentIndex] = slide;
@@ -696,9 +746,8 @@ const DeckEditor: React.FC = () => {
             onDownloadPDF={handleDownloadPDF}
             onDownloadPPTX={handleDownloadPPTX}
             isEditing={isEditing}
-            deckTitle={
-              templateId ? getTemplateById()?.name : "Pitch Deck Editor"
-            }
+            deckTitle={deckTitle}
+            onTitleChange={handleTitleChange}
             onBack={() => navigate(templateId ? "/templates" : "/")}
             backLabel={templateId ? "Templates" : "Home"}
             hideDeckInfo={isEditing}

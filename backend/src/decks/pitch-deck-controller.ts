@@ -300,9 +300,24 @@ export class PitchDeckController {
     try {
       const pitchDeck = await this.pitchDeckService.findOne(id, req.user.id);
       if (!pitchDeck) throw new NotFoundException("Pitch deck not found");
-      // Only return slides and theme for DeckEditor
-      const { slides, theme } = pitchDeck.spec || {};
-      return { success: true, data: { slides, theme } };
+
+      // Handle edge cases where spec might be null or undefined
+      const spec = pitchDeck.spec || {};
+
+      // Return the full spec and title for DeckEditor
+      const response = {
+        success: true,
+        data: {
+          slides: spec.slides || [],
+          theme: spec.theme || {
+            primaryColor: "#2563eb",
+            secondaryColor: "#059669",
+            fontFamily: "Inter, system-ui, sans-serif",
+          },
+          title: pitchDeck.title || "Untitled Deck",
+        },
+      };
+      return response;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException("Failed to fetch pitch deck");
@@ -470,6 +485,7 @@ export class PitchDeckController {
         slides,
         req.user.id
       );
+
       return { success: true, data: updated };
     } catch (error) {
       if (error instanceof SyntaxError) {
@@ -504,6 +520,35 @@ export class PitchDeckController {
       }
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException("Failed to update theme");
+    }
+  }
+
+  @Patch(":id/title")
+  async updateTitle(
+    @Param("id") id: string,
+    @Body("title") title: string,
+    @Request() req
+  ) {
+    try {
+      if (!title || typeof title !== "string") {
+        throw new BadRequestException("Title must be a non-empty string");
+      }
+
+      const updated = await this.pitchDeckService.updateTitle(
+        id,
+        title,
+        req.user.id
+      );
+
+      return { success: true, data: updated };
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException("Failed to update title");
     }
   }
 

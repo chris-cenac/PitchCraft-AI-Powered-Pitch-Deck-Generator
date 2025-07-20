@@ -21,18 +21,13 @@ export interface PitchDeckTemplate {
 
 // Legacy functions for backward compatibility (now deprecated)
 export const getTemplateById = (): PitchDeckTemplate | undefined => {
-  console.warn("getTemplateById is deprecated. Use backend API instead.");
   return undefined;
 };
 
 export const getAllTemplates = (): PitchDeckTemplate[] => {
-  console.warn("getAllTemplates is deprecated. Use backend API instead.");
   return [];
 };
 
 export const getTemplatesByCategory = (): PitchDeckTemplate[] => {
-  console.warn(
-    "getTemplatesByCategory is deprecated. Use backend API instead."
-  );
   return [];
 };
