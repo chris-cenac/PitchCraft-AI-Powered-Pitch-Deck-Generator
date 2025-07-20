@@ -199,7 +199,7 @@ export class AuthService {
       };
 
       return this.jwtService.sign(payload, {
-        expiresIn: "15m", // Shorter token lifetime for security
+        expiresIn: "7d", // Extended to 7 days for better user experience
       });
     } catch (error) {
       this.logger.error("Failed to generate access token:", error.message);

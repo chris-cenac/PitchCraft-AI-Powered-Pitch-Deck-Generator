@@ -24,6 +24,8 @@ interface DeckNavigationProps {
   isEditing?: boolean;
   deckTitle?: string;
   onTitleChange?: (title: string) => void;
+  onTitleEditStart?: () => void;
+  onTitleEditEnd?: () => void;
   onBack?: () => void;
   backLabel?: string;
   hideDeckInfo?: boolean;
@@ -103,6 +105,8 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
   isEditing = false,
   deckTitle,
   onTitleChange,
+  onTitleEditStart,
+  onTitleEditEnd,
   onBack,
   backLabel,
   hideDeckInfo = false,
@@ -249,14 +253,17 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
                         if (e.key === "Enter") {
                           setIsEditingTitle(false);
                           onTitleChange?.(editingTitle);
+                          onTitleEditEnd?.();
                         } else if (e.key === "Escape") {
                           setIsEditingTitle(false);
                           setEditingTitle(deckTitle || "");
+                          onTitleEditEnd?.();
                         }
                       }}
                       onBlur={() => {
                         setIsEditingTitle(false);
                         onTitleChange?.(editingTitle);
+                        onTitleEditEnd?.();
                       }}
                       className="text-sm font-bold text-primary dark:text-accent bg-transparent border-b border-primary dark:border-accent focus:outline-none focus:border-2 px-1 py-0.5 min-w-[120px]"
                       autoFocus
@@ -265,6 +272,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
                       onClick={() => {
                         setIsEditingTitle(false);
                         onTitleChange?.(editingTitle);
+                        onTitleEditEnd?.();
                       }}
                       className="text-xs text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                     >
@@ -276,6 +284,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
                     onClick={() => {
                       setIsEditingTitle(true);
                       setEditingTitle(deckTitle || "");
+                      onTitleEditStart?.();
                     }}
                     className="text-sm font-bold text-primary dark:text-accent truncate max-w-max hover:underline cursor-pointer group"
                     title="Click to edit title"

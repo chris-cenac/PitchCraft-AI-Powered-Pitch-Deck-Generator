@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Stepper from "./StepperComponent";
 import { TextInput, TextArea, SelectDropdown } from "@/components/form";
 
@@ -35,40 +35,48 @@ export interface PitchFormData {
 
 interface MultiStepFormProps {
   onSubmit: (PitchFormData: PitchFormData) => void;
+  initialData?: PitchFormData;
 }
 
-const MultiStepForm: React.FC<MultiStepFormProps> = ({ onSubmit }) => {
+const MultiStepForm: React.FC<MultiStepFormProps> = ({
+  onSubmit,
+  initialData,
+}) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [FormData, setFormData] = useState<PitchFormData>({
-    // Step 1: Company Basics
-    companyName: "",
-    tagline: "",
-    industry: "",
-    businessStage: "",
+  const [FormData, setFormData] = useState<PitchFormData>(
+    initialData || {
+      // Step 1: Company Basics
+      companyName: "",
+      tagline: "",
+      industry: "",
+      businessStage: "",
+      // Step 2: Problem & Solution
+      problemStatement: "",
+      targetAudience: "",
+      proposedSolution: "",
+      uniqueValueProposition: "",
+      // Step 3: Business & Market
+      revenueModel: "",
+      marketSize: "",
+      competitors: "",
+      pricingStrategy: "",
+      goToMarketStrategy: "",
+      // Step 4: Team & Vision
+      founders: "",
+      teamSize: "",
+      visionStatement: "",
+      longTermGoals: "",
+      // Step 5: Design Preferences
+      designStyle: "",
+    }
+  );
 
-    // Step 2: Problem & Solution
-    problemStatement: "",
-    targetAudience: "",
-    proposedSolution: "",
-    uniqueValueProposition: "",
-
-    // Step 3: Business & Market
-    revenueModel: "",
-    marketSize: "",
-    competitors: "",
-    pricingStrategy: "",
-    goToMarketStrategy: "",
-
-    // Step 4: Team & Vision
-    founders: "",
-    teamSize: "",
-    visionStatement: "",
-    longTermGoals: "",
-
-    // Step 5: Design Preferences
-    designStyle: "",
-  });
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const steps = [
     { title: "Company Basics", description: "Basic company information" },

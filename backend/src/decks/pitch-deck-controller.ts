@@ -25,6 +25,7 @@ import { AiService } from "../ai/ai.service";
 import { ComponentsService } from "../ai/services/components.service";
 import { TemplateService } from "../ai/services/template.service";
 import { Response } from "express";
+import { Express } from "express";
 import { Public } from "../auth/decorators/public.decorator";
 
 function sleep(ms: number) {
@@ -97,7 +98,7 @@ export class PitchDeckController {
   }
 
   @Get("templates")
-  async findTemplates(@Request() req) {
+  async findTemplates(@Request() _req) {
     try {
       // Get hardcoded templates from TemplateService
       const hardcodedTemplates = this.templateService.getAllTemplates();
@@ -388,7 +389,7 @@ export class PitchDeckController {
         );
       }
 
-      let logoUrl: string | null = null;
+      const logoUrl: string | null = null;
 
       if (logo) {
         const allowedTypes = [
@@ -601,25 +602,32 @@ export class PitchDeckController {
       await this.pitchDeckService.updateProgressPhase(id, 80, 4, req.user.id); // Finalizing
       await sleep(700);
 
-      // Get business data and components catalog
+      // Get business data
       const businessData = pitchDeck.spec.businessData;
-      const catalog = this.componentsService.getAll();
 
-      // Generate the deck using AI service
-      const generatedSpec: DeckSpec = await this.aiService.generateDeck({
-        businessData,
-        componentsCatalog: catalog,
-      });
+      // Generate the deck using AI service (with fallback info)
+      let generatedResult: { deck: DeckSpec; usedFallback: boolean };
+      try {
+        generatedResult = await this.aiService.generateDeck({
+          businessData,
+        });
+      } catch (err) {
+        // Revert status on error
+        await this.pitchDeckService.updateStatus(id, "draft", req.user.id);
+        throw new InternalServerErrorException(
+          err.message || "Failed to generate pitch deck"
+        );
+      }
 
       // Update the deck with the generated slides and theme
       await this.pitchDeckService.updateSlides(
         id,
-        generatedSpec.slides,
+        generatedResult.deck.slides,
         req.user.id
       );
       await this.pitchDeckService.updateTheme(
         id,
-        generatedSpec.theme,
+        generatedResult.deck.theme,
         req.user.id
       );
 
@@ -636,16 +644,22 @@ export class PitchDeckController {
       return {
         success: true,
         data: updatedPitchDeck,
+        ...(generatedResult.usedFallback
+          ? {
+              usedFallback: true,
+              message:
+                "A fallback deck was generated due to an AI error or incomplete data. Please review and edit your deck as needed.",
+            }
+          : {}),
         message: "Pitch deck generated successfully",
       };
     } catch (error) {
       // If generation fails, revert status back to draft
       try {
         await this.pitchDeckService.updateStatus(id, "draft", req.user.id);
-      } catch (statusError) {
+      } catch {
         // Failed to revert status, but do not throw
       }
-
       if (
         error instanceof NotFoundException ||
         error instanceof BadRequestException

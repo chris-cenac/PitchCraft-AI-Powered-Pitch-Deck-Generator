@@ -3,6 +3,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  Logger,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -11,8 +12,6 @@ import {
   PitchDeckDocument,
   BusinessData,
 } from "./schemas/pitch-deck.schema";
-import { CreatePitchDeckDto } from "./dto/create-pitch-deck.dto";
-import { DeckSpec, Slide } from "src/common/slide-types";
 import { TemplateService } from "../ai/services/template.service";
 import { DeckTheme } from "src/common/slide-types";
 import * as puppeteer from "puppeteer";
@@ -52,6 +51,7 @@ type UnifiedDeckSpec = {
 
 @Injectable()
 export class PitchDeckService {
+  private readonly logger = new Logger(PitchDeckService.name);
   constructor(
     @InjectModel(PitchDeck.name)
     private pitchDeckModel: Model<PitchDeckDocument>,
@@ -59,47 +59,74 @@ export class PitchDeckService {
   ) {}
 
   async create(createPitchDeckDto: any, userId: string): Promise<PitchDeck> {
-    const { businessData, template, ...rest } = createPitchDeckDto;
+    try {
+      const { businessData, template, ...rest } = createPitchDeckDto;
 
-    // Determine deck type
-    let deckType = "custom";
-    if (businessData && !template) {
-      deckType = "ai-generated";
-    } else if (template && !businessData) {
-      deckType = "template-based";
+      // Validate required fields
+      if (!businessData && !template) {
+        throw new BadRequestException(
+          "Either businessData or template must be provided"
+        );
+      }
+      if (
+        businessData &&
+        (typeof businessData !== "object" || Array.isArray(businessData))
+      ) {
+        throw new BadRequestException("businessData must be a plain object");
+      }
+      if (
+        template &&
+        (typeof template !== "object" || Array.isArray(template))
+      ) {
+        throw new BadRequestException("template must be a plain object");
+      }
+
+      // Determine deck type
+      let deckType = "custom";
+      if (businessData && !template) {
+        deckType = "ai-generated";
+      } else if (template && !businessData) {
+        deckType = "template-based";
+      }
+
+      // Create initial version
+      const initialVersion = {
+        version: 1,
+        createdAt: new Date(),
+        spec: {
+          businessData,
+          template,
+          ...rest,
+        },
+        description: "Initial version",
+        createdBy: userId,
+      };
+
+      const pitchDeck = new this.pitchDeckModel({
+        userId: new Types.ObjectId(userId),
+        spec: {
+          businessData,
+          template,
+          ...rest,
+        },
+        status: "draft",
+        currentVersion: 1,
+        versions: [initialVersion],
+        deckType,
+        title: businessData?.companyName || template?.name || "Untitled Deck",
+        description: businessData?.tagline || template?.description,
+        isTemplate: createPitchDeckDto.isTemplate || false,
+        parentDeckId: createPitchDeckDto.parentDeckId,
+      });
+
+      return pitchDeck.save();
+    } catch (err) {
+      this.logger.error("Error creating pitch deck:", err);
+      if (err instanceof BadRequestException) throw err;
+      throw new BadRequestException(
+        err.message || "Failed to create pitch deck"
+      );
     }
-
-    // Create initial version
-    const initialVersion = {
-      version: 1,
-      createdAt: new Date(),
-      spec: {
-        businessData,
-        template,
-        ...rest,
-      },
-      description: "Initial version",
-      createdBy: userId,
-    };
-
-    const pitchDeck = new this.pitchDeckModel({
-      userId: new Types.ObjectId(userId),
-      spec: {
-        businessData,
-        template,
-        ...rest,
-      },
-      status: "draft",
-      currentVersion: 1,
-      versions: [initialVersion],
-      deckType,
-      title: businessData?.companyName || template?.name || "Untitled Deck",
-      description: businessData?.tagline || template?.description,
-      isTemplate: createPitchDeckDto.isTemplate || false,
-      parentDeckId: createPitchDeckDto.parentDeckId,
-    });
-
-    return pitchDeck.save();
   }
 
   async createFromTemplate(
@@ -107,41 +134,49 @@ export class PitchDeckService {
     userId: string,
     customData?: Partial<BusinessData>
   ): Promise<PitchDeck> {
-    // Get template data (this would come from your template service)
-    const template = await this.getTemplateById(templateId);
-    if (!template) {
-      throw new NotFoundException("Template not found");
+    try {
+      // Get template data (this would come from your template service)
+      const template = await this.getTemplateById(templateId);
+      if (!template) {
+        throw new NotFoundException("Template not found");
+      }
+
+      // Generate the actual deck content from the template
+      const generatedDeck = template.generateDeck
+        ? template.generateDeck()
+        : {
+            slides: [],
+            theme: template.theme || {},
+          };
+
+      // Create deck from template
+      const createDto = {
+        template: {
+          id: template.id,
+          name: template.name,
+          category: template.category,
+          description: template.description,
+          slides: template.slides,
+          theme: template.theme,
+          componentsCatalog: template.componentsCatalog,
+        },
+        businessData: customData,
+        slides: generatedDeck.slides || [],
+        theme: generatedDeck.theme || template.theme || {},
+        deckType: "template-based",
+        title: customData?.companyName || template.name,
+        description: customData?.tagline || template.description,
+        parentDeckId: templateId,
+      };
+
+      return this.create(createDto, userId);
+    } catch (err) {
+      this.logger.error("Error creating deck from template:", err);
+      if (err instanceof NotFoundException) throw err;
+      throw new BadRequestException(
+        err.message || "Failed to create deck from template"
+      );
     }
-
-    // Generate the actual deck content from the template
-    const generatedDeck = template.generateDeck
-      ? template.generateDeck()
-      : {
-          slides: [],
-          theme: template.theme || {},
-        };
-
-    // Create deck from template
-    const createDto = {
-      template: {
-        id: template.id,
-        name: template.name,
-        category: template.category,
-        description: template.description,
-        slides: template.slides,
-        theme: template.theme,
-        componentsCatalog: template.componentsCatalog,
-      },
-      businessData: customData,
-      slides: generatedDeck.slides || [],
-      theme: generatedDeck.theme || template.theme || {},
-      deckType: "template-based",
-      title: customData?.companyName || template.name,
-      description: customData?.tagline || template.description,
-      parentDeckId: templateId,
-    };
-
-    return this.create(createDto, userId);
   }
 
   async createVersion(
@@ -150,44 +185,50 @@ export class PitchDeckService {
     spec: any,
     description?: string
   ): Promise<PitchDeck> {
-    const pitchDeck = await this.findOne(id, userId);
-    if (!pitchDeck) {
-      throw new NotFoundException("Pitch deck not found");
-    }
+    try {
+      const pitchDeck = await this.findOne(id, userId);
+      if (!pitchDeck) {
+        throw new NotFoundException("Pitch deck not found");
+      }
 
-    const newVersion = pitchDeck.currentVersion + 1;
-    const version = {
-      version: newVersion,
-      createdAt: new Date(),
-      spec,
-      description: description || `Version ${newVersion}`,
-      createdBy: userId,
-    };
+      const newVersion = pitchDeck.currentVersion + 1;
+      const version = {
+        version: newVersion,
+        createdAt: new Date(),
+        spec,
+        description: description || `Version ${newVersion}`,
+        createdBy: userId,
+      };
 
-    // Add new version to versions array and update
-    const updatedDeck = await this.pitchDeckModel
-      .findOneAndUpdate(
-        {
-          _id: new Types.ObjectId(id),
-          userId: new Types.ObjectId(userId),
-        },
-        {
-          $push: { versions: version },
-          $set: {
-            currentVersion: newVersion,
-            spec,
-            updatedAt: new Date(),
+      // Add new version to versions array and update
+      const updatedDeck = await this.pitchDeckModel
+        .findOneAndUpdate(
+          {
+            _id: new Types.ObjectId(id),
+            userId: new Types.ObjectId(userId),
           },
-        },
-        { new: true }
-      )
-      .exec();
+          {
+            $push: { versions: version },
+            $set: {
+              currentVersion: newVersion,
+              spec,
+              updatedAt: new Date(),
+            },
+          },
+          { new: true }
+        )
+        .exec();
 
-    if (!updatedDeck) {
-      throw new NotFoundException("Pitch deck not found");
+      if (!updatedDeck) {
+        throw new NotFoundException("Pitch deck not found");
+      }
+
+      return updatedDeck;
+    } catch (err) {
+      this.logger.error("Error creating version:", err);
+      if (err instanceof NotFoundException) throw err;
+      throw new BadRequestException(err.message || "Failed to create version");
     }
-
-    return updatedDeck;
   }
 
   async getVersion(id: string, version: number, userId: string): Promise<any> {

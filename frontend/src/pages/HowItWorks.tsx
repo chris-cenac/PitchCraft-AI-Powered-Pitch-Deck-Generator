@@ -1,40 +1,63 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import analyzing from "@/assets/illustrations/analyzing.webm";
-import designing from "@/assets/illustrations/designing.webm";
-import finalizing from "@/assets/illustrations/finalizing.webm";
-import uploading from "@/assets/illustrations/uploading.webm";
+import {
+  FaUpload,
+  FaBrain,
+  FaPalette,
+  FaEdit,
+  FaDownload,
+} from "react-icons/fa";
 
 const steps = [
   {
-    title: "1. Tell Us About Your Business",
-    description:
-      "Fill out a simple form with details about your company, your idea, and your goals. No jargon, just your story!",
-    illustration: uploading,
+    title: "Tell Us About Your Business",
+    icon: FaUpload,
+    substeps: [
+      "Enter your company name",
+      "Describe your idea",
+      "Add your tagline",
+      "Upload your logo (optional)",
+      "Select your industry and stage",
+    ],
   },
   {
-    title: "2. Our AI Gets to Work",
-    description:
-      "Our smart AI analyzes your info, researches your market, and plans the perfect pitch deck structure for you.",
-    illustration: analyzing,
+    title: "Our AI Gets to Work",
+    icon: FaBrain,
+    substeps: [
+      "Analyzes your input",
+      "Researches your market",
+      "Plans the perfect pitch deck structure",
+      "Suggests the best slide order",
+    ],
   },
   {
-    title: "3. Designing Your Slides",
-    description:
-      "We design beautiful, modern slides that match your style and make your story shine. You don’t need any design skills!",
-    illustration: designing,
+    title: "Designing Your Slides",
+    icon: FaPalette,
+    substeps: [
+      "Applies modern, professional design",
+      "Uses your brand style",
+      "Arranges content for clarity",
+      "Ensures investor-ready visuals",
+    ],
   },
   {
-    title: "4. Review & Edit",
-    description:
-      "Preview your deck, make tweaks, and rearrange slides as you like. It’s all drag-and-drop easy!",
-    illustration: finalizing,
+    title: "Review & Edit",
+    icon: FaEdit,
+    substeps: [
+      "Preview your deck instantly",
+      "Edit text and images",
+      "Rearrange slides with drag-and-drop",
+      "Make tweaks until it's perfect",
+    ],
   },
   {
-    title: "5. Download & Share!",
-    description:
-      "Export your pitch deck as PDF or PowerPoint, ready to impress investors, partners, or your team.",
-    illustration: finalizing,
+    title: "Download & Share!",
+    icon: FaDownload,
+    substeps: [
+      "Export as PDF or PowerPoint",
+      "Share with investors or your team",
+      "Ready to impress!",
+    ],
   },
 ];
 
@@ -42,40 +65,65 @@ const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background dark:bg-background-dark flex flex-col items-center py-12 px-4">
-      <div className="max-w-3xl w-full mx-auto text-center mb-10">
+      <div className="max-w-2xl w-full mx-auto text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-primary dark:text-accent mb-4">
           How PitchCraft Works
         </h1>
         <p className="text-lg text-secondary dark:text-secondary-light mb-6">
-          Creating a stunning pitch deck is as easy as 1-2-3 (well, 5 steps!).
-          Here’s how we turn your ideas into a beautiful, investor-ready
-          presentation:
+          See how easy it is to go from idea to investor-ready pitch deck:
         </p>
       </div>
-      <div className="w-full max-w-4xl grid gap-10">
-        {steps.map((step, idx) => (
-          <div
-            key={idx}
-            className="flex flex-col md:flex-row items-center bg-surface dark:bg-surface-dark rounded-2xl shadow-lg p-6 md:p-10 gap-6 md:gap-10 border border-secondary/20 dark:border-secondary-dark/20"
-          >
-            <video
-              src={step.illustration}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-40 h-40 md:w-56 md:h-56 rounded-xl object-cover shadow"
-            />
-            <div className="flex-1 text-left">
-              <h2 className="text-2xl md:text-3xl font-bold text-primary dark:text-accent mb-2">
-                {step.title}
-              </h2>
-              <p className="text-lg text-secondary dark:text-secondary-light">
-                {step.description}
-              </p>
+      <div className="relative w-full max-w-2xl flex flex-col items-center">
+        {/* Vertical progress line */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-0 h-full w-1 bg-gradient-to-b from-primary/30 to-secondary/30 z-0"
+          style={{ minHeight: steps.length * 180 }}
+        />
+        {steps.map((step, idx) => {
+          const IconComponent = step.icon;
+          return (
+            <div
+              key={idx}
+              className="relative flex flex-col items-center w-full z-10 mb-12 last:mb-0"
+            >
+              {/* Step dot/number */}
+              <div className="flex flex-col items-center">
+                <div
+                  className="bg-primary dark:bg-accent rounded-full flex items-center justify-center shadow-lg mb-2 border-4 border-white dark:border-background"
+                  style={{ width: 72, height: 72 }}
+                >
+                  <IconComponent className="text-white w-10 h-10" />
+                </div>
+                <span className="text-primary dark:text-accent font-bold text-lg mb-2">
+                  Step {idx + 1}
+                </span>
+              </div>
+              {/* Card */}
+              <div className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl p-8 w-full max-w-xl border border-secondary/20 dark:border-secondary-dark/20 text-center">
+                <h2 className="text-2xl font-bold text-primary dark:text-accent mb-3">
+                  {step.title}
+                </h2>
+                <ul className="text-base text-secondary dark:text-secondary-light flex flex-col gap-2">
+                  {step.substeps.map((sub, subIdx) => (
+                    <li
+                      key={subIdx}
+                      className="flex items-center gap-2 justify-center"
+                    >
+                      <span className="inline-block w-2 h-2 rounded-full bg-primary dark:bg-accent" />
+                      <span>{sub}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* Progress dot/line */}
+              {idx < steps.length - 1 && (
+                <div className="flex flex-col items-center">
+                  <div className="w-1 h-8 bg-primary/30 dark:bg-accent/30" />
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <button
         onClick={() => navigate("/")}

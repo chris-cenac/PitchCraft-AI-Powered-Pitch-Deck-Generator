@@ -1,12 +1,21 @@
 // src/ai/components.service.ts
 import { Injectable } from "@nestjs/common";
-import {
-  ComponentDefinition,
-  COMPONENT_CATALOG,
-} from "../data/components.catalog";
+import { COMPONENT_NAMES, COMPONENT_GUIDE } from "../data/components.catalog";
+
 @Injectable()
 export class ComponentsService {
-  getAll(): ComponentDefinition[] {
-    return COMPONENT_CATALOG;
+  getComponentNames(): string[] {
+    return COMPONENT_NAMES;
+  }
+
+  getComponentGuide(): string {
+    return COMPONENT_GUIDE;
+  }
+
+  getAll(): { names: string[]; guide: string } {
+    return {
+      names: COMPONENT_NAMES,
+      guide: COMPONENT_GUIDE,
+    };
   }
 }

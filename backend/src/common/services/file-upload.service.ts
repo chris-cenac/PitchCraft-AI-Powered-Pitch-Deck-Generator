@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import * as path from "path";
 import * as fs from "fs";
 import { v4 as uuidv4 } from "uuid";
+import { Express } from "express";
 
 @Injectable()
 export class FileUploadService {
@@ -54,7 +55,7 @@ export class FileUploadService {
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
       }
-    } catch (error) {
+    } catch {
       // Error deleting file, but do not throw
     }
   }

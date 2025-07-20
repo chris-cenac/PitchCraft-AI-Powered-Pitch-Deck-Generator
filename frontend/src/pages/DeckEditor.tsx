@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import {
+  useParams,
+  useSearchParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 import SlideRenderer from "@/components/Deck/SlideRenderer";
 import type { DeckSpec } from "@/components/Deck/slideTypes";
@@ -32,6 +37,7 @@ const DeckEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [deck, setDeck] = useState<DeckSpec | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +46,10 @@ const DeckEditor: React.FC = () => {
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [showNavigation, setShowNavigation] = useState(true);
   const [deckTitle, setDeckTitle] = useState<string>("Pitch Deck Editor");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const slideContainerRef = React.useRef<HTMLDivElement>(null);
   const pdfContainerRef = React.useRef<HTMLDivElement>(null);
+  const [fallbackWarning, setFallbackWarning] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if we have a template ID from URL params
@@ -58,14 +66,30 @@ const DeckEditor: React.FC = () => {
     }
   }, [id, searchParams]);
 
+  useEffect(() => {
+    // Check for fallback warning in navigation state
+    if (
+      location.state &&
+      location.state.usedFallback &&
+      location.state.message
+    ) {
+      setFallbackWarning(location.state.message);
+    }
+  }, [location.state]);
+
   // Auto-hide navigation after 3 seconds of inactivity
   useEffect(() => {
+    // Don't auto-hide if user is editing the title
+    if (isEditingTitle) {
+      return;
+    }
+
     const timer = setTimeout(() => {
       setShowNavigation(false);
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [currentIndex, showNavigation]);
+  }, [currentIndex, showNavigation, isEditingTitle]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -244,6 +268,14 @@ const DeckEditor: React.FC = () => {
     } catch {
       toast.error("Failed to update title. Please try again.");
     }
+  };
+
+  const handleTitleEditStart = () => {
+    setIsEditingTitle(true);
+  };
+
+  const handleTitleEditEnd = () => {
+    setIsEditingTitle(false);
   };
 
   const handleSave = async () => {
@@ -659,6 +691,16 @@ const DeckEditor: React.FC = () => {
 
   return (
     <>
+      {/* Fallback warning banner */}
+      {fallbackWarning && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+          <div className="flex items-center">
+            <span className="mr-2 text-2xl">⚠️</span>
+            <span className="font-semibold">AI Generation Warning:</span>
+            <span className="ml-2">{fallbackWarning}</span>
+          </div>
+        </div>
+      )}
       {/* Hidden container for PDF export - always rendered, just hidden off-screen */}
       <div
         style={{ position: "absolute", left: -9999, top: 0 }}
@@ -748,6 +790,8 @@ const DeckEditor: React.FC = () => {
             isEditing={isEditing}
             deckTitle={deckTitle}
             onTitleChange={handleTitleChange}
+            onTitleEditStart={handleTitleEditStart}
+            onTitleEditEnd={handleTitleEditEnd}
             onBack={() => navigate(templateId ? "/templates" : "/")}
             backLabel={templateId ? "Templates" : "Home"}
             hideDeckInfo={false}

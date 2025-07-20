@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "sync-schema": "node scripts/sync-schema.js"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "husky": "^9.1.7",
+    "ts-json-schema-generator": "^2.4.0"
+  }
+}

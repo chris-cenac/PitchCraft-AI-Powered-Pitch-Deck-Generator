@@ -1,10 +1,14 @@
 import js from "@eslint/js";
 import globals from "globals";
+import typescript from "@typescript-eslint/eslint-plugin";
+import typescriptParser from "@typescript-eslint/parser";
 
 export default [
   js.configs.recommended,
   {
+    files: ["**/*.ts"],
     languageOptions: {
+      parser: typescriptParser,
       globals: {
         ...globals.node,
         ...globals.es2021,
@@ -14,7 +18,11 @@ export default [
         sourceType: "module",
       },
     },
+    plugins: {
+      "@typescript-eslint": typescript,
+    },
     rules: {
+      ...typescript.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_" },
@@ -28,9 +36,21 @@ export default [
     },
   },
   {
-    files: ["**/*.ts"],
+    files: ["**/*.js"],
     languageOptions: {
-      parser: "@typescript-eslint/parser",
+      globals: {
+        ...globals.node,
+        ...globals.es2021,
+      },
+      parserOptions: {
+        ecmaVersion: 2021,
+        sourceType: "module",
+      },
+    },
+    rules: {
+      "prefer-const": "error",
+      "no-var": "error",
+      "no-console": "warn",
     },
   },
 ];

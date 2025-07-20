@@ -30,7 +30,7 @@ import { JwtAuthGuard } from "./jwt-auth/jwt-auth.guard";
         secret:
           configService.get<string>("JWT_SECRET") || "fallback-secret-key",
         signOptions: {
-          expiresIn: configService.get<string>("JWT_EXPIRES_IN") || "1h",
+          expiresIn: configService.get<string>("JWT_EXPIRES_IN") || "7d",
         },
       }),
       inject: [ConfigService],

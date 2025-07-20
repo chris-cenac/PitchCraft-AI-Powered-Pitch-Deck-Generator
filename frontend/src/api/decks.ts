@@ -277,7 +277,12 @@ export const revertToVersion = async (
 // Generate AI content for a deck
 export const generateDeck = async (
   id: string
-): Promise<Record<string, unknown>> => {
+): Promise<{
+  success: boolean;
+  data: Record<string, unknown>;
+  usedFallback?: boolean;
+  message?: string;
+}> => {
   const response = await fetch(`${BASE_URL}/pitch-decks/${id}/generate`, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -289,7 +294,12 @@ export const generateDeck = async (
 // Legacy function for backward compatibility
 export const generatePitchDeck = async (
   id: string
-): Promise<Record<string, unknown>> => {
+): Promise<{
+  success: boolean;
+  data: Record<string, unknown>;
+  usedFallback?: boolean;
+  message?: string;
+}> => {
   return generateDeck(id);
 };
 

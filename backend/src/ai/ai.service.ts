@@ -149,17 +149,25 @@ export class AiService {
   async generatePitchDeckOutline(
     dto: CreatePitchDeckDto
   ): Promise<PitchDeckOutline> {
-    const input = this.mapDtoToPitchDeckInput(dto);
-    const prompt = PromptUtils.buildPitchDeckGenerationPrompt(input);
+    // Only send essential fields for outline
+    const minimalInput = {
+      companyName: dto.companyName,
+      industry: dto.industry,
+      problemStatement: this.truncate(dto.problemStatement, 200),
+      solution: this.truncate(dto.solution, 200),
+      uniqueValueProposition: this.truncate(dto.uniqueValueProposition, 200),
+    };
+    // Minimal system prompt for outline
+    const minimalSystemPrompt =
+      "You are an expert pitch deck consultant. Generate a high-level outline for an investor pitch deck. Only output slide titles and a 1-2 sentence description for each.";
+    const prompt = `Generate a 10-slide outline for a pitch deck for the following startup.\n\n# Startup Data\n${JSON.stringify(minimalInput, null, 2)}\n\n# Output Format\n[\n  {\n    \"title\": \"...\",\n    \"content\": \"...\"\n  },\n  ...\n]\n`;
 
     const response = await this.openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
-          content: PromptUtils.buildSystemPrompt(
-            input.companyName + " - " + input.industry
-          ),
+          content: minimalSystemPrompt,
         },
         {
           role: "user",
@@ -167,13 +175,37 @@ export class AiService {
         },
       ],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 1200,
     });
 
     const content = response.choices[0].message.content;
     if (!content) throw new Error("AI response content is empty");
 
-    return this.parsePitchDeckResponse(content, input);
+    // Parse as array of slides
+    let slides: any[] = [];
+    try {
+      slides = JSON.parse(content);
+    } catch {
+      // Try to extract JSON array from text
+      const match = content.match(/\[.*\]/s);
+      if (match) {
+        slides = JSON.parse(match[0]);
+      } else {
+        throw new Error("Failed to parse outline response");
+      }
+    }
+    // Return as PitchDeckOutline
+    return {
+      slides: slides.map((s, idx) => ({
+        title: s.title,
+        content: s.content,
+        speakerNotes: "",
+        suggestedImages: [],
+        type: this.getSlideType(idx),
+      })),
+      overallNotes: "Present with confidence.",
+      duration: "10-15 minutes",
+    };
   }
 
   async regenerateSlide(
@@ -309,7 +341,7 @@ export class AiService {
         overallNotes: parsed.overallNotes || "Present with confidence.",
         duration: parsed.duration || "10-15 minutes",
       };
-    } catch (e) {
+    } catch {
       return this.createFallbackPitchDeck(input);
     }
   }
@@ -344,141 +376,614 @@ export class AiService {
     };
   }
 
+  // Utility to truncate long fields
+  private truncate(str: string | undefined, max = 400): string | undefined {
+    if (!str) return str;
+    return str.length > max ? str.slice(0, max) + "..." : str;
+  }
+
+  // Utility to filter out empty fields
+  private filterNonEmpty(obj: Record<string, any>): Record<string, any> {
+    return Object.fromEntries(
+      Object.entries(obj).filter(
+        ([_, v]) => v !== undefined && v !== null && v !== ""
+      )
+    );
+  }
+
+  // Utility: Extract JSON from AI output
+  private extractJson(content: string): any {
+    try {
+      // Try direct parse
+      return JSON.parse(content);
+    } catch (e) {
+      this.logger.error("Direct JSON parse failed:", e.message);
+
+      // Try to extract JSON object/array from text
+      const match = content.match(/[\[{][\s\S]*[\]}]/);
+      if (match) {
+        try {
+          return JSON.parse(match[0]);
+        } catch (e2) {
+          this.logger.error("Failed to parse extracted JSON:", e2.message);
+        }
+      }
+
+      // Try to fix common JSON issues
+      try {
+        const fixedContent = this.fixCommonJsonIssues(content);
+        return JSON.parse(fixedContent);
+      } catch (e3) {
+        this.logger.error("Failed to parse fixed JSON:", e3.message);
+      }
+
+      // Try to extract and fix truncated JSON
+      try {
+        const fixedContent = this.fixTruncatedJson(content);
+        return JSON.parse(fixedContent);
+      } catch (e4) {
+        this.logger.error("Failed to parse truncated JSON:", e4.message);
+      }
+
+      this.logger.error("Failed to extract JSON from AI output:", content);
+      return null;
+    }
+  }
+
+  // Utility: Fix common JSON issues
+  private fixCommonJsonIssues(content: string): string {
+    let fixed = content;
+
+    // Find the last complete JSON object
+    const jsonMatch = content.match(/\{[\s\S]*\}/g);
+    if (jsonMatch && jsonMatch.length > 0) {
+      // Take the last complete JSON object
+      fixed = jsonMatch[jsonMatch.length - 1];
+    }
+
+    // Fix unclosed quotes in strings
+    fixed = fixed.replace(/"([^"]*?)(?=\s*[,}\]])/g, '"$1"');
+
+    // Fix missing closing brackets
+    const openBraces = (fixed.match(/\{/g) || []).length;
+    const closeBraces = (fixed.match(/\}/g) || []).length;
+    const openBrackets = (fixed.match(/\[/g) || []).length;
+    const closeBrackets = (fixed.match(/\]/g) || []).length;
+
+    // Add missing closing brackets
+    for (let i = 0; i < openBraces - closeBraces; i++) {
+      fixed += "}";
+    }
+    for (let i = 0; i < openBrackets - closeBrackets; i++) {
+      fixed += "]";
+    }
+
+    return fixed;
+  }
+
+  // Utility: Fix truncated JSON responses
+  private fixTruncatedJson(content: string): string {
+    let fixed = content.trim();
+
+    // If content ends with incomplete object/array, try to complete it
+    if (fixed.endsWith('"') || fixed.endsWith(",")) {
+      // Remove trailing comma or incomplete string
+      fixed = fixed.replace(/[",\s]*$/, "");
+    }
+
+    // Count brackets and braces to see what's missing
+    const openBraces = (fixed.match(/\{/g) || []).length;
+    const closeBraces = (fixed.match(/\}/g) || []).length;
+    const openBrackets = (fixed.match(/\[/g) || []).length;
+    const closeBrackets = (fixed.match(/\]/g) || []).length;
+
+    // If we have more opening than closing, add the missing ones
+    for (let i = 0; i < openBraces - closeBraces; i++) {
+      fixed += "}";
+    }
+    for (let i = 0; i < openBrackets - closeBrackets; i++) {
+      fixed += "]";
+    }
+
+    // If content looks like it was truncated mid-object, try to close it properly
+    if (fixed.includes('"slides"') && !fixed.includes('"theme"')) {
+      // Looks like we have slides but no theme, add a basic theme
+      fixed =
+        fixed.replace(/,\s*$/, "") +
+        ', "theme": {"primaryColor": "#3B82F6", "secondaryColor": "#1E40AF", "fontFamily": "Arial, sans-serif"}}';
+    }
+
+    // If content looks like it was truncated mid-array, try to close it
+    if (fixed.startsWith("[") && !fixed.endsWith("]")) {
+      fixed += "]";
+    }
+
+    return fixed;
+  }
+
+  // Utility: Validate businessData for required fields
+  private validateBusinessData(businessData: any): void {
+    const required = [
+      "companyName",
+      "industry",
+      "problemStatement",
+      "proposedSolution",
+      "uniqueValueProposition",
+    ];
+    for (const field of required) {
+      if (
+        !businessData[field] ||
+        typeof businessData[field] !== "string" ||
+        !businessData[field].trim()
+      ) {
+        throw new BadRequestException(
+          `Missing or invalid required field: ${field}`
+        );
+      }
+    }
+  }
+
+  // Utility: Validate DeckSpec structure
+  private validateDeckSpec(spec: any): boolean {
+    return spec && Array.isArray(spec.slides) && spec.slides.length > 0;
+  }
+
+  // Utility: Retry OpenAI call
+  private async withRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+    let lastErr;
+    for (let i = 0; i <= retries; i++) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastErr = err;
+        if (i < retries) {
+          const delay = Math.pow(2, i) * 500;
+          await new Promise((res) => setTimeout(res, delay));
+        }
+      }
+    }
+    throw lastErr;
+  }
+
   async generateDeck(dto: {
     businessData: any;
-    componentsCatalog: any[];
-  }): Promise<DeckSpec> {
-    const prompt = `You are an expert pitch deck designer and business strategist. Create a compelling, investor-ready pitch deck that tells a powerful story and showcases the business opportunity.
-
-**CRITICAL REQUIREMENTS:**
-- Generate exactly 10 slides following this proven structure
-- Use ALL available components creatively and strategically
-- Create visually rich, professional layouts that fill the screen
-- Make content compelling, data-driven, and investor-focused
-- Use the business data provided but enhance it with strategic insights
-
-**SLIDE STRUCTURE (10 slides):**
-1. **Title Slide** - Company introduction with hero messaging
-2. **Problem Statement** - Pain point with compelling data/story
-3. **Solution Overview** - Your unique approach with key benefits
-4. **Market Opportunity** - Market size, growth, and timing
-5. **Business Model** - Revenue streams and unit economics
-6. **Competitive Advantage** - Why you'll win vs alternatives
-7. **Go-to-Market Strategy** - How you'll acquire customers
-8. **Financial Projections** - Revenue, growth, and key metrics
-9. **Team & Advisors** - Why you can execute
-10. **Funding Ask** - Investment opportunity and use of funds
-
-**COMPONENT USAGE STRATEGY:**
-- **LabelHeader**: Use for slide titles, section headers, and key messaging
-- **MetricCard**: Display key metrics, KPIs, financial data, and growth indicators
-- **FeatureList**: Show benefits, competitive advantages, product features
-- **QuoteCard**: Customer testimonials, market validation, expert opinions
-- **DeckChart**: Market data, growth trends, competitive analysis, financial projections
-- **ComparisonTable**: Competitive analysis, feature comparisons, market positioning
-- **IllustrationFlow**: Process flows, user journeys, business model visualization
-- **LogoDisplay**: Company branding, partner logos, customer logos
-
-**LAYOUT PRINCIPLES:**
-- Use full 12-column grid effectively
-- Create visual hierarchy with different component sizes
-- Balance text, data, and visual elements
-- Use multiple components per slide for richness
-- Ensure professional spacing and alignment
-
-**CONTENT ENHANCEMENT:**
-- Transform basic business data into compelling narratives
-- Add market research insights and industry trends
-- Include realistic but optimistic projections
-- Create emotional connection with problem/solution
-- Demonstrate clear path to market leadership
-
-**Business Data:**
-${JSON.stringify(dto.businessData, null, 2)}
-
-**Available Components:**
-${JSON.stringify(dto.componentsCatalog, null, 2)}
-
-**EXAMPLE SLIDE STRUCTURE:**
-{
-  "id": "problem-statement",
-  "title": "The Market Pain Point",
-  "items": [
-    {
-      "name": "LabelHeader",
-      "props": {
-        "text": "The Problem We're Solving",
-        "subtext": "A $50B market opportunity waiting to be captured",
-        "size": "xl",
-        "variant": "section",
-        "underline": true
-      },
-      "layout": { "columns": 12, "rowStart": 1 }
-    },
-    {
-      "name": "MetricCard",
-      "props": {
-        "title": "Market Size",
-        "value": "$50B",
-        "subtitle": "Total Addressable Market",
-        "icon": "FiDollarSign",
-        "variant": "primary"
-      },
-      "layout": { "columns": 4, "rowStart": 2 }
-    },
-    {
-      "name": "FeatureList",
-      "props": {
-        "title": "Current Market Problems",
-        "features": [
-          { "text": "Inefficient processes cost $15B annually", "icon": "FiAlertTriangle", "highlight": true },
-          { "text": "80% of companies struggle with legacy systems", "icon": "FiClock" },
-          { "text": "Only 20% achieve digital transformation goals", "icon": "FiTarget" }
-        ],
-        "variant": "highlights",
-        "layout": "cards"
-      },
-      "layout": { "columns": 8, "rowStart": 2 }
+  }): Promise<{ deck: DeckSpec; usedFallback: boolean }> {
+    try {
+      this.validateBusinessData(dto.businessData);
+    } catch (err) {
+      this.logger.error("Validation error in businessData:", err);
+      throw err;
     }
-  ]
-}
+    // Truncate long fields and filter out empty fields
+    const fieldsToTruncate = [
+      "problemStatement",
+      "solution",
+      "businessModel",
+      "targetMarket",
+      "uniqueValueProposition",
+      "goToMarketStrategy",
+      "competitors",
+      "founders",
+      "advisors",
+      "visionStatement",
+      "longTermGoals",
+      "exitStrategy",
+      "designStyle",
+      "tagline",
+      "pricingStrategy",
+      "additionalInfo",
+    ];
+    const truncatedBusinessData: Record<string, any> = { ...dto.businessData };
+    for (const key of fieldsToTruncate) {
+      if (truncatedBusinessData[key]) {
+        truncatedBusinessData[key] = this.truncate(truncatedBusinessData[key]);
+      }
+    }
+    // Remove empty fields
+    const filteredBusinessData = this.filterNonEmpty(truncatedBusinessData);
 
-Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creating a compelling narrative that investors will love.`;
+    // Use the strict prompt from PromptUtils
+    const input = {
+      companyName: filteredBusinessData.companyName || "",
+      industry: filteredBusinessData.industry || "",
+      ...filteredBusinessData,
+    };
+    let prompt = PromptUtils.buildPitchDeckGenerationPrompt(input);
+    const systemPrompt = PromptUtils.buildSystemPrompt(
+      input.companyName + " - " + input.industry
+    );
+    // Token calculation logic
 
-    const response = await this.openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert pitch deck designer with 15+ years of experience helping startups raise billions in funding. You understand investor psychology, market dynamics, and what makes a pitch deck compelling. Always create professional, data-driven content that tells a powerful story. Respond only with valid JSON.",
-        },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.4,
-      max_tokens: 6000,
-    });
+    // --- Token calculation logic ---
+    let promptTokens: number = 0;
+    // Try to use tiktoken if available, otherwise estimate by word count
+    let tiktokenAvailable = false;
+    try {
+      // Dynamically import tiktoken if available (optional dependency)
+      // @ts-ignore
+      const tiktoken = await import("@dqbd/tiktoken");
+      if (tiktoken && tiktoken.encoding_for_model) {
+        const enc = tiktoken.encoding_for_model("gpt-4");
+        const systemPrompt = PromptUtils.buildSystemPrompt(
+          input.companyName + " - " + input.industry
+        );
+        promptTokens =
+          enc.encode(systemPrompt).length + enc.encode(prompt).length;
+        tiktokenAvailable = true;
+      }
+    } catch {
+      // tiktoken not installed or failed to load, fallback to estimation
+      tiktokenAvailable = false;
+    }
+    if (!tiktokenAvailable) {
+      // Fallback: estimate tokens as 1.3x word count
+      const systemPrompt = PromptUtils.buildSystemPrompt(
+        input.companyName + " - " + input.industry
+      );
+      const wordCount =
+        systemPrompt.split(/\s+/).length + prompt.split(/\s+/).length;
+      promptTokens = Math.ceil(wordCount * 1.3);
+    }
+    const MAX_CONTEXT = 8192;
+    // Set a more conservative completion limit to avoid truncation
+    const maxTokens = Math.min(3000, MAX_CONTEXT - promptTokens);
+    if (maxTokens < 1000) {
+      // If prompt is so large that completion would be too small, throw a user-friendly error
+      throw new Error(
+        `Your input is too large to generate a pitch deck. Please reduce the amount of information or try again with less detail.`
+      );
+    }
+
+    try {
+      let attempts = 0;
+      const maxAttempts = 2;
+
+      while (attempts < maxAttempts) {
+        attempts++;
+
+        const response = await this.withRetry(() =>
+          this.openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content: PromptUtils.buildSystemPrompt(
+                  input.companyName + " - " + input.industry
+                ),
+              },
+              { role: "user", content: prompt },
+            ],
+            temperature: 0.4,
+            max_tokens: maxTokens,
+          })
+        );
+
+        const content = response.choices[0].message.content;
+        if (!content) throw new Error("AI response content is empty");
+
+        const parsed = this.extractJson(content);
+        if (this.validateDeckSpec(parsed)) {
+          return { deck: parsed, usedFallback: false };
+        } else {
+          this.logger.error(
+            `Invalid DeckSpec structure from AI (attempt ${attempts}/${maxAttempts}), using fallback.`
+          );
+
+          if (attempts < maxAttempts) {
+            // Add a more specific instruction for the retry
+            const retryPrompt =
+              prompt +
+              "\n\nIMPORTANT: The previous response had JSON formatting errors. Please ensure all JSON is properly formatted with complete quotes, brackets, and braces. Focus on creating valid JSON structure.";
+
+            // Update the prompt for retry
+            prompt = retryPrompt;
+            continue;
+          }
+        }
+      }
+
+      // If all attempts failed, use fallback
+      return {
+        deck: this.createFallbackDeckSpec(dto.businessData),
+        usedFallback: true,
+      };
+    } catch (err: any) {
+      this.logger.error("OpenAI error in generateDeck:", err);
+      if (
+        err?.message?.includes("maximum context length") ||
+        err?.message?.includes("tokens")
+      ) {
+        throw new Error(
+          "The pitch deck could not be generated because the input is too large for the AI model. Please reduce the amount of information and try again."
+        );
+      }
+      // Fallback
+      return {
+        deck: this.createFallbackDeckSpec(dto.businessData),
+        usedFallback: true,
+      };
+    }
+  }
+
+  /**
+   * Multi-stage deck generation: outline first, then each slide.
+   */
+  async generateDeckMultiStage(dto: {
+    businessData: any;
+  }): Promise<{ deck: DeckSpec; usedFallback: boolean }> {
+    try {
+      this.validateBusinessData(dto.businessData);
+    } catch (err) {
+      this.logger.error("Validation error in businessData:", err);
+      throw err;
+    }
+    // 1. Generate outline (slide titles and short descriptions)
+    let outline;
+    try {
+      outline = await this.withRetry(() =>
+        this.generatePitchDeckOutline(dto.businessData)
+      );
+    } catch (err) {
+      this.logger.error("Failed to generate outline, using fallback:", err);
+      return {
+        deck: this.createFallbackDeckSpec(dto.businessData),
+        usedFallback: true,
+      };
+    }
+    if (!outline || !outline.slides || outline.slides.length === 0) {
+      this.logger.error("Empty outline from AI, using fallback.");
+      return {
+        deck: this.createFallbackDeckSpec(dto.businessData),
+        usedFallback: true,
+      };
+    }
+    // 2. For each slide, generate detailed content
+    const slides: any[] = [];
+    let usedFallback = false;
+    // Generate outline for multi-stage approach
+    for (const outlineSlide of outline.slides) {
+      try {
+        const prompt = `You are an expert pitch deck designer. Generate detailed content for a pitch deck slide with the following information.\n\n# Slide Title\n${outlineSlide.title}\n\n# Slide Description\n${outlineSlide.content}\n\n# Company Context\n${JSON.stringify(dto.businessData, null, 2)}\n\n# Requirements\n- Output valid JSON for a slide object with title, content, speakerNotes, suggestedImages, and type.\n- Do not include explanations, only output valid JSON.`;
+        const response = await this.withRetry(() =>
+          this.openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content: PromptUtils.buildSystemPrompt(
+                  dto.businessData.companyName +
+                    " - " +
+                    dto.businessData.industry
+                ),
+              },
+              { role: "user", content: prompt },
+            ],
+            temperature: 0.6,
+            max_tokens: 800,
+          })
+        );
+        const content = response.choices[0].message.content;
+        if (!content) throw new Error("AI response content is empty");
+        const parsed = this.extractJson(content);
+        if (parsed && parsed.title && parsed.content) {
+          slides.push(parsed);
+        } else {
+          this.logger.error(
+            "Invalid slide structure from AI, using outline slide as fallback."
+          );
+          slides.push({
+            title: outlineSlide.title,
+            content: outlineSlide.content,
+            speakerNotes:
+              outlineSlide.speakerNotes || "Present with confidence.",
+            suggestedImages: outlineSlide.suggestedImages || [],
+            type: outlineSlide.type || "custom",
+          });
+          usedFallback = true;
+        }
+      } catch (err) {
+        this.logger.error(
+          "OpenAI error in slide generation, using outline slide as fallback:",
+          err
+        );
+        slides.push({
+          title: outlineSlide.title,
+          content: outlineSlide.content,
+          speakerNotes: outlineSlide.speakerNotes || "Present with confidence.",
+          suggestedImages: outlineSlide.suggestedImages || [],
+          type: outlineSlide.type || "custom",
+        });
+        usedFallback = true;
+      }
+    }
+    // 3. Assemble the deck
+    const defaultTheme = {
+      primaryColor: "#2563eb",
+      secondaryColor: "#059669",
+      accentColor: "#f59e42",
+      backgroundColor: "#ffffff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      headingFontFamily: "Inter, system-ui, sans-serif",
+    };
+    return {
+      deck: { slides, theme: defaultTheme },
+      usedFallback,
+    };
+  }
+
+  /**
+   * Chunked deck generation: Generate slides in smaller batches to avoid token limits
+   */
+  async generateDeckChunked(dto: {
+    businessData: any;
+  }): Promise<{ deck: DeckSpec; usedFallback: boolean }> {
+    try {
+      this.validateBusinessData(dto.businessData);
+    } catch (err) {
+      this.logger.error("Validation error in businessData:", err);
+      throw err;
+    }
+
+    // Generate slides in chunks of 3-4 slides each
+    const slideChunks = [
+      [1, 2, 3, 4], // Cover, Problem, Market, Solution
+      [5, 6, 7, 8], // Features, Business Model, GTM, Traction
+      [9, 10, 11, 12], // Financials, Competition, Team, Ask
+    ];
+
+    const allSlides: any[] = [];
+    let usedFallback = false;
+
+    for (let i = 0; i < slideChunks.length; i++) {
+      const chunk = slideChunks[i];
+      try {
+        const chunkSlides = await this.generateSlideChunk(
+          dto.businessData,
+          chunk
+        );
+        allSlides.push(...chunkSlides);
+      } catch (err) {
+        this.logger.error(
+          `Failed to generate chunk ${i + 1}, using fallback:`,
+          err
+        );
+        // Generate fallback slides for this chunk
+        const fallbackSlides = this.createFallbackSlidesForChunk(
+          dto.businessData,
+          chunk
+        );
+        allSlides.push(...fallbackSlides);
+        usedFallback = true;
+      }
+    }
+
+    // Create the complete deck spec
+    const deck: DeckSpec = {
+      slides: allSlides,
+      theme: {
+        primaryColor: "#3B82F6",
+        secondaryColor: "#1E40AF",
+        accentColor: "#60A5FA",
+        backgroundColor: "#FFFFFF",
+        fontFamily: "Arial, sans-serif",
+        headingFontFamily: "Arial, sans-serif",
+      },
+    };
+
+    return { deck, usedFallback };
+  }
+
+  /**
+   * Generate a specific chunk of slides
+   */
+  private async generateSlideChunk(
+    businessData: any,
+    slideNumbers: number[]
+  ): Promise<any[]> {
+    const input = {
+      companyName: businessData.companyName || "",
+      industry: businessData.industry || "",
+      ...this.filterNonEmpty(businessData),
+    };
+
+    const prompt = PromptUtils.buildSlideChunkPrompt(input, slideNumbers);
+    const systemPrompt = PromptUtils.buildSystemPrompt(
+      input.companyName + " - " + input.industry
+    );
+
+    // Calculate tokens more conservatively for chunked generation
+    const wordCount =
+      systemPrompt.split(/\s+/).length + prompt.split(/\s+/).length;
+    const estimatedTokens = Math.ceil(wordCount * 1.3);
+    const maxTokens = Math.min(2000, 8192 - estimatedTokens); // More conservative token limit
+
+    const response = await this.withRetry(() =>
+      this.openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.4,
+        max_tokens: maxTokens,
+      })
+    );
 
     const content = response.choices[0].message.content;
     if (!content) throw new Error("AI response content is empty");
 
-    try {
-      // Try to extract JSON if the response contains other text
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      const jsonContent = jsonMatch ? jsonMatch[0] : content;
-
-      const parsed = JSON.parse(jsonContent) as DeckSpec;
-
-      // Validate the structure
-      if (!parsed.slides || !Array.isArray(parsed.slides)) {
-        throw new Error("Invalid DeckSpec structure: missing slides array");
-      }
-
+    const parsed = this.extractJson(content);
+    if (Array.isArray(parsed) && parsed.length > 0) {
       return parsed;
-    } catch (e) {
-      // Invalid DeckSpec JSON or raw AI response, fallback
-      return this.createFallbackDeckSpec(dto.businessData);
     }
+
+    throw new Error("Failed to parse slide chunk response");
+  }
+
+  /**
+   * Create fallback slides for a specific chunk
+   */
+  private createFallbackSlidesForChunk(
+    businessData: any,
+    slideNumbers: number[]
+  ): any[] {
+    const slideTypes = [
+      "Cover & Company Overview",
+      "The Problem",
+      "Market Size & Opportunity",
+      "Our Solution",
+      "Product Features & Benefits",
+      "Business Model",
+      "Go-To-Market Strategy",
+      "Traction & Metrics",
+      "Financials & Projections",
+      "Competitive Analysis",
+      "Team & Advisors",
+      "The Ask & Use of Funds",
+    ];
+
+    return slideNumbers.map((slideNum) => ({
+      id: `slide${slideNum}`,
+      title: slideTypes[slideNum - 1],
+      items: [
+        {
+          name: "LabelHeader",
+          props: {
+            text: slideTypes[slideNum - 1],
+            size: "xl",
+            align: "center",
+            variant: "section",
+          },
+          layout: {
+            columns: 12,
+            rows: 2,
+            rowStart: 1,
+            align: "center",
+            justify: "center",
+          },
+        },
+        {
+          name: "FeatureList",
+          props: {
+            features: [
+              { text: "Feature 1", icon: "check", highlight: true },
+              { text: "Feature 2", icon: "check", highlight: true },
+              { text: "Feature 3", icon: "check", highlight: true },
+            ],
+            title: "Key Points",
+            variant: "highlights",
+            layout: "cards",
+            columns: 3,
+          },
+          layout: {
+            columns: 12,
+            rows: 6,
+            columnStart: 1,
+            rowStart: 3,
+          },
+        },
+      ],
+    }));
   }
 
   private createFallbackDeckSpec(businessData: any): DeckSpec {
@@ -496,10 +1001,14 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
                 size: "2xl",
                 variant: "hero",
                 gradient: true,
-                underline: true,
+                align: "center",
+                color: "#2563eb",
               },
               layout: {
                 columns: 12,
+                rows: 3,
+                columnStart: 1,
+                rowStart: 2,
                 align: "center",
                 justify: "center",
               },
@@ -508,13 +1017,73 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
               name: "LogoDisplay",
               props: {
                 companyName: businessData.companyName || "Company",
-                variant: "with-text",
-                size: "lg",
+                variant: "standalone",
+                size: "xl",
                 circular: true,
                 border: "accent",
               },
               layout: {
-                columns: 6,
+                columns: 4,
+                rows: 2,
+                columnStart: 5,
+                rowStart: 5,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Industry",
+                value: businessData.industry || "Technology",
+                subtitle: "Sector",
+                icon: "FiBriefcase",
+                variant: "primary",
+                size: "sm",
+              },
+              layout: {
+                columns: 2,
+                rows: 1,
+                columnStart: 2,
+                rowStart: 9,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Stage",
+                value: businessData.businessStage || "Startup",
+                subtitle: "Company Stage",
+                icon: "FiTrendingUp",
+                variant: "primary",
+                size: "sm",
+              },
+              layout: {
+                columns: 2,
+                rows: 1,
+                columnStart: 6,
+                rowStart: 9,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "MetricCard",
+              props: {
+                title: "Team",
+                value: businessData.teamSize?.toString() || "5+",
+                subtitle: "Team Size",
+                icon: "FiUsers",
+                variant: "primary",
+                size: "sm",
+              },
+              layout: {
+                columns: 2,
+                rows: 1,
+                columnStart: 10,
+                rowStart: 9,
                 align: "center",
                 justify: "center",
               },
@@ -532,40 +1101,70 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
                 subtext: "A critical market gap that needs addressing",
                 size: "xl",
                 variant: "section",
-                underline: true,
+                align: "center",
+                color: "#2d3748",
               },
               layout: {
                 columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 3,
                 align: "center",
+                justify: "center",
               },
             },
             {
-              name: "FeatureList",
+              name: "IllustrationFlow",
               props: {
-                title: "Market Challenges",
-                features: [
-                  {
-                    text:
-                      businessData.problemStatement ||
-                      "Current solutions are inadequate",
-                    icon: "FiAlertTriangle",
-                    highlight: true,
-                  },
-                  {
-                    text: "High costs and inefficiencies",
-                    icon: "FiDollarSign",
-                  },
-                  {
-                    text: "Poor user experience",
-                    icon: "FiUser",
-                  },
-                ],
-                variant: "highlights",
-                layout: "cards",
-                columns: 3,
+                iconName: "FiAlertTriangle",
+                title: "Market Gap",
+                description:
+                  businessData.problemStatement ||
+                  "Current solutions are inadequate",
+                color: "#e53e3e",
               },
               layout: {
-                columns: 12,
+                columns: 4,
+                rows: 3,
+                columnStart: 1,
+                rowStart: 8,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "IllustrationFlow",
+              props: {
+                iconName: "FiDollarSign",
+                title: "High Costs",
+                description:
+                  "Inefficient processes cost businesses billions annually",
+                color: "#d69e2e",
+              },
+              layout: {
+                columns: 4,
+                rows: 3,
+                columnStart: 5,
+                rowStart: 6,
+                align: "center",
+                justify: "center",
+              },
+            },
+            {
+              name: "IllustrationFlow",
+              props: {
+                iconName: "FiUser",
+                title: "Poor UX",
+                description: "Users struggle with complex, outdated solutions",
+                color: "#38a169",
+              },
+              layout: {
+                columns: 4,
+                rows: 3,
+                columnStart: 9,
+                rowStart: 8,
+                align: "center",
+                justify: "center",
               },
             },
           ],
@@ -581,11 +1180,16 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
                 subtext: "Transforming the industry with innovative technology",
                 size: "xl",
                 variant: "section",
-                underline: true,
+                align: "center",
+                color: "#059669",
               },
               layout: {
                 columns: 12,
+                rows: 2,
+                columnStart: 1,
+                rowStart: 2,
                 align: "center",
+                justify: "center",
               },
             },
             {
@@ -598,7 +1202,6 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
                       businessData.proposedSolution ||
                       "Innovative approach to solving the problem",
                     icon: "FiZap",
-                    highlight: true,
                   },
                   {
                     text: "10x faster than alternatives",
@@ -608,26 +1211,39 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
                     text: "Cost-effective solution",
                     icon: "FiTrendingUp",
                   },
+                  {
+                    text: "User-friendly interface",
+                    icon: "FiUser",
+                  },
                 ],
-                variant: "benefits",
-                layout: "list",
-                columns: 1,
+                variant: "highlights",
               },
               layout: {
-                columns: 8,
+                columns: 6,
+                rows: 4,
+                columnStart: 4,
+                rowStart: 7,
+                align: "start",
+                justify: "start",
               },
             },
             {
               name: "MetricCard",
               props: {
-                title: "Market Impact",
+                title: "Performance",
                 value: "10x",
-                subtitle: "Performance improvement",
+                subtitle: "Faster than alternatives",
                 icon: "FiTarget",
-                variant: "success",
+                variant: "primary",
+                size: "md",
               },
               layout: {
-                columns: 4,
+                columns: 5,
+                rows: 2,
+                columnStart: 5,
+                rowStart: 5,
+                align: "center",
+                justify: "center",
               },
             },
           ],
@@ -635,10 +1251,11 @@ Return ONLY a valid JSON object matching the DeckSpec structure. Focus on creati
       ],
       theme: {
         primaryColor: "#2563eb",
-        secondaryColor: "#0ea5e9",
-        accentColor: "#8b5cf6",
-        fontFamily: "Inter, sans-serif",
-        backgroundColor: "#f8fafc",
+        secondaryColor: "#059669",
+        accentColor: "#f59e42",
+        backgroundColor: "#f9fafb",
+        fontFamily: "Inter, system-ui, sans-serif",
+        headingFontFamily: "Inter, system-ui, sans-serif",
       },
     };
   }

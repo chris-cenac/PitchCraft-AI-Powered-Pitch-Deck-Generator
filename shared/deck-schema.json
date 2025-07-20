@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "slides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "props": { "type": "object" },
+                "layout": {
+                  "type": "object",
+                  "properties": {
+                    "columns": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 12
+                    },
+                    "rows": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 12
+                    },
+                    "columnStart": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 12
+                    },
+                    "rowStart": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 12
+                    },
+                    "align": { "enum": ["start", "center", "end", "stretch"] },
+                    "justify": { "enum": ["start", "center", "end", "stretch"] }
+                  },
+                  "required": ["columns"]
+                }
+              },
+              "required": ["name", "props", "layout"]
+            }
+          }
+        },
+        "required": ["id", "items"]
+      }
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "backgroundColor": { "type": "string" },
+        "fontFamily": { "type": "string" },
+        "headingFontFamily": { "type": "string" }
+      },
+      "required": ["primaryColor", "secondaryColor", "fontFamily"]
+    }
+  },
+  "required": ["slides", "theme"]
+}

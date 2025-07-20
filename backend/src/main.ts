@@ -82,7 +82,6 @@ async function bootstrap() {
   logger.log(`Application is running on: http://localhost:${port}`);
   logger.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 }
-bootstrap().catch((error) => {
-  console.error("Failed to start application:", error);
+bootstrap().catch(() => {
   process.exit(1);
 });

@@ -12,6 +12,34 @@ import { FiArrowLeft } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { handleAuthError } from "@/utils/authInterceptor";
 
+const TEST_FORM_DATA = {
+  companyName: "TestTech Solutions",
+  tagline: "Innovating Tomorrow, Today",
+  industry: "FinTech",
+  businessStage: "Growth",
+  problemStatement:
+    "Small businesses struggle to access affordable financial analytics tools.",
+  targetAudience: "Small business owners, startups, and entrepreneurs",
+  proposedSolution:
+    "A cloud-based platform offering real-time, AI-driven financial insights.",
+  uniqueValueProposition:
+    "First to offer predictive analytics tailored for SMBs at a low monthly cost.",
+  revenueModel: "Subscription-based with tiered pricing",
+  marketSize: "$10B TAM, $1B SAM",
+  competitors: "QuickBooks, Xero, FreshBooks",
+  pricingStrategy: "Freemium with paid advanced features",
+  goToMarketStrategy:
+    "Partner with local banks and run targeted digital campaigns.",
+  founders: "Jane Doe (CEO), John Smith (CTO), Alice Lee (CFO)",
+  teamSize: "18",
+  visionStatement:
+    "Empower every small business to make data-driven decisions.",
+  longTermGoals:
+    "Expand globally, integrate with major POS systems, reach 100k users by 2027.",
+  designStyle: "Minimal",
+  logoUrl: "https://placehold.co/400x200?text=Logo",
+};
+
 const FormView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [phaseIndex, setPhaseIndex] = useState(0);
@@ -20,6 +48,18 @@ const FormView: React.FC = () => {
   const navigate = useNavigate();
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const simulateRef = useRef<NodeJS.Timeout | null>(null);
+  const [autofillData, setAutofillData] = useState<PitchFormData | undefined>(
+    undefined
+  );
+  const [logoUrl, setLogoUrl] = useState<string>(TEST_FORM_DATA.logoUrl);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setLogoUrl(url);
+    }
+  };
 
   // Remove convertToFormData and replace with direct payload construction
   const handleGenerate = async (pitchData: PitchFormData) => {
@@ -50,6 +90,7 @@ const FormView: React.FC = () => {
           visionStatement: pitchData.visionStatement,
           longTermGoals: pitchData.longTermGoals,
           designStyle: pitchData.designStyle,
+          logoUrl: logoUrl || "https://placehold.co/400x200?text=Logo",
         },
       };
 
@@ -104,7 +145,7 @@ const FormView: React.FC = () => {
           setError("Failed to check generation status. Please try again.");
           toast.error("Failed to check generation status. Please try again.");
         }
-      }, 1000);
+      }, 5000);
 
       // Set timeout to prevent infinite polling
       setTimeout(() => {
@@ -121,7 +162,11 @@ const FormView: React.FC = () => {
       }, 300000); // 5 minutes timeout
 
       // Now trigger backend generation WITHOUT awaiting
-      generatePitchDeck(id);
+      generatePitchDeck(id).then((result) => {
+        if (result?.usedFallback && result?.message) {
+          toast.error(result.message, { duration: 8000 });
+        }
+      });
     } catch (error) {
       if (simulateRef.current) clearInterval(simulateRef.current);
       if (pollRef.current) clearInterval(pollRef.current);
@@ -169,6 +214,39 @@ const FormView: React.FC = () => {
           <h1 className="text-xl font-semibold">Create Pitch Deck</h1>
           <div className="w-20"></div> {/* Spacer for centering */}
         </div>
+        {/* Logo Upload */}
+        <div className="mt-4 flex items-center gap-4">
+          <label className="block text-sm font-medium text-secondary dark:text-secondary-light">
+            Upload Logo:
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoUpload}
+              className="ml-2"
+            />
+          </label>
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Logo Preview"
+              className="h-12 w-auto rounded shadow border border-secondary/20 dark:border-secondary-dark/20"
+            />
+          )}
+        </div>
+        {/* Autofill Button (DEV only) */}
+        {process.env.NODE_ENV !== "production" && (
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => {
+                setAutofillData(TEST_FORM_DATA);
+                setLogoUrl(TEST_FORM_DATA.logoUrl);
+              }}
+              className="px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition-colors text-sm font-semibold"
+            >
+              Autofill Test Data
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Error message */}
@@ -190,7 +268,7 @@ const FormView: React.FC = () => {
 
       {/* Form content - takes remaining space */}
       <div className="flex-1 overflow-hidden">
-        <MultiStepForm onSubmit={handleGenerate} />
+        <MultiStepForm onSubmit={handleGenerate} initialData={autofillData} />
       </div>
     </div>
   );

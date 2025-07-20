@@ -27,10 +27,9 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
-    const req = context.switchToHttp().getRequest();
+  handleRequest(err: any, user: any, info: any, _context: ExecutionContext) {
     if (err || !user) {
-      // switch to Nest’s proper exception so Nest returns 401 instead of 500
+      // switch to Nest's proper exception so Nest returns 401 instead of 500
       throw err || new UnauthorizedException(info?.message || "Unauthorized");
     }
     return user;

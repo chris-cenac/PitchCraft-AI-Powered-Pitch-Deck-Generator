@@ -7,7 +7,7 @@ import {
   IsEnum,
   IsBoolean,
 } from "class-validator";
-import { Type, Transform } from "class-transformer";
+import { Type } from "class-transformer";
 
 class BusinessDataDto {
   @IsString()

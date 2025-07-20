@@ -1,114 +1,101 @@
 import { ChatContext } from "../interfaces/ai.interface";
-// src/ai/utils/prompt.utils.ts
+import { COMPONENT_GUIDE } from "../data/components.catalog";
+
 export class PromptUtils {
   static buildSystemPrompt(context: string): string {
-    return `
-      You are an expert startup pitch deck consultant with extensive experience in helping entrepreneurs create compelling investor presentations. Your expertise includes:
-      
-      - Venture capital and angel investor expectations
-      - Market analysis and competitive positioning
-      - Financial modeling and projections
-      - Storytelling and narrative structure
-      - Visual presentation design principles
-      
-      Context: ${context}
-      
-      Always provide actionable, specific advice that helps create professional, investor-ready content.
-
-      ---
-      
-      When specifying slide layouts, use the following grid system:
-      - Each slide is a 12-column grid (columns: 1-12).
-      - For each component, the layout object MUST ALWAYS include ALL of the following properties:
-        - columns: width (number of columns to span, 1-12)
-        - columnStart: left position (starting column, 1-based)
-        - rowStart: top position (starting row, 1-based)
-        - rows: height (number of rows to span, 1 or more)
-      - Do NOT omit any of these properties, even if the value is 1.
-      - Example layout for a component:
-        {
-          "name": "MetricCard",
-          "props": { ... },
-          "layout": {
-            "columns": 4,
-            "rows": 2,
-            "columnStart": 5,
-            "rowStart": 1
-          }
-        }
-      - Place components so they are visually balanced and do not overlap.
-      - Use columnStart/rowStart to position components left/right and up/down as needed.
-      - Use align/justify for fine-tuned alignment within their grid area (optional).
-      - Omitting any of the required layout properties will result in rejection.
-    `;
+    return `Expert pitch deck designer. Generate investor-ready decks using JSON schema. Use 12-column grid layouts. Context: ${context}. ${COMPONENT_GUIDE} Output valid JSON only.`;
   }
 
   static buildPitchDeckGenerationPrompt(input: any): string {
-    return `
-      Create a comprehensive, investor-ready pitch deck for the following startup:
-      
-      Company Details:
-      - Name: ${input.companyName}
-      - Industry: ${input.industry}
-      - Problem: ${input.problemStatement}
-      - Solution: ${input.solution}
-      - Business Model: ${input.businessModel}
-      - Target Market: ${input.targetMarket}
-      ${input.financials ? `- Financials: ${JSON.stringify(input.financials)}` : ""}
-      ${input.teamSize ? `- Team Size: ${input.teamSize}` : ""}
-      ${input.additionalInfo ? `- Additional Info: ${input.additionalInfo}` : ""}
-      
-      Requirements:
-      1. Create 8-10 slides following standard VC pitch deck structure
-      2. Each slide should have:
-         - Compelling, concise title
-         - 3-5 bullet points of key content
-         - Speaker notes (2-3 sentences)
-         - Suggested visual elements
-      3. Ensure content is investor-focused and data-driven
-      4. Include clear value proposition and market opportunity
-      5. Address potential investor concerns proactively
-      
-      Standard slide sequence:
-      1. Title/Company Introduction
-      2. Problem Statement
-      3. Solution
-      4. Market Opportunity & Size
-      5. Business Model & Revenue Streams
-      6. Go-to-Market Strategy
-      7. Financial Projections
-      8. Team & Advisors
-      9. Funding Ask & Use of Funds
-      10. Closing & Next Steps
+    // Clean the input to remove Mongoose metadata and only include essential business data
+    const cleanInput = {
+      companyName: input.companyName || input.businessData?.companyName,
+      tagline: input.tagline || input.businessData?.tagline,
+      logoUrl: input.logoUrl || input.businessData?.logoUrl,
+      industry: input.industry || input.businessData?.industry,
+      businessStage: input.businessStage || input.businessData?.businessStage,
+      problemStatement:
+        input.problemStatement || input.businessData?.problemStatement,
+      targetAudience:
+        input.targetAudience || input.businessData?.targetAudience,
+      proposedSolution:
+        input.proposedSolution || input.businessData?.proposedSolution,
+      uniqueValueProposition:
+        input.uniqueValueProposition ||
+        input.businessData?.uniqueValueProposition,
+      revenueModel: input.revenueModel || input.businessData?.revenueModel,
+      pricingStrategy:
+        input.pricingStrategy || input.businessData?.pricingStrategy,
+      goToMarketStrategy:
+        input.goToMarketStrategy || input.businessData?.goToMarketStrategy,
+      marketSize: input.marketSize || input.businessData?.marketSize,
+      competitors: input.competitors || input.businessData?.competitors,
+      founders: input.founders || input.businessData?.founders,
+      teamSize: input.teamSize || input.businessData?.teamSize,
+      visionStatement:
+        input.visionStatement || input.businessData?.visionStatement,
+      longTermGoals: input.longTermGoals || input.businessData?.longTermGoals,
+      designStyle: input.designStyle || input.businessData?.designStyle,
+    };
 
-      ---
-      
-      When specifying slide layouts, use the following grid system:
-      - Each slide is a 12-column grid (columns: 1-12).
-      - For each component, the layout object MUST ALWAYS include ALL of the following properties:
-        - columns: width (number of columns to span, 1-12)
-        - columnStart: left position (starting column, 1-based)
-        - rowStart: top position (starting row, 1-based)
-        - rows: height (number of rows to span, 1 or more)
-      - Do NOT omit any of these properties, even if the value is 1.
-      - Example layout for a component:
-        {
-          "name": "MetricCard",
-          "props": { ... },
-          "layout": {
-            "columns": 4,
-            "rows": 2,
-            "columnStart": 5,
-            "rowStart": 1
-          }
-        }
-      - Place components so they are visually balanced and do not overlap.
-      - Use columnStart/rowStart to position components left/right and up/down as needed.
-      - Use align/justify for fine-tuned alignment within their grid area (optional).
-      - Omitting any of the required layout properties will result in rejection.
-      
-      Format as JSON with proper structure for easy parsing.
-    `;
+    return `Generate 12-slide pitch deck for: ${JSON.stringify(cleanInput, null, 2)}
+
+Requirements:
+1. 12 slides: Cover, Problem, Market, Solution, Features, Business Model, GTM, Traction, Financials, Competition, Team, Ask
+2. Use 12-column grid layouts with columnStart/rowStart positioning
+3. Use each component type once: LabelHeader, MetricCard, FeatureList, QuoteCard, ComparisonTable, DeckChart, IllustrationFlow, LogoDisplay
+4. Professional content, no "undefined", fill required props
+5. Output valid JSON with "slides" array and "theme" object
+6. Each slide: id, title, items array with name, props, layout objects
+7. Layout: columns(1-12), rows(1-12), columnStart(1-12), rowStart(1-12), align, justify
+
+Output JSON only.`;
+  }
+
+  // New method for chunked generation
+  static buildSlideChunkPrompt(input: any, slideNumbers: number[]): string {
+    const cleanInput = {
+      companyName: input.companyName || input.businessData?.companyName,
+      industry: input.industry || input.businessData?.industry,
+      problemStatement:
+        input.problemStatement || input.businessData?.problemStatement,
+      proposedSolution:
+        input.proposedSolution || input.businessData?.proposedSolution,
+      uniqueValueProposition:
+        input.uniqueValueProposition ||
+        input.businessData?.uniqueValueProposition,
+    };
+
+    const slideTypes = [
+      "Cover & Company Overview",
+      "The Problem",
+      "Market Size & Opportunity",
+      "Our Solution",
+      "Product Features & Benefits",
+      "Business Model",
+      "Go-To-Market Strategy",
+      "Traction & Metrics",
+      "Financials & Projections",
+      "Competitive Analysis",
+      "Team & Advisors",
+      "The Ask & Use of Funds",
+    ];
+
+    const requestedSlides = slideNumbers
+      .map((num) => `${num}: ${slideTypes[num - 1]}`)
+      .join(", ");
+
+    return `Generate slides ${requestedSlides} for: ${JSON.stringify(cleanInput, null, 2)}
+
+Requirements:
+1. Create exactly ${slideNumbers.length} slides with specified types
+2. Use 12-column grid layouts with proper positioning
+3. Use appropriate components for each slide type
+4. Professional content, no "undefined"
+5. Output valid JSON array of slide objects
+6. Each slide: id, title, items array with name, props, layout
+
+Output JSON array only.`;
   }
 
   static buildSlideRegenerationPrompt(
@@ -117,43 +104,79 @@ export class PromptUtils {
     context: string
   ): string {
     return `
-      Improve this pitch deck slide based on the provided feedback:
+      You are an expert pitch deck designer. Improve the following slide based on the feedback, using the component guide provided.
       
-      Current Slide:
-      - Title: ${slide.title}
-      - Content: ${slide.content}
-      - Speaker Notes: ${slide.speakerNotes}
-      - Type: ${slide.type}
+      # Current Slide
+      - id: ${slide.id}
+      - title: ${slide.title}
+      - items: ${JSON.stringify(slide.items)}
       
-      Company Context: ${context}
-      Feedback: ${feedback}
+      # Company Context
+      ${context}
       
-      Please regenerate the slide addressing the feedback while:
-      1. Maintaining professional investor-ready quality
-      2. Keeping content concise and impactful
-      3. Ensuring alignment with overall pitch narrative
-      4. Including relevant data points where applicable
-      5. Suggesting appropriate visual elements
+      # Feedback
+      ${feedback}
       
-      Return the improved slide in JSON format.
+      # Requirements
+      - Maintain professional, investor-ready quality
+      - Keep content concise and impactful
+      - Use a variety of components as appropriate
+      - Layout: Use a 12-column grid with detailed positioning
+      - Include columns, rows, columnStart, rowStart, align, justify for all items
+      - Create visual hierarchy and balanced layouts
+      - Output must be valid JSON, no explanations
+      
+      # Layout Guidelines
+      - Position components strategically using columnStart and rowStart
+      - Create visual hierarchy with different component sizes
+      - Use spacing effectively by leaving empty grid areas
+      - Mix different component types for visual variety
+      
+      # Output Format
+      {
+        "id": "slide-id",
+        "title": "Slide Title",
+        "items": [
+          {
+            "name": "LabelHeader",
+            "props": { /* ... */ },
+            "layout": { 
+              "columns": 12, 
+              "rows": 2,
+              "columnStart": 1,
+              "rowStart": 1,
+              "align": "center", 
+              "justify": "center" 
+            }
+          }
+          // ... more items
+        ]
+      }
+      // End of sample
+      
+      WARNING: Do not include any explanations, only output valid JSON conforming to the schema.
     `;
   }
 
   static buildChatPrompt(message: string, context: ChatContext): string {
     const historyContext = context.conversationHistory
-      .slice(-5) // Keep last 5 messages for context
+      .slice(-5)
       .map((msg) => `${msg.role}: ${msg.content}`)
       .join("\n");
 
     return `
-      You are helping with a pitch deck for ${context.companyName} in the ${context.industry} industry.
+      You are an expert pitch deck consultant for ${context.companyName} in the ${context.industry} industry.
       
       Recent conversation:
       ${historyContext}
       
       Current question/request: ${message}
       
-      Provide specific, actionable advice that helps improve the pitch deck. If the user is asking about a specific slide, reference the slide number and provide targeted suggestions.
+      # Instructions
+      - Reference slide numbers where relevant
+      - Suggest specific improvements using the allowed components and layout schema
+      - Output must be actionable and concise
+      - Do not include any explanations unless explicitly asked
     `;
   }
 }

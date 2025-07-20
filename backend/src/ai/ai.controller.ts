@@ -121,18 +121,22 @@ export class AiController {
   async generateFullDeck(
     @Param("id") id: string,
     @Request() req
-  ): Promise<{ success: boolean; data: DeckSpec }> {
+  ): Promise<{
+    success: boolean;
+    data: DeckSpec;
+    usedFallback?: boolean;
+    message?: string;
+  }> {
     const deck = await this.deckService.findOne(id, req.user.id);
     if (!deck) throw new NotFoundException("Pitch deck not found");
 
     const businessData = deck.spec.businessData;
-    const catalog = this.components.getAll();
 
-    let generated: DeckSpec;
+    let generatedResult: { deck: DeckSpec; usedFallback: boolean };
     try {
-      generated = await this.aiService.generateDeck({
+      // Use chunked generation to avoid token limit issues
+      generatedResult = await this.aiService.generateDeckChunked({
         businessData,
-        componentsCatalog: catalog,
       });
     } catch (err) {
       throw new InternalServerErrorException(
@@ -141,9 +145,19 @@ export class AiController {
     }
 
     // Update the deck with the generated spec
-    await this.deckService.updateSpec(id, generated, req.user.id);
+    await this.deckService.updateSpec(id, generatedResult.deck, req.user.id);
 
-    // Return the generated spec directly
-    return { success: true, data: generated };
+    // Return the generated spec directly, with fallback info if relevant
+    return {
+      success: true,
+      data: generatedResult.deck,
+      ...(generatedResult.usedFallback
+        ? {
+            usedFallback: true,
+            message:
+              "A fallback deck was generated due to an AI error or incomplete data. Please review and edit your deck as needed.",
+          }
+        : {}),
+    };
   }
 }
