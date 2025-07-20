@@ -750,7 +750,7 @@ const DeckEditor: React.FC = () => {
             onTitleChange={handleTitleChange}
             onBack={() => navigate(templateId ? "/templates" : "/")}
             backLabel={templateId ? "Templates" : "Home"}
-            hideDeckInfo={isEditing}
+            hideDeckInfo={false}
             // New props for rearrange UI
             slides={slides}
             moveSlide={moveSlide}

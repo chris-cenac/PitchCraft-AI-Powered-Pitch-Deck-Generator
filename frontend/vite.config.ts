@@ -58,5 +58,43 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          "react-vendor": ["react", "react-dom"],
+          "router-vendor": ["react-router-dom"],
+          "ui-vendor": ["react-icons", "react-hot-toast"],
+          "chart-vendor": ["chart.js", "react-chartjs-2"],
+          "dnd-vendor": ["react-dnd", "react-dnd-html5-backend"],
+          "utils-vendor": ["clsx", "pptxgenjs"],
+        },
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId
+            ? chunkInfo.facadeModuleId
+                .split("/")
+                .pop()
+                ?.replace(".tsx", "")
+                .replace(".ts", "")
+            : "chunk";
+          return `js/${facadeModuleId}-[hash].js`;
+        },
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name?.split(".") || [];
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || "")) {
+            return `images/[name]-[hash][extname]`;
+          }
+          if (/css/i.test(ext || "")) {
+            return `css/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
+    sourcemap: false, // Disable sourcemaps in production for smaller bundles
+  },
   preview: {},
 });

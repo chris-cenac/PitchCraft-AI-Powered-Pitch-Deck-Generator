@@ -1,10 +1,7 @@
 import React, { useMemo } from "react";
 import { Chart } from "react-chartjs-2";
 // These imports are required for Chart.js registration
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chart as ChartJS, registerables } from "chart.js";
-/* eslint-enable @typescript-eslint/no-unused-vars */
 import type { ChartData, ChartOptions } from "chart.js";
 import { useTheme } from "@/hooks/useTheme";
 

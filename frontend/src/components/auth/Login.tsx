@@ -19,7 +19,20 @@ const Login: React.FC = () => {
     };
 
     try {
-      const result = await login(payload);
+      const result = (await login(payload)) as {
+        data: {
+          tokens: {
+            accessToken: string;
+            refreshToken: string;
+          };
+          user: {
+            id: string;
+            email: string;
+            name?: string;
+            roles?: string[];
+          };
+        };
+      };
 
       // Access tokens from the nested data.tokens structure
       const { accessToken, refreshToken } = result.data.tokens;

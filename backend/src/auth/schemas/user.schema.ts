@@ -34,9 +34,16 @@ export class AuthUser {
 
   @Prop()
   passwordResetExpires?: Date;
+
+  @Prop({ type: Number, default: 0 })
+  failedLoginAttempts?: number;
+
+  @Prop()
+  lockedUntil?: Date;
 }
 
 export const AuthUserSchema = SchemaFactory.createForClass(AuthUser);
 
 AuthUserSchema.index({ email: 1 }, { unique: true });
 AuthUserSchema.index({ sub: 1 }, { unique: true, sparse: true });
+AuthUserSchema.index({ lockedUntil: 1 }, { expireAfterSeconds: 0 }); // TTL index for automatic cleanup

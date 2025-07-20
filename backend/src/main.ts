@@ -1,25 +1,55 @@
 import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
+import { ValidationPipe, Logger } from "@nestjs/common";
 import { AppModule } from "./app.module";
 import helmet from "helmet";
 
 async function bootstrap() {
+  const logger = new Logger("Bootstrap");
+
+  // Validate required environment variables
+  const requiredEnvVars = ["JWT_SECRET", "MONGODB_URI"];
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName]
+  );
+
+  if (missingVars.length > 0) {
+    logger.error(
+      `Missing required environment variables: ${missingVars.join(", ")}`
+    );
+    process.exit(1);
+  }
+
   const app = await NestFactory.create(AppModule);
 
-  app.use(helmet());
+  // Enhanced security headers
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", "data:", "https:"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
+  // Enhanced validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: false,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
       },
+      errorHttpStatusCode: 422,
     })
   );
 
-  // CORS configuration for both development and production
+  // Enhanced CORS configuration
   const allowedOrigins = [
     "https://chriscenac.dev",
     "http://localhost:5173",
@@ -36,13 +66,23 @@ async function bootstrap() {
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
+        logger.warn(`Blocked request from unauthorized origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    maxAge: 86400, // 24 hours
   });
 
-  await app.listen(process.env.PORT || 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error("Failed to start application:", error);
+  process.exit(1);
+});

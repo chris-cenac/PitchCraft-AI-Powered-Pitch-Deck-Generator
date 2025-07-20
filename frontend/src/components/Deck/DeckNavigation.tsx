@@ -123,7 +123,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
     if (typeof onSlideChange === "function") {
       onSlideChange(0);
     }
-  }, [currentSlide, totalSlides, onSlideChange]);
+  }, [onSlideChange]);
   const goToLast = useCallback(() => {
     if (
       typeof onSlideChange === "function" &&
@@ -131,22 +131,15 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
     ) {
       onSlideChange(totalSlides - 1);
     }
-  }, [currentSlide, totalSlides, onSlideChange]);
-  const goPrev = useCallback(() => {
-    if (
-      typeof onSlideChange === "function" &&
-      typeof currentSlide === "number"
-    ) {
-      onSlideChange(Math.max(currentSlide - 1, 0));
+  }, [totalSlides, onSlideChange]);
+  const handlePrevious = useCallback(() => {
+    if (currentSlide > 1) {
+      onSlideChange(currentSlide - 1);
     }
   }, [currentSlide, onSlideChange]);
-  const goNext = useCallback(() => {
-    if (
-      typeof onSlideChange === "function" &&
-      typeof currentSlide === "number" &&
-      typeof totalSlides === "number"
-    ) {
-      onSlideChange(Math.min(currentSlide + 1, totalSlides - 1));
+  const handleNext = useCallback(() => {
+    if (currentSlide < totalSlides) {
+      onSlideChange(currentSlide + 1);
     }
   }, [currentSlide, totalSlides, onSlideChange]);
 
@@ -316,7 +309,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
             </button>
             {/* Previous Slide */}
             <button
-              onClick={goPrev}
+              onClick={handlePrevious}
               disabled={typeof currentSlide !== "number" || currentSlide === 0}
               className="inline-flex flex-col items-center justify-center px-3 py-2 hover:bg-background dark:hover:bg-background-dark group transition-colors disabled:opacity-50"
               title="Previous Slide"
@@ -338,7 +331,7 @@ const DeckNavigation: React.FC<DeckNavigationProps> = ({
             </div>
             {/* Next Slide */}
             <button
-              onClick={goNext}
+              onClick={handleNext}
               disabled={
                 typeof currentSlide !== "number" ||
                 typeof totalSlides !== "number" ||

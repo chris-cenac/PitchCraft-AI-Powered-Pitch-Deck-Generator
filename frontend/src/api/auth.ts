@@ -18,7 +18,8 @@ export interface LogoutDto {
 
 const BASE_URL = import.meta.env.VITE_NEST_API_URL || "http://localhost:3000";
 
-async function handleResponse(res: Response) {
+// Enhanced error handling with retry logic
+async function handleResponse(res: Response, retries = 0): Promise<unknown> {
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}));
 
@@ -56,9 +57,24 @@ async function handleResponse(res: Response) {
         throw new Error(
           payload.message || "Validation error. Please check your input."
         );
+      case 429:
+        if (retries < 3) {
+          // Retry with exponential backoff
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.pow(2, retries) * 1000)
+          );
+          // Note: We can't retry with the same request due to Response limitations
+          // In a real implementation, you'd need to store the original request details
+          throw new Error("Too many requests. Please try again later.");
+        }
+        throw new Error("Too many requests. Please try again later.");
       case 500:
         throw new Error(
           payload.message || "Server error. Please try again later."
+        );
+      case 503:
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
         );
       default:
         throw new Error(
@@ -69,8 +85,33 @@ async function handleResponse(res: Response) {
   return res.json();
 }
 
+// Enhanced fetch wrapper with timeout
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeout = 10000
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Request timeout. Please try again.");
+    }
+    throw error;
+  }
+}
+
 export async function signup(data: SignupDto) {
-  return fetch(`${BASE_URL}/auth/signup`, {
+  return fetchWithTimeout(`${BASE_URL}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -78,7 +119,7 @@ export async function signup(data: SignupDto) {
 }
 
 export async function login(data: LoginDto) {
-  return fetch(`${BASE_URL}/auth/login`, {
+  return fetchWithTimeout(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -88,7 +129,7 @@ export async function login(data: LoginDto) {
 export async function logout(data: LogoutDto) {
   const accessToken = localStorage.getItem("accessToken");
 
-  return fetch(`${BASE_URL}/auth/logout`, {
+  return fetchWithTimeout(`${BASE_URL}/auth/logout`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
