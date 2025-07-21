@@ -82,7 +82,7 @@ const Hero: React.FC = () => {
         {/* Dark mode toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-full bg-surface dark:bg-surface-dark text-primary dark:text-primary-light hover:bg-accent-light dark:hover:bg-accent transition-colors shadow-soft dark:shadow-neumorphic-dark"
+          className="p-2 rounded-full bg-surface dark:bg-surface-dark text-primary dark:text-accent hover:bg-primary/10 dark:hover:bg-accent/20 hover:text-primary-dark dark:hover:text-accent-light transition-colors shadow-soft dark:shadow-neumorphic-dark border border-secondary/20 dark:border-secondary-dark/20"
           aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
         >
           {isDark ? (

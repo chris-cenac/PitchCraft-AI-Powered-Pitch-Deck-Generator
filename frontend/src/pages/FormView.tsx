@@ -37,7 +37,7 @@ const TEST_FORM_DATA = {
   longTermGoals:
     "Expand globally, integrate with major POS systems, reach 100k users by 2027.",
   designStyle: "Minimal",
-  logoUrl: "https://placehold.co/400x200?text=Logo",
+  logoUrl: "",
 };
 
 const FormView: React.FC = () => {
@@ -51,15 +51,6 @@ const FormView: React.FC = () => {
   const [autofillData, setAutofillData] = useState<PitchFormData | undefined>(
     undefined
   );
-  const [logoUrl, setLogoUrl] = useState<string>(TEST_FORM_DATA.logoUrl);
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setLogoUrl(url);
-    }
-  };
 
   // Remove convertToFormData and replace with direct payload construction
   const handleGenerate = async (pitchData: PitchFormData) => {
@@ -90,7 +81,8 @@ const FormView: React.FC = () => {
           visionStatement: pitchData.visionStatement,
           longTermGoals: pitchData.longTermGoals,
           designStyle: pitchData.designStyle,
-          logoUrl: logoUrl || "https://placehold.co/400x200?text=Logo",
+          logoUrl:
+            pitchData.logoUrl || "https://placehold.co/400x200?text=Logo",
         },
       };
 
@@ -214,32 +206,12 @@ const FormView: React.FC = () => {
           <h1 className="text-xl font-semibold">Create Pitch Deck</h1>
           <div className="w-20"></div> {/* Spacer for centering */}
         </div>
-        {/* Logo Upload */}
-        <div className="mt-4 flex items-center gap-4">
-          <label className="block text-sm font-medium text-secondary dark:text-secondary-light">
-            Upload Logo:
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              className="ml-2"
-            />
-          </label>
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt="Logo Preview"
-              className="h-12 w-auto rounded shadow border border-secondary/20 dark:border-secondary-dark/20"
-            />
-          )}
-        </div>
         {/* Autofill Button (DEV only) */}
         {process.env.NODE_ENV !== "production" && (
           <div className="mt-4 flex justify-end">
             <button
               onClick={() => {
                 setAutofillData(TEST_FORM_DATA);
-                setLogoUrl(TEST_FORM_DATA.logoUrl);
               }}
               className="px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition-colors text-sm font-semibold"
             >

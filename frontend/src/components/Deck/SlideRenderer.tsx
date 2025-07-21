@@ -13,6 +13,7 @@ interface SlideRendererProps {
   containerHeight?: string;
   containerWidth?: string;
   isEditing?: boolean;
+  businessData?: Record<string, unknown>;
   onLayoutChange?: (
     index: number,
     layout: Partial<SlideItem["layout"]>
@@ -367,6 +368,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
   containerHeight = "100%",
   containerWidth = "100%",
   isEditing = false,
+  businessData,
   onLayoutChange,
 }) => {
   const { theme } = useTheme();
@@ -435,6 +437,21 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
         const Component = isValidComponentName(item.name)
           ? componentRegistry[item.name]
           : null;
+
+        // Inject logo URL from businessData into LogoDisplay components
+        let enhancedProps = { ...item.props };
+        if (item.name === "LogoDisplay" && businessData) {
+          enhancedProps = {
+            ...enhancedProps,
+            logoUrl:
+              ((enhancedProps as Record<string, unknown>).logoUrl as string) ||
+              (businessData.logoUrl as string),
+            companyName:
+              ((enhancedProps as Record<string, unknown>)
+                .companyName as string) || (businessData.companyName as string),
+          };
+        }
+
         const content = Component ? (
           <div
             className={`flex ${alignItems} ${justifyContent} w-full h-full`}
@@ -445,7 +462,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({
                 item.name === "DeckChart" ? "w-full h-full" : "inline-block"
               }
             >
-              <Component {...item.props} />
+              <Component {...enhancedProps} />
             </div>
           </div>
         ) : (

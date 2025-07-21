@@ -1,69 +1,696 @@
 {
+  "$ref": "#/definitions/DeckSpec",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "slides": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "title": { "type": "string" },
+  "definitions": {
+    "DeckSpec": {
+      "additionalProperties": false,
+      "description": "Complete deck specification including slides and theme",
+      "properties": {
+        "businessData": {
+          "additionalProperties": {},
+          "description": "Business data including logo URL",
+          "type": "object"
+        },
+        "slides": {
+          "description": "Ordered collection of slides",
           "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
+            "$ref": "#/definitions/Slide"
+          },
+          "type": "array"
+        },
+        "theme": {
+          "$ref": "#/definitions/DeckTheme",
+          "description": "Global theme settings"
+        }
+      },
+      "required": [
+        "slides",
+        "theme"
+      ],
+      "type": "object"
+    },
+    "DeckTheme": {
+      "additionalProperties": false,
+      "description": "Theme configuration for the entire deck",
+      "properties": {
+        "accentColor": {
+          "description": "Optional accent color (hex/rgb)",
+          "type": "string"
+        },
+        "backgroundColor": {
+          "description": "Base background color (hex/rgb)",
+          "type": "string"
+        },
+        "fontFamily": {
+          "description": "Font family for all text",
+          "type": "string"
+        },
+        "headingFontFamily": {
+          "description": "Optional heading font family",
+          "type": "string"
+        },
+        "primaryColor": {
+          "description": "Primary brand color (hex/rgb)",
+          "type": "string"
+        },
+        "secondaryColor": {
+          "description": "Secondary brand color (hex/rgb)",
+          "type": "string"
+        }
+      },
+      "required": [
+        "primaryColor",
+        "secondaryColor",
+        "fontFamily"
+      ],
+      "type": "object"
+    },
+    "Slide": {
+      "additionalProperties": false,
+      "description": "A complete slide containing multiple components",
+      "properties": {
+        "id": {
+          "description": "Unique slide identifier",
+          "type": "string"
+        },
+        "items": {
+          "description": "Components to render on this slide",
+          "items": {
+            "$ref": "#/definitions/SlideItem"
+          },
+          "type": "array"
+        },
+        "title": {
+          "description": "Optional slide title for editor organization",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "items"
+      ],
+      "type": "object"
+    },
+    "SlideItem": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "LabelHeader",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
               "properties": {
-                "name": { "type": "string" },
-                "props": { "type": "object" },
-                "layout": {
-                  "type": "object",
-                  "properties": {
-                    "columns": {
-                      "type": "number",
-                      "minimum": 1,
-                      "maximum": 12
-                    },
-                    "rows": {
-                      "type": "number",
-                      "minimum": 1,
-                      "maximum": 12
-                    },
-                    "columnStart": {
-                      "type": "number",
-                      "minimum": 1,
-                      "maximum": 12
-                    },
-                    "rowStart": {
-                      "type": "number",
-                      "minimum": 1,
-                      "maximum": 12
-                    },
-                    "align": { "enum": ["start", "center", "end", "stretch"] },
-                    "justify": { "enum": ["start", "center", "end", "stretch"] }
-                  },
-                  "required": ["columns"]
+                "align": {
+                  "enum": [
+                    "left",
+                    "center",
+                    "right"
+                  ],
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "gradient": {
+                  "type": "boolean"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "size": {
+                  "enum": [
+                    "sm",
+                    "md",
+                    "lg",
+                    "xl",
+                    "2xl"
+                  ],
+                  "type": "string"
+                },
+                "subtext": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "underline": {
+                  "type": "boolean"
+                },
+                "underlineColor": {
+                  "type": "string"
+                },
+                "variant": {
+                  "enum": [
+                    "default",
+                    "hero",
+                    "section"
+                  ],
+                  "type": "string"
                 }
               },
-              "required": ["name", "props", "layout"]
+              "required": [
+                "text"
+              ],
+              "type": "object"
             }
-          }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
         },
-        "required": ["id", "items"]
-      }
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "MetricCard",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "size": {
+                  "enum": [
+                    "sm",
+                    "md",
+                    "lg",
+                    "xl"
+                  ],
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "trend": {
+                  "enum": [
+                    "up",
+                    "down",
+                    "neutral"
+                  ],
+                  "type": "string"
+                },
+                "trendValue": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "variant": {
+                  "enum": [
+                    "primary",
+                    "secondary",
+                    "success",
+                    "warning",
+                    "danger"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "value"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "FeatureList",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "columns": {
+                  "enum": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "type": "number"
+                },
+                "features": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "highlight": {
+                        "type": "boolean"
+                      },
+                      "icon": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "layout": {
+                  "enum": [
+                    "list",
+                    "cards",
+                    "grid"
+                  ],
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "variant": {
+                  "enum": [
+                    "default",
+                    "benefits",
+                    "highlights"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "features"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "QuoteCard",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "author": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "company": {
+                  "type": "string"
+                },
+                "quote": {
+                  "type": "string"
+                },
+                "size": {
+                  "enum": [
+                    "sm",
+                    "md",
+                    "lg"
+                  ],
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "variant": {
+                  "enum": [
+                    "testimonial",
+                    "quote",
+                    "highlight"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "quote",
+                "author"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "ComparisonTable",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "caption": {
+                  "type": "string"
+                },
+                "className": {
+                  "type": "string"
+                },
+                "headers": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "height": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                },
+                "highlightCols": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "highlightRows": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "rows": {
+                  "items": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": "array"
+                },
+                "variant": {
+                  "enum": [
+                    "default",
+                    "striped",
+                    "bordered",
+                    "highlighted"
+                  ],
+                  "type": "string"
+                },
+                "width": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "headers",
+                "rows"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "DeckChart",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "className": {
+                  "type": "string"
+                },
+                "data": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "height": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                },
+                "loading": {
+                  "type": "boolean"
+                },
+                "options": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "type": {
+                  "enum": [
+                    "bar",
+                    "line",
+                    "pie",
+                    "doughnut",
+                    "polarArea",
+                    "radar",
+                    "bubble",
+                    "scatter"
+                  ],
+                  "type": "string"
+                },
+                "width": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "data"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "IllustrationFlow",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "descriptionColor": {
+                  "type": "string"
+                },
+                "iconName": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "iconName",
+                "title",
+                "description"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "$ref": "#/definitions/SlideLayout"
+            },
+            "name": {
+              "const": "LogoDisplay",
+              "type": "string"
+            },
+            "props": {
+              "additionalProperties": false,
+              "properties": {
+                "border": {
+                  "enum": [
+                    "none",
+                    "light",
+                    "medium",
+                    "accent"
+                  ],
+                  "type": "string"
+                },
+                "circular": {
+                  "type": "boolean"
+                },
+                "companyName": {
+                  "type": "string"
+                },
+                "height": {
+                  "type": "number"
+                },
+                "logoUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "size": {
+                  "enum": [
+                    "xs",
+                    "sm",
+                    "md",
+                    "lg",
+                    "xl"
+                  ],
+                  "type": "string"
+                },
+                "variant": {
+                  "enum": [
+                    "standalone",
+                    "with-text"
+                  ],
+                  "type": "string"
+                },
+                "width": {
+                  "type": "number"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "props",
+            "layout"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "A single component on a slide with its properties and layout"
     },
-    "theme": {
-      "type": "object",
+    "SlideLayout": {
+      "additionalProperties": false,
+      "description": "Grid layout configuration for a slide component",
       "properties": {
-        "primaryColor": { "type": "string" },
-        "secondaryColor": { "type": "string" },
-        "accentColor": { "type": "string" },
-        "backgroundColor": { "type": "string" },
-        "fontFamily": { "type": "string" },
-        "headingFontFamily": { "type": "string" }
+        "align": {
+          "default": "stretch",
+          "description": "Vertical alignment within grid cell",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
+          "type": "string"
+        },
+        "columnStart": {
+          "description": "Optional starting column line",
+          "type": "number"
+        },
+        "columns": {
+          "description": "Number of columns to span (1-12)",
+          "type": "number"
+        },
+        "justify": {
+          "default": "stretch",
+          "description": "Horizontal alignment within grid cell",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
+          "type": "string"
+        },
+        "rowStart": {
+          "description": "Optional starting row line",
+          "type": "number"
+        },
+        "rows": {
+          "description": "Optional number of rows to span",
+          "type": "number"
+        }
       },
-      "required": ["primaryColor", "secondaryColor", "fontFamily"]
+      "required": [
+        "columns"
+      ],
+      "type": "object"
     }
-  },
-  "required": ["slides", "theme"]
+  }
 }

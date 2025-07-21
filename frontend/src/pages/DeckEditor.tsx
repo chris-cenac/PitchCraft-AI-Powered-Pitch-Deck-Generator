@@ -31,6 +31,7 @@ interface DeckSlide {
 
 interface DeckResponse extends DeckSpec {
   title?: string;
+  businessData?: Record<string, unknown>;
 }
 
 const DeckEditor: React.FC = () => {
@@ -38,7 +39,9 @@ const DeckEditor: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [deck, setDeck] = useState<DeckSpec | null>(null);
+  const [deck, setDeck] = useState<
+    (DeckSpec & { businessData?: Record<string, unknown> }) | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -152,6 +155,7 @@ const DeckEditor: React.FC = () => {
             secondaryColor: "#059669",
             fontFamily: "Inter, system-ui, sans-serif",
           },
+          businessData: data.businessData || {},
         };
 
         setDeck(deckWithDefaults);
@@ -729,6 +733,7 @@ const DeckEditor: React.FC = () => {
                 containerWidth="100%"
                 containerHeight="100%"
                 isEditing={isEditing}
+                businessData={deck?.businessData}
                 onLayoutChange={isEditing ? handleLayoutChange : undefined}
               />
             </SlideContainer>
@@ -752,6 +757,7 @@ const DeckEditor: React.FC = () => {
                 containerWidth="100%"
                 containerHeight="100%"
                 isEditing={isEditing}
+                businessData={deck?.businessData}
                 onLayoutChange={isEditing ? handleLayoutChange : undefined}
               />
             </SlideContainer>

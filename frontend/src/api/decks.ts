@@ -349,6 +349,26 @@ export const getDeckById = async (id: string): Promise<DeckSpec> => {
   }
 };
 
+// Upload logo
+export const uploadLogo = async (file: File): Promise<{ logoUrl: string }> => {
+  const formData = new FormData();
+  formData.append("logo", file);
+
+  const token = localStorage.getItem("accessToken");
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${BASE_URL}/pitch-decks/upload-logo`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  return handleResponse(response);
+};
+
 // Export deck as PDF
 export const exportDeckPdf = async (html: string, filename = "deck.pdf") => {
   const response = await fetch(`${BASE_URL}/pitch-decks/pdf`, {

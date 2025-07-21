@@ -24,4 +24,5 @@ export interface DeckTheme {
 export interface DeckSpec {
   slides: Slide[];
   theme: DeckTheme;
+  businessData?: Record<string, any>;
 }

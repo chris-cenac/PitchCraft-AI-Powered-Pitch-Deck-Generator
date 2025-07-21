@@ -316,12 +316,54 @@ export class PitchDeckController {
             fontFamily: "Inter, system-ui, sans-serif",
           },
           title: pitchDeck.title || "Untitled Deck",
+          businessData: spec.businessData || {},
         },
       };
       return response;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException("Failed to fetch pitch deck");
+    }
+  }
+
+  @Post("upload-logo")
+  @UseInterceptors(FileInterceptor("logo"))
+  async uploadLogo(@UploadedFile() logo: Express.Multer.File, @Request() _req) {
+    try {
+      if (!logo) {
+        throw new BadRequestException("No logo file provided");
+      }
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+      ];
+      if (!allowedTypes.includes(logo.mimetype)) {
+        throw new BadRequestException(
+          "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed."
+        );
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (logo.size > maxSize) {
+        throw new BadRequestException(
+          "File size too large. Maximum size is 5MB."
+        );
+      }
+
+      // Convert file to Base64 for MongoDB storage
+      const base64String = `data:${logo.mimetype};base64,${logo.buffer.toString("base64")}`;
+
+      return {
+        success: true,
+        logoUrl: base64String,
+        message: "Logo uploaded successfully",
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      throw new InternalServerErrorException("Failed to upload logo");
     }
   }
 
@@ -389,7 +431,7 @@ export class PitchDeckController {
         );
       }
 
-      const logoUrl: string | null = null;
+      let logoUrl: string | null = null;
 
       if (logo) {
         const allowedTypes = [
@@ -405,7 +447,8 @@ export class PitchDeckController {
         if (logo.size > maxSize) {
           throw new BadRequestException("File size too large.");
         }
-        // logoUrl = await this.fileUploadService.uploadLogo(logo, req.user.id);
+        // Convert file to Base64 for MongoDB storage
+        logoUrl = `data:${logo.mimetype};base64,${logo.buffer.toString("base64")}`;
       }
 
       // Prepare update data

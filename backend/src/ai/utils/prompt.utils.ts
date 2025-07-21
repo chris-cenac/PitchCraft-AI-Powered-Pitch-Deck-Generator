@@ -3,7 +3,9 @@ import { COMPONENT_GUIDE } from "../data/components.catalog";
 
 export class PromptUtils {
   static buildSystemPrompt(context: string): string {
-    return `Expert pitch deck designer. Generate investor-ready decks using JSON schema. Use 12-column grid layouts. Context: ${context}. ${COMPONENT_GUIDE} Output valid JSON only.`;
+    return `You are an expert pitch deck designer. Generate investor-ready decks using JSON schema. Use 12-column grid layouts. Context: ${context}. ${COMPONENT_GUIDE} 
+
+CRITICAL: You must output ONLY valid JSON. Do not include any explanatory text, markdown, or other formatting. Start your response with { and end with }. Never use phrases like "Here's a" or "I'll create" - just pure JSON.`;
   }
 
   static buildPitchDeckGenerationPrompt(input: any): string {
@@ -49,7 +51,7 @@ Requirements:
 6. Each slide: id, title, items array with name, props, layout objects
 7. Layout: columns(1-12), rows(1-12), columnStart(1-12), rowStart(1-12), align, justify
 
-Output JSON only.`;
+CRITICAL: Output ONLY valid JSON. Do not include any text before or after the JSON. Start with { and end with }. No explanations, no markdown, just pure JSON.`;
   }
 
   // New method for chunked generation

@@ -160,7 +160,7 @@ export class AiService {
     // Minimal system prompt for outline
     const minimalSystemPrompt =
       "You are an expert pitch deck consultant. Generate a high-level outline for an investor pitch deck. Only output slide titles and a 1-2 sentence description for each.";
-    const prompt = `Generate a 10-slide outline for a pitch deck for the following startup.\n\n# Startup Data\n${JSON.stringify(minimalInput, null, 2)}\n\n# Output Format\n[\n  {\n    \"title\": \"...\",\n    \"content\": \"...\"\n  },\n  ...\n]\n`;
+    const prompt = `Generate a 10-slide outline for a pitch deck for the following startup.\n\n# Startup Data\n${JSON.stringify(minimalInput, null, 2)}\n\n# Output Format\n[\n  {\n    "title": "...",\n    "content": "..."\n  },\n  ...\n]\n`;
 
     const response = await this.openai.chat.completions.create({
       model: "gpt-4",
@@ -399,8 +399,18 @@ export class AiService {
     } catch (e) {
       this.logger.error("Direct JSON parse failed:", e.message);
 
+      // Clean the content - remove any text before the first { or [
+      let cleanedContent = content.trim();
+      const firstBraceIndex = Math.min(
+        cleanedContent.indexOf("{"),
+        cleanedContent.indexOf("[")
+      );
+      if (firstBraceIndex > 0) {
+        cleanedContent = cleanedContent.substring(firstBraceIndex);
+      }
+
       // Try to extract JSON object/array from text
-      const match = content.match(/[\[{][\s\S]*[\]}]/);
+      const match = cleanedContent.match(/[[{][\s\S]*[\]}]/);
       if (match) {
         try {
           return JSON.parse(match[0]);
@@ -411,7 +421,7 @@ export class AiService {
 
       // Try to fix common JSON issues
       try {
-        const fixedContent = this.fixCommonJsonIssues(content);
+        const fixedContent = this.fixCommonJsonIssues(cleanedContent);
         return JSON.parse(fixedContent);
       } catch (e3) {
         this.logger.error("Failed to parse fixed JSON:", e3.message);
@@ -419,7 +429,7 @@ export class AiService {
 
       // Try to extract and fix truncated JSON
       try {
-        const fixedContent = this.fixTruncatedJson(content);
+        const fixedContent = this.fixTruncatedJson(cleanedContent);
         return JSON.parse(fixedContent);
       } catch (e4) {
         this.logger.error("Failed to parse truncated JSON:", e4.message);
@@ -548,6 +558,17 @@ export class AiService {
   async generateDeck(dto: {
     businessData: any;
   }): Promise<{ deck: DeckSpec; usedFallback: boolean }> {
+    // Log business data including logo for debugging
+    this.logger.log("Generating pitch deck with business data:", {
+      companyName: dto.businessData.companyName,
+      hasLogo: !!dto.businessData.logoUrl,
+      logoType: dto.businessData.logoUrl
+        ? dto.businessData.logoUrl.startsWith("data:")
+          ? "Base64"
+          : "URL"
+        : "None",
+    });
+
     try {
       this.validateBusinessData(dto.businessData);
     } catch (err) {
@@ -589,9 +610,6 @@ export class AiService {
       ...filteredBusinessData,
     };
     let prompt = PromptUtils.buildPitchDeckGenerationPrompt(input);
-    const systemPrompt = PromptUtils.buildSystemPrompt(
-      input.companyName + " - " + input.industry
-    );
     // Token calculation logic
 
     // --- Token calculation logic ---
@@ -600,7 +618,7 @@ export class AiService {
     let tiktokenAvailable = false;
     try {
       // Dynamically import tiktoken if available (optional dependency)
-      // @ts-ignore
+      // @ts-expect-error - Optional dependency
       const tiktoken = await import("@dqbd/tiktoken");
       if (tiktoken && tiktoken.encoding_for_model) {
         const enc = tiktoken.encoding_for_model("gpt-4");

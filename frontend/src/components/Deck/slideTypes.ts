@@ -185,4 +185,7 @@ export interface DeckSpec {
 
   /** Global theme settings */
   theme: DeckTheme;
+
+  /** Business data including logo URL */
+  businessData?: Record<string, unknown>;
 }

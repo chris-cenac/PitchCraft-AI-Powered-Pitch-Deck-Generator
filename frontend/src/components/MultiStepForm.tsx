@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Stepper from "./StepperComponent";
 import { TextInput, TextArea, SelectDropdown } from "@/components/form";
+import { uploadLogo } from "@/api/decks";
+import { toast } from "react-hot-toast";
 
 // Streamlined PitchFormData shape
 export interface PitchFormData {
@@ -31,6 +33,7 @@ export interface PitchFormData {
 
   // Step 5: Design Preferences
   designStyle: string;
+  logoUrl?: string;
 }
 
 interface MultiStepFormProps {
@@ -44,6 +47,7 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [FormData, setFormData] = useState<PitchFormData>(
     initialData || {
       // Step 1: Company Basics
@@ -69,6 +73,7 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
       longTermGoals: "",
       // Step 5: Design Preferences
       designStyle: "",
+      logoUrl: "",
     }
   );
 
@@ -110,6 +115,38 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(
+        "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed."
+      );
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size too large. Maximum size is 5MB.");
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const result = await uploadLogo(file);
+      setFormData((prev) => ({ ...prev, logoUrl: result.logoUrl }));
+      toast.success("Logo uploaded successfully!");
+    } catch (error) {
+      toast.error("Failed to upload logo. Please try again.");
+      console.error("Logo upload error:", error);
+    } finally {
+      setIsUploadingLogo(false);
     }
   };
 
@@ -243,6 +280,123 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
               <option value="Growth">Growth Stage</option>
               <option value="Scale">Scale Stage</option>
             </SelectDropdown>
+
+            {/* Logo Upload Section */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-secondary dark:text-secondary-light">
+                Company Logo (Optional)
+              </label>
+
+              {/* Enhanced Logo Upload Area */}
+              <div className="relative">
+                <div
+                  className={`
+                  border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200
+                  ${
+                    FormData.logoUrl
+                      ? "border-green-300 bg-green-50 dark:border-green-600 dark:bg-green-900/20"
+                      : "border-secondary/30 dark:border-secondary-dark/30 hover:border-primary/50 dark:hover:border-accent/50"
+                  }
+                  ${
+                    isUploadingLogo
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                `}
+                >
+                  {FormData.logoUrl ? (
+                    // Logo Preview State
+                    <div className="space-y-3">
+                      <div className="flex justify-center">
+                        <img
+                          src={FormData.logoUrl}
+                          alt="Logo Preview"
+                          className="h-16 w-auto rounded-lg shadow-sm border border-secondary/20 dark:border-secondary-dark/20"
+                        />
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-sm font-medium">
+                          Logo uploaded successfully
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({ ...prev, logoUrl: "" }))
+                        }
+                        className="text-xs text-secondary dark:text-secondary-light hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                      >
+                        Remove logo
+                      </button>
+                    </div>
+                  ) : (
+                    // Upload State
+                    <div className="space-y-3">
+                      <div className="flex justify-center">
+                        <div className="w-12 h-12 bg-primary/10 dark:bg-accent/10 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-6 h-6 text-primary dark:text-accent"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-secondary dark:text-secondary-light">
+                          {isUploadingLogo
+                            ? "Uploading..."
+                            : "Upload your company logo"}
+                        </p>
+                        <p className="text-xs text-secondary/70 dark:text-secondary-light/70 mt-1">
+                          PNG, JPG, GIF, or WebP up to 5MB
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    disabled={isUploadingLogo}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Upload Progress */}
+                {isUploadingLogo && (
+                  <div className="mt-3 flex items-center justify-center gap-2 text-sm text-secondary dark:text-secondary-light">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary dark:border-accent"></div>
+                    <span>Uploading logo...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Help Text */}
+              <p className="text-xs text-secondary/60 dark:text-secondary-light/60">
+                Your logo will be used in the pitch deck header and branding
+                elements
+              </p>
+            </div>
           </div>
         );
 
